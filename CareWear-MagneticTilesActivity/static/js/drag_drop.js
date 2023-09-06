@@ -129,7 +129,7 @@ class Square extends Shape {
     ctx.save(); // Save the current transformation state
     ctx.translate(this.x + this.width / 2, this.y + this.height / 2); // Translate the coordinate system to the center of the square
     ctx.rotate((Math.PI / 180) * this.rotation); // Rotate the coordinate system by the specified angle
-    ctx.fillStyle = this.isSnapped ? this.doneColor : this.color; 
+    ctx.fillStyle = this.isSnapped ? this.doneColor : this.color;
     ctx.fillRect(-this.width / 2, -this.height / 2, this.width, this.height); // Draw the square centered at the translated coordinates
     ctx.restore(); // Restore the previous transformation state
   }
@@ -1284,6 +1284,7 @@ function getTimestamp() {
 }
 
 function postMouseMotionData() {
+  console.log("Right before - ", mouse_motion_array);
   fetch("/process-mouse-data", {
     method: "POST",
     headers: {
@@ -1295,8 +1296,14 @@ function postMouseMotionData() {
       userID: getLocalStorageOrNull("userID"),
     }),
   })
-    .then((res) => console.log(res))
+    .then((res) => {
+      //RESET
+      mouse_motion_accumulator = 0;
+      mouse_motion_array = [];
+    })
     .catch((err) => console.log(err));
+
+  console.log("Right after - ", mouse_motion_array);
 }
 
 function postLevelMouseData() {
@@ -1308,8 +1315,6 @@ function postLevelMouseData() {
 
   console.log("End of motion - ", mouse_motion_array);
   postMouseMotionData();
-  mouse_motion_accumulator = 0;
-  mouse_motion_array = [];
 }
 
 //====================================
@@ -1469,7 +1474,7 @@ function mouse_move(event) {
       postLevelMouseData(); //Create csv
     }
     setTimeout(() => {}, 1000); // Wait 1s
-    // window.location.href = "/scoring-page"; //Send to scoring page
+
     window.location.href = `/scoring_page?userID=${getLocalStorageOrNull(
       "userID"
     )}&level=${getLocalStorageOrNull("currentLevel")}`; //Goto scoring page
