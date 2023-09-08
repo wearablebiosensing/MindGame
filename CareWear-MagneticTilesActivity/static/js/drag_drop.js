@@ -31,7 +31,7 @@ class Shape {
 
   checkRotationThreshold(targetShape, equivalentRotations = [0]) {
     const rotationDifference = Math.abs(this.rotation - targetShape.rotation);
-    const rotationThreshold = 300;
+    const rotationThreshold = 340;
 
     for (const angle of equivalentRotations) {
       const difference = Math.abs(rotationDifference - angle);
@@ -69,6 +69,12 @@ class Shape {
   //both a distance & rotation threshold
   snapToTargetShape(targetShape) {}
 
+  // Since we now allow shapes to be dragged back to their
+  // Building blocks to be removed, we need a way to determine
+  // if we can snap the shape back to its building block. Otherwise
+  // we would never be able to move shapes away from the building blocks
+  // since it always would snap back as soon as it is created. This checks if the start
+  // dragging point of the shape is outside of the snapdistance of the building block to allow this
   canMoveShapeBackToOrigin(targetShape, thresholdOffset = 10) {
     if (targetShape.isBuildingBlock) {
       const dx = Math.abs(this.dragStartX - targetShape.x);
@@ -94,6 +100,17 @@ class Shape {
     }
 
     return false;
+  }
+
+  //Abstract
+  getDistanceToShape(targetShape) {
+    //This is what a few shapes use so I set this as default
+    //Others can overide
+    const distance = Math.sqrt(
+      Math.pow(this.x - targetShape.x, 2) + Math.pow(this.y - targetShape.y, 2)
+    );
+
+    return distance;
   }
 
   //A helper function that gets called if
@@ -127,6 +144,7 @@ class Shape {
 
   mouseMove(x, y) {
     if (this.isDragging) {
+      console.log("MOVING");
       const dx = x - this.startX;
       const dy = y - this.startY;
 
@@ -190,12 +208,11 @@ class Square extends Shape {
           Math.pow(this.y - targetShape.y, 2)
       );
 
-      if (this.canMoveShapeBackToOrigin(targetShape)) {
+      if (this.canMoveShapeBackToOrigin(targetShape, 50)) {
         return;
       }
 
       if (distance <= this.snapDistanceThreshold) {
-        console.log("NOPE");
         this.x = targetShape.x;
         this.y = targetShape.y;
         this.snapUpdate(targetShape);
@@ -1141,6 +1158,11 @@ function PinkQuarterCircle(
   );
 }
 
+// TODO
+//Get Distances for each shape from where you drop, look for the closest shape,
+// If the drag shape type and closest shape are teh same then do the snap
+// Otherwise give feedback about wrong shape
+
 //====================================
 //          Canvas Settings
 //====================================
@@ -1176,6 +1198,7 @@ function getLocalStorageOrNull(key) {
 //Shape Stuff
 let shapes = [];
 let current_shape_index = null;
+let closest_shape_to_current = null;
 
 //Level Data
 let current_level = 1;
@@ -1413,8 +1436,6 @@ function postLevelMouseData() {
 function mouse_down(event) {
   event.preventDefault();
 
-  console.log("Dragging Start  - ", event.clientX, " , ", event.clientY);
-
   let clientX = 0;
   let clientY = 0;
 
@@ -1465,6 +1486,42 @@ function mouse_down(event) {
   }
 }
 
+function animateShapeToBuildingBlock(shape, buildingBlockOfShape) {
+  const animationSpeed = 0.2; // You can adjust the speed as needed
+  const dx = (buildingBlockOfShape.x - shape.x) * animationSpeed;
+  const dy = (buildingBlockOfShape.y - shape.y) * animationSpeed;
+
+  // Check if the shape is close enough to the buildingBlockOfShape
+  if (Math.abs(dx) < 1 && Math.abs(dy) < 1) {
+    // Snap the shape to the buildingBlockOfShape to avoid precision issues
+    shape.x = buildingBlockOfShape.x;
+    shape.y = buildingBlockOfShape.y;
+    drawShapes();
+
+    console.log(
+      shape.x,
+      shape.y,
+      "    ",
+      buildingBlockOfShape.x,
+      buildingBlockOfShape.y
+    );
+
+    return;
+  } else {
+    // Move the shape towards the buildingBlockOfShape
+    shape.x += dx;
+    shape.y += dy;
+  }
+
+  // Update Position on screen
+  drawShapes();
+
+  // Repeat the animation on the next frame
+  requestAnimationFrame(() => {
+    animateShapeToBuildingBlock(shape, buildingBlockOfShape);
+  });
+}
+
 function mouse_up(event) {
   console.log("UP");
   event.preventDefault();
@@ -1472,6 +1529,22 @@ function mouse_up(event) {
   if (current_shape_index === null) return;
 
   const shape = shapes[current_shape_index];
+
+  //Shape is not over correct shape, give feedback
+  if (shape.type != closest_shape_to_current.type) {
+    //Get Building Block so we can move shape back
+    let buildingBlockOfShape = null;
+
+    for (let buildingBlock of shapes.filter((s) => s.isBuildingBlock)) {
+      if (shape.type == buildingBlock.type) {
+        buildingBlockOfShape = buildingBlock;
+      }
+    }
+
+    //Move shape back to Building Block
+    animateShapeToBuildingBlock(shape, buildingBlockOfShape);
+  }
+
   shape.mouseUp();
   current_shape_index = null;
 
@@ -1552,14 +1625,33 @@ function mouse_move(event) {
     }
   }
 
+  let closestDistanceToShape = null;
+
   const shape = shapes[current_shape_index];
   for (let targetShape of shapes.filter(
     (s) => s.isLevelShape || s.isBuildingBlock
   )) {
+    //Calculate distance from dragging shape to level shape
+    const distance = shape.getDistanceToShape(targetShape);
+    if (closestDistanceToShape == null) {
+      closestDistanceToShape = distance;
+      closest_shape_to_current = targetShape; //Global Var
+    } else if (distance < closestDistanceToShape) {
+      closestDistanceToShape = distance;
+      closest_shape_to_current = targetShape; //Global Var
+    }
+
     // Check if the shape is close enough to a special shape and snap it if true
     shape.snapToTargetShape(targetShape);
     updateProgressBar();
   }
+
+  console.log(
+    "Closest - ",
+    closest_shape_to_current.type,
+    "  ",
+    closestDistanceToShape
+  );
 
   if (getProgressBarPercentage() == 100) {
     if (mouse_motion_array.length != 0) {
