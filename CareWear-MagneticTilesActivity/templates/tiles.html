@@ -41,6 +41,19 @@
         align-items: center;
         justify-content: center;
       }
+
+      .shapeFeedbackText {
+        position: absolute;
+        font-family: "Inter", sans-serif;
+        font-weight: bold;
+        color: rgb(243, 63, 63);
+        font-size: 2em;
+
+        top: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: none;
+      }
     </style>
   </head>
   <body>
@@ -53,6 +66,10 @@
       </header>
       <main>
         <div class="canvas-container" id="container">
+          <!-- Text to show when user dosent get right shape -->
+          <div class="shapeFeedbackText">Wrong Shape... Please Try Again</div>
+
+          <!-- Four Mouse Data Points on the Right of the Screen -->
           <div class="mouse_analytics_container">
             <div class="mouse_analytics_item">
               Mouse X : &nbsp<span id="mouse_analytics_xpos"></span>&nbsp px
@@ -72,23 +89,6 @@
           <canvas id="canvas"></canvas>
         </div>
       </main>
-
-      <!-- Mouse Statistics Data -->
-      <!-- <div class="mouse-data" id="mouse_popup">
-        Current Window - X : <span id="currentWindowX"></span> px<br />
-        Current Window - Y : <span id="currentWindowY"></span> px<br />
-        Movement - X : <span id="movementX"></span> px<br />
-        Movement - Y : <span id="movementY"></span> px<br />
-        Movement : <span id="movement"></span> px<br />
-        Speed : <span id="speed"></span> px/s<br />
-        Max. Speed : <span id="maxSpeed"></span> px/s<br />
-        Acceleration X : <span id="accelerationX"></span> px/s<sup>2</sup><br />
-        Acceleration Y : <span id="accelerationY"></span> px/s<sup>2</sup><br />
-        Max. Positive Acceleration :
-        <span id="maxPositiveAcceleration"></span> px/s<sup>2</sup><br />
-        Max. Negative Acceleration :
-        <span id="maxNegativeAcceleration"></span> px/s<sup>2</sup><br />
-      </div> -->
     </div>
 
     <!-- Progress Bar -->

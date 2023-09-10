@@ -28,16 +28,6 @@ setInterval(function () {
     document.getElementById("mouse_analytics_ypos").innerText =
       currentEvent.clientY;
 
-    //speed=movement/100ms= movement/0.1s= 10*movement/s
-    var speed = 10 * movement; //current speed
-
-    // document.getElementById("speed").innerText = Math.round(speed);
-    // document.getElementById("maxSpeed").innerText = Math.round(
-    //   speed > maxSpeed ? (maxSpeed = speed) : maxSpeed
-    // );
-
-    var acceleration = 10 * (speed - prevSpeed);
-
     // Calculate the change in position and time
     const dx = x - prev_x;
     const dy = y - prev_y;
@@ -63,22 +53,7 @@ setInterval(function () {
     document.getElementById("mouse_analytics_yacc").innerText = Math.round(
       accelerationY_in_px_per_s_squared
     );
-
-    // if (acceleration > 0) {
-    //   document.getElementById("maxPositiveAcceleration").innerText = Math.round(
-    //     acceleration > maxPositiveAcc
-    //       ? (maxPositiveAcc = acceleration)
-    //       : maxPositiveAcc
-    //   );
-    // } else {
-    //   document.getElementById("maxNegativeAcceleration").innerText = Math.round(
-    //     acceleration < maxNegativeAcc
-    //       ? (maxNegativeAcc = acceleration)
-    //       : maxNegativeAcc
-    //   );
-    // }
   }
 
   prevEvent = currentEvent;
-  prevSpeed = speed;
-}, 100);
+}, 50); // The smaller the value the more accurate
