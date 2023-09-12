@@ -1040,7 +1040,7 @@ function OrangeSquare(
   isBuildingBlock = false
 ) {
   const SQUARE_SIZE = 100;
-  let color = isLevelTile ? "#D9D9D9" : "#FFCC4D";
+  let color = isLevelTile ? "#D9D9D9" : "#7BBEFC";
   return new Square(
     x,
     y,
