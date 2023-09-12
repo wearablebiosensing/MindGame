@@ -1457,6 +1457,42 @@ function calculateMousePos(clientX, clientY) {
   return { x, y };
 }
 
+function calculateTotalLevelTime() {
+  console.log("BEFORE CALC - ", mouse_motion_array);
+  const firstTimestamp = mouse_motion_array[0][2];
+  const lastTimestamp = mouse_motion_array[mouse_motion_array.length - 1][2];
+  console.log("Calc Time - ", firstTimestamp, lastTimestamp);
+
+  // Assuming the time string format is "HH:mm:ss:SSS"
+  const timeComponentsFirst = firstTimestamp.split(":");
+  const timeComponentsLast = lastTimestamp.split(":");
+
+  // Create Date objects with the time components
+  const firstDate = new Date();
+  firstDate.setHours(parseInt(timeComponentsFirst[0]));
+  firstDate.setMinutes(parseInt(timeComponentsFirst[1]));
+  firstDate.setSeconds(parseInt(timeComponentsFirst[2]));
+  firstDate.setMilliseconds(parseInt(timeComponentsFirst[3]));
+
+  const lastDate = new Date();
+  lastDate.setHours(parseInt(timeComponentsLast[0]));
+  lastDate.setMinutes(parseInt(timeComponentsLast[1]));
+  lastDate.setSeconds(parseInt(timeComponentsLast[2]));
+  lastDate.setMilliseconds(parseInt(timeComponentsLast[3]));
+
+  console.log("Date! - ", firstDate, lastDate);
+
+  const sub = lastDate - firstDate;
+  console.log("DONE - ", sub); // This should now work correctly
+
+  // Calculate minutes and seconds from the time difference
+  const minutes = Math.floor(sub / (1000 * 60));
+  const seconds = Math.floor((sub / 1000) % 60);
+
+  console.log("Minutes:", minutes);
+  console.log("Seconds:", seconds);
+}
+
 function showFeedbackText() {
   shapeFeedbackText.style.display = "block";
 
@@ -1474,7 +1510,7 @@ function euclideanDistance(x1, y1, x2, y2) {
 
 function calculateShortestEuclidianDistanceForCurrentLevel() {
   shortestEuclidDistances = {};
-  console.log(shapes);
+  // console.log(shapes);
 
   for (let levelShape of shapes.filter((s) => s.isLevelShape)) {
     //Getting Building Block
@@ -1492,23 +1528,23 @@ function calculateShortestEuclidianDistanceForCurrentLevel() {
       levelShape.y
     );
 
-    console.log(
-      "x1 - ",
-      buildingBlockOfSameLevelShape.x,
-      "  y1 - ",
-      buildingBlockOfSameLevelShape.y,
-      "    x2 - ",
-      levelShape.x,
-      "    y2 - ",
-      levelShape.y
-    );
+    // console.log(
+    //   "x1 - ",
+    //   buildingBlockOfSameLevelShape.x,
+    //   "  y1 - ",
+    //   buildingBlockOfSameLevelShape.y,
+    //   "    x2 - ",
+    //   levelShape.x,
+    //   "    y2 - ",
+    //   levelShape.y
+    // );
 
-    console.log(
-      "Distance - ",
-      distance,
-      "    Shape - ",
-      buildingBlockOfSameLevelShape.type
-    );
+    // console.log(
+    //   "Distance - ",
+    //   distance,
+    //   "    Shape - ",
+    //   buildingBlockOfSameLevelShape.type
+    // );
 
     if (levelShape.type in shortestEuclidDistances) {
       //Add to Shortest Distance
@@ -1573,6 +1609,7 @@ function postLevelMouseData() {
     reset all of the accumulators
   */
 
+  calculateTotalLevelTime();
   console.log("End of motion - ", mouse_motion_array);
   postMouseMotionData();
 }
