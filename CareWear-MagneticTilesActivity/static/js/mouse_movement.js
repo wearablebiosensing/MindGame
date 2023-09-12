@@ -23,22 +23,10 @@ setInterval(function () {
     var movementY = Math.abs(y - prev_y);
     var movement = Math.sqrt(movementX * movementX + movementY * movementY);
 
-    document.getElementById("currentWindowX").innerText = currentEvent.clientX;
-    document.getElementById("currentWindowY").innerText = currentEvent.clientY;
-
-    document.getElementById("movementX").innerText = movementX;
-    document.getElementById("movementY").innerText = movementY;
-    document.getElementById("movement").innerText = Math.round(movement);
-
-    //speed=movement/100ms= movement/0.1s= 10*movement/s
-    var speed = 10 * movement; //current speed
-
-    document.getElementById("speed").innerText = Math.round(speed);
-    document.getElementById("maxSpeed").innerText = Math.round(
-      speed > maxSpeed ? (maxSpeed = speed) : maxSpeed
-    );
-
-    var acceleration = 10 * (speed - prevSpeed);
+    document.getElementById("mouse_analytics_xpos").innerText =
+      currentEvent.clientX;
+    document.getElementById("mouse_analytics_ypos").innerText =
+      currentEvent.clientY;
 
     // Calculate the change in position and time
     const dx = x - prev_x;
@@ -59,28 +47,13 @@ setInterval(function () {
     pMouseY = y;
     pTimestamp = currentTime;
 
-    document.getElementById("accelerationX").innerText = Math.round(
+    document.getElementById("mouse_analytics_xacc").innerText = Math.round(
       accelerationX_in_px_per_s_squared
     );
-    document.getElementById("accelerationY").innerText = Math.round(
+    document.getElementById("mouse_analytics_yacc").innerText = Math.round(
       accelerationY_in_px_per_s_squared
     );
-
-    // if (acceleration > 0) {
-    //   document.getElementById("maxPositiveAcceleration").innerText = Math.round(
-    //     acceleration > maxPositiveAcc
-    //       ? (maxPositiveAcc = acceleration)
-    //       : maxPositiveAcc
-    //   );
-    // } else {
-    //   document.getElementById("maxNegativeAcceleration").innerText = Math.round(
-    //     acceleration < maxNegativeAcc
-    //       ? (maxNegativeAcc = acceleration)
-    //       : maxNegativeAcc
-    //   );
-    // }
   }
 
   prevEvent = currentEvent;
-  prevSpeed = speed;
-}, 100);
+}, 50); // The smaller the value the more accurate

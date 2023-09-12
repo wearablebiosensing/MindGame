@@ -1,4 +1,13 @@
 class Shape {
+  /**
+   * Creates a new Shape instance.
+   * @param {number} x - The x-coordinate of the shape.
+   * @param {number} y - The y-coordinate of the shape.
+   * @param {string} color - The color of the shape.
+   * @param {number} rotation - The rotation angle of the shape.
+   * @param {boolean} isLevelShape - Flag to indicate if it's a special shape.
+   * @param {boolean} [isBuildingBlock=false] - Flag to indicate if it's a building block.
+   */
   constructor(x, y, color, rotation, isLevelShape, isBuildingBlock = false) {
     this.x = x;
     this.y = y;
@@ -16,8 +25,16 @@ class Shape {
     this.snapDistanceThreshold = 50; //Flag to indicate how close a shape must be to Level shape to snap to it
 
     this.isBuildingBlock = isBuildingBlock;
+
+    // Trying to make deleting shapes work
+    this.dragStartX = 0;
+    this.dragStartY = 0;
   }
 
+  /**
+   * Rotates the shape by the specified degree.
+   * @param {number} degree - The degree by which to rotate the shape.
+   */
   rotate(degree) {
     this.rotation = (this.rotation + degree) % 360;
     if (this.rotation < 0) {
@@ -25,9 +42,15 @@ class Shape {
     }
   }
 
+  /**
+   * Checks if the rotation of this shape is within a certain threshold of another shape's rotation.
+   * @param {Shape} targetShape - The target shape to compare rotations with.
+   * @param {number[]} [equivalentRotations=[0]] - An array of equivalent rotations to check against.
+   * @returns {boolean} True if the rotations are within the threshold, false otherwise.
+   */
   checkRotationThreshold(targetShape, equivalentRotations = [0]) {
     const rotationDifference = Math.abs(this.rotation - targetShape.rotation);
-    const rotationThreshold = 300;
+    const rotationThreshold = 340;
 
     for (const angle of equivalentRotations) {
       const difference = Math.abs(rotationDifference - angle);
@@ -44,18 +67,27 @@ class Shape {
     return false;
   }
 
+  /**
+   * Creates a shape from a building block (abstract method, to be implemented in specific shape classes).
+   */
   createShapeFromBlock() {
     // Abstract method - to be implemented in specific shape classes
   }
 
+  /**
+   * Draws the shape (abstract method, to be implemented in specific shape classes).
+   */
   draw() {
     // Abstract method - to be implemented in specific shape classes
   }
 
   // Abstract method:
-  /*
-    Determines if a point(Users Mouse x,y) is within the shapes bounds
-  */
+  /**
+   * Determines if a point (x, y) is inside the bounds of the shape.
+   * @param {number} x - The x-coordinate of the point.
+   * @param {number} y - The y-coordinate of the point.
+   * @returns {boolean} True if the point is inside the shape's bounds, false otherwise.
+   */
   isPointInside(x, y) {
     return false;
   }
@@ -63,29 +95,112 @@ class Shape {
   //Checks to see if dragged shape and target shape
   //are both instances of the same object, are within
   //both a distance & rotation threshold
+  /**
+   * Snaps this shape to a target shape if conditions are met.
+   * @param {Shape} targetShape - The target shape to snap to.
+   */
   snapToTargetShape(targetShape) {}
+
+  // Since we now allow shapes to be dragged back to their
+  // Building blocks to be removed, we need a way to determine
+  // if we can snap the shape back to its building block. Otherwise
+  // we would never be able to move shapes away from the building blocks
+  // since it always would snap back as soon as it is created. This checks if the start
+  // dragging point of the shape is outside of the snapdistance of the building block to allow this
+  /**
+   * Checks if this shape can be moved back to its original position (building block).
+   * @param {Shape} targetShape - The target shape to check against.
+   * @param {number} [thresholdOffset=10] - The threshold offset value.
+   * @returns {boolean} True if the shape can be moved back to its original position, false otherwise.
+   */
+  canMoveShapeBackToOrigin(targetShape, thresholdOffset = 10) {
+    if (targetShape.isBuildingBlock) {
+      const dx = Math.abs(this.dragStartX - targetShape.x);
+      const dy = Math.abs(this.dragStartY - targetShape.y);
+      const threshold = this.snapDistanceThreshold + thresholdOffset;
+
+      console.log(
+        "SnapOrigin:  dx - ",
+        dx,
+        "   dy - ",
+        dy,
+        "   thresh - ",
+        threshold
+      );
+
+      if (dx > threshold || dy > threshold) {
+        // this.canSnapBack = false; // The shape can't snap back yet
+        return false;
+      } else {
+        // this.canSnapBack = true; // The shape can snap back
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  /**
+   * Gets the distance to another shape.
+   * @param {Shape} targetShape - The target shape to calculate the distance to.
+   * @returns {number} The distance to the target shape.
+   */
+  getDistanceToShape(targetShape) {
+    //This is what a few shapes use so I set this as default
+    //Others can overide
+    const distance = Math.sqrt(
+      Math.pow(this.x - targetShape.x, 2) + Math.pow(this.y - targetShape.y, 2)
+    );
+
+    return distance;
+  }
 
   //A helper function that gets called if
   //snapToTargetShape passes all conditions
+  /**
+   * Handles the snap update when this shape is snapped to a target shape.
+   * @param {Shape} targetShape - The target shape that this shape is snapped to.
+   */
   snapUpdate(targetShape) {
+    if (targetShape.isBuildingBlock) {
+      console.log("Snap is BuildingBlock");
+      this.rotation = targetShape.rotation;
+      this.mouseUp();
+      return;
+    }
+
     this.isSnapped = true;
     targetShape.isLevelShapeFilled = true;
     this.rotation = targetShape.rotation;
     this.mouseUp();
   }
 
+  /**
+   * Handles the mouse down event.
+   * @param {number} x - The x-coordinate of the mouse event.
+   * @param {number} y - The y-coordinate of the mouse event.
+   */
   mouseDown(x, y) {
     this.isDragging = true;
     this.startX = x;
     this.startY = y;
+
+    this.dragStartX = x;
+    this.dragStartY = y;
   }
 
   mouseUp() {
     this.isDragging = false;
   }
 
+  /**
+   * Handles the mouse move event.
+   * @param {number} x - The x-coordinate of the mouse event.
+   * @param {number} y - The y-coordinate of the mouse event.
+   */
   mouseMove(x, y) {
     if (this.isDragging) {
+      console.log("MOVING");
       const dx = x - this.startX;
       const dy = y - this.startY;
 
@@ -129,7 +244,7 @@ class Square extends Shape {
     ctx.save(); // Save the current transformation state
     ctx.translate(this.x + this.width / 2, this.y + this.height / 2); // Translate the coordinate system to the center of the square
     ctx.rotate((Math.PI / 180) * this.rotation); // Rotate the coordinate system by the specified angle
-    ctx.fillStyle = this.isSnapped ? this.doneColor : this.color; 
+    ctx.fillStyle = this.isSnapped ? this.doneColor : this.color;
     ctx.fillRect(-this.width / 2, -this.height / 2, this.width, this.height); // Draw the square centered at the translated coordinates
     ctx.restore(); // Restore the previous transformation state
   }
@@ -148,6 +263,11 @@ class Square extends Shape {
         Math.pow(this.x - targetShape.x, 2) +
           Math.pow(this.y - targetShape.y, 2)
       );
+
+      if (this.canMoveShapeBackToOrigin(targetShape, 50)) {
+        return;
+      }
+
       if (distance <= this.snapDistanceThreshold) {
         this.x = targetShape.x;
         this.y = targetShape.y;
@@ -215,6 +335,12 @@ class Circle extends Shape {
         Math.pow(this.x - targetShape.x, 2) +
           Math.pow(this.y - targetShape.y, 2)
       );
+
+      //Dont Snap To Buildiong Block if dragStartX is too close to building block
+      if (this.canMoveShapeBackToOrigin(targetShape)) {
+        return;
+      }
+
       if (distance <= this.snapDistanceThreshold) {
         this.x = targetShape.x;
         this.y = targetShape.y;
@@ -293,6 +419,12 @@ class Trapezoid extends Shape {
         Math.pow(this.x - targetShape.x, 2) +
           Math.pow(this.y - targetShape.y, 2)
       );
+
+      //Dont Snap To Buildiong Block if dragStartX is too close to building block
+      if (this.canMoveShapeBackToOrigin(targetShape)) {
+        return;
+      }
+
       if (distance <= this.snapDistanceThreshold) {
         this.x = targetShape.x;
         this.y = targetShape.y;
@@ -408,6 +540,11 @@ class RightTriangle extends Shape {
           Math.pow(centerY - targetCenterY, 2)
       );
 
+      //Dont Snap To Buildiong Block if dragStartX is too close to building block
+      if (this.canMoveShapeBackToOrigin(targetShape)) {
+        return;
+      }
+
       if (distance <= this.snapDistanceThreshold) {
         // Snap the RightTriangle shape to the target RightTriangle shape
         const dx = targetShape.x - this.x;
@@ -520,6 +657,12 @@ class Diamond extends Shape {
         Math.pow(this.x - targetShape.x, 2) +
           Math.pow(this.y - targetShape.y, 2)
       );
+
+      //Dont Snap To Buildiong Block if dragStartX is too close to building block
+      if (this.canMoveShapeBackToOrigin(targetShape, 60)) {
+        return;
+      }
+
       if (distance <= this.snapDistanceThreshold) {
         this.x = targetShape.x;
         this.y = targetShape.y;
@@ -612,6 +755,11 @@ class EquilateralTriangle extends Shape {
         Math.pow(centerX - targetCenterX, 2) +
           Math.pow(centerY - targetCenterY, 2)
       );
+
+      //Dont Snap To Buildiong Block if dragStartX is too close to building block
+      if (this.canMoveShapeBackToOrigin(targetShape)) {
+        return;
+      }
 
       if (distance <= this.snapDistanceThreshold) {
         // Snap the EquilateralTriangle shape to the target EquilateralTriangle shape
@@ -736,7 +884,17 @@ class Hexagon extends Shape {
         Math.pow(this.x - targetShape.x, 2) +
           Math.pow(this.y - targetShape.y, 2)
       );
+
+      //Dont Snap To Buildiong Block if dragStartX is too close to building block
+      if (this.canMoveShapeBackToOrigin(targetShape)) {
+        console.log("RETT");
+        return;
+      }
+
+      console.log("HEXDIS - ", distance <= this.snapDistanceThreshold);
+
       if (distance <= this.snapDistanceThreshold) {
+        console.log("GOOD");
         this.x = targetShape.x;
         this.y = targetShape.y;
         this.snapUpdate(targetShape);
@@ -817,6 +975,11 @@ class QuarterCircle extends Shape {
         Math.pow(this.x - targetShape.x, 2) +
           Math.pow(this.y - targetShape.y, 2)
       );
+
+      if (this.canMoveShapeBackToOrigin(targetShape)) {
+        return;
+      }
+
       if (distance <= this.snapDistanceThreshold) {
         this.x = targetShape.x;
         this.y = targetShape.y;
@@ -851,6 +1014,19 @@ class QuarterCircle extends Shape {
 }
 
 //====================================
+//          JS Doc types
+//====================================
+/**
+ * @typedef {object} Shape
+ * @property {number} x - The x-coordinate of the shape.
+ * @property {number} y - The y-coordinate of the shape.
+ * @property {number} rotation - The rotation angle of the shape.
+ * @property {boolean} isLevelShape - Indicates if the shape is part of the level shape.
+ * @property {boolean} isSnapped - Indicates if the shape is snapped into place.
+ * @property {string} type - The type of the shape (e.g., "OrangeSquare", "RedCircle").
+ */
+
+//====================================
 //          Shape Factory's
 //====================================
 /*We need these functions becuase we use the same shape
@@ -864,7 +1040,7 @@ function OrangeSquare(
   isBuildingBlock = false
 ) {
   const SQUARE_SIZE = 100;
-  let color = isLevelTile ? "#D9D9D9" : "#65A7FF";
+  let color = isLevelTile ? "#D9D9D9" : "#FFCC4D";
   return new Square(
     x,
     y,
@@ -928,7 +1104,7 @@ function GreenTrapezoid(
 ) {
   const BASE = 200;
   const HEIGHT = 100;
-  let color = isLevelTile ? "#D9D9D9" : "#6D14A4";
+  let color = isLevelTile ? "#D9D9D9" : "#A36DBD";
   return new Trapezoid(
     x,
     y,
@@ -969,7 +1145,7 @@ function BlueHexagon(
   isBuildingBlock = false
 ) {
   const SIDE_LENGTH = 100;
-  let color = isLevelTile ? "#D9D9D9" : "#82D1FE";
+  let color = isLevelTile ? "#D9D9D9" : "#81E5DB";
 
   return new Hexagon(
     x,
@@ -991,7 +1167,7 @@ function YellowDiamond(
 ) {
   const WIDTH = 70;
   const HEIGHT = 200;
-  let color = isLevelTile ? "#D9D9D9" : "#81E5DB";
+  let color = isLevelTile ? "#D9D9D9" : "#E5CF81";
 
   return new Diamond(
     x,
@@ -1016,7 +1192,7 @@ function PurpleDiamond(
   // TODO: Change this.
   const WIDTH = 100;
   const HEIGHT = 200;
-  let color = isLevelTile ? "#D9D9D9" : "#9F9AFF";
+  let color = isLevelTile ? "#D9D9D9" : "#CA6B6E";
 
   return new Diamond(
     x,
@@ -1039,7 +1215,7 @@ function PinkQuarterCircle(
   isBuildingBlock = false
 ) {
   const RADIUS = 100;
-  let color = isLevelTile ? "#D9D9D9" : "#FFA800";
+  let color = isLevelTile ? "#D9D9D9" : "#727A9C";
   return new QuarterCircle(
     x,
     y,
@@ -1051,14 +1227,27 @@ function PinkQuarterCircle(
   );
 }
 
+// TODO
+//Get Distances for each shape from where you drop, look for the closest shape,
+// If the drag shape type and closest shape are teh same then do the snap
+// Otherwise give feedback about wrong shape
+
 //====================================
 //          Canvas Settings
 //====================================
-const canvas = document.getElementById("canvas");
-const ctx = canvas.getContext("2d");
-const container = document.getElementById("container");
 
-console.log(container);
+/**
+ * @type {HTMLElement}
+ */
+const canvas = document.getElementById("canvas");
+
+/** @type {CanvasRenderingContext2D} */
+const ctx = canvas.getContext("2d");
+
+/**
+ * @type {HTMLElement}
+ */
+const container = document.getElementById("container");
 
 canvas.width = container.clientWidth + 300;
 canvas.height = container.clientHeight + 300;
@@ -1086,10 +1275,17 @@ function getLocalStorageOrNull(key) {
 //Shape Stuff
 let shapes = [];
 let current_shape_index = null;
+let closest_shape_to_current = null;
 
 //Level Data
 let current_level = 1;
 let current_sub_level = 1;
+
+//Text to show when wrong shape
+/**
+ * @type {HTMLElement}
+ */
+const shapeFeedbackText = document.querySelector(".shapeFeedbackText");
 
 //Progress Bar
 const progressBar = document.getElementById("progressBar");
@@ -1261,6 +1457,106 @@ function calculateMousePos(clientX, clientY) {
   return { x, y };
 }
 
+function calculateTotalLevelTime() {
+  console.log("BEFORE CALC - ", mouse_motion_array);
+  const firstTimestamp = mouse_motion_array[0][2];
+  const lastTimestamp = mouse_motion_array[mouse_motion_array.length - 1][2];
+  console.log("Calc Time - ", firstTimestamp, lastTimestamp);
+
+  // Assuming the time string format is "HH:mm:ss:SSS"
+  const timeComponentsFirst = firstTimestamp.split(":");
+  const timeComponentsLast = lastTimestamp.split(":");
+
+  // Create Date objects with the time components
+  const firstDate = new Date();
+  firstDate.setHours(parseInt(timeComponentsFirst[0]));
+  firstDate.setMinutes(parseInt(timeComponentsFirst[1]));
+  firstDate.setSeconds(parseInt(timeComponentsFirst[2]));
+  firstDate.setMilliseconds(parseInt(timeComponentsFirst[3]));
+
+  const lastDate = new Date();
+  lastDate.setHours(parseInt(timeComponentsLast[0]));
+  lastDate.setMinutes(parseInt(timeComponentsLast[1]));
+  lastDate.setSeconds(parseInt(timeComponentsLast[2]));
+  lastDate.setMilliseconds(parseInt(timeComponentsLast[3]));
+
+  console.log("Date! - ", firstDate, lastDate);
+
+  const sub = lastDate - firstDate;
+  console.log("DONE - ", sub); // This should now work correctly
+
+  // Calculate minutes and seconds from the time difference
+  const minutes = Math.floor(sub / (1000 * 60));
+  const seconds = Math.floor((sub / 1000) % 60);
+
+  console.log("Minutes:", minutes);
+  console.log("Seconds:", seconds);
+}
+
+function showFeedbackText() {
+  shapeFeedbackText.style.display = "block";
+
+  setTimeout(() => {
+    shapeFeedbackText.style.display = "none";
+  }, 1000);
+}
+
+function euclideanDistance(x1, y1, x2, y2) {
+  const deltaX = x2 - x1;
+  const deltaY = y2 - y1;
+  const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+  return distance;
+}
+
+function calculateShortestEuclidianDistanceForCurrentLevel() {
+  shortestEuclidDistances = {};
+  // console.log(shapes);
+
+  for (let levelShape of shapes.filter((s) => s.isLevelShape)) {
+    //Getting Building Block
+    let buildingBlockOfSameLevelShape = null;
+    shapes.forEach((shape) => {
+      if (shape.isBuildingBlock && shape.type == levelShape.type) {
+        buildingBlockOfSameLevelShape = shape;
+      }
+    });
+
+    distance = euclideanDistance(
+      buildingBlockOfSameLevelShape.x,
+      buildingBlockOfSameLevelShape.y,
+      levelShape.x,
+      levelShape.y
+    );
+
+    // console.log(
+    //   "x1 - ",
+    //   buildingBlockOfSameLevelShape.x,
+    //   "  y1 - ",
+    //   buildingBlockOfSameLevelShape.y,
+    //   "    x2 - ",
+    //   levelShape.x,
+    //   "    y2 - ",
+    //   levelShape.y
+    // );
+
+    // console.log(
+    //   "Distance - ",
+    //   distance,
+    //   "    Shape - ",
+    //   buildingBlockOfSameLevelShape.type
+    // );
+
+    if (levelShape.type in shortestEuclidDistances) {
+      //Add to Shortest Distance
+      shortestEuclidDistances[levelShape.type] += distance;
+    } else {
+      shortestEuclidDistances[levelShape.type] = distance;
+    }
+  }
+
+  console.log("Shortest Euclid Distance For Level - ", shortestEuclidDistances);
+}
+
 //====================================
 //        Collect mouse data
 //====================================
@@ -1284,6 +1580,7 @@ function getTimestamp() {
 }
 
 function postMouseMotionData() {
+  console.log("Right before - ", mouse_motion_array);
   fetch("/process-mouse-data", {
     method: "POST",
     headers: {
@@ -1295,8 +1592,14 @@ function postMouseMotionData() {
       userID: getLocalStorageOrNull("userID"),
     }),
   })
-    .then((res) => console.log(res))
+    .then((res) => {
+      //RESET
+      // mouse_motion_accumulator = 0;
+      // mouse_motion_array = [];
+    })
     .catch((err) => console.log(err));
+
+  console.log("Right after - ", mouse_motion_array);
 }
 
 function postLevelMouseData() {
@@ -1306,10 +1609,9 @@ function postLevelMouseData() {
     reset all of the accumulators
   */
 
+  calculateTotalLevelTime();
   console.log("End of motion - ", mouse_motion_array);
   postMouseMotionData();
-  mouse_motion_accumulator = 0;
-  mouse_motion_array = [];
 }
 
 //====================================
@@ -1317,8 +1619,6 @@ function postLevelMouseData() {
 //====================================
 function mouse_down(event) {
   event.preventDefault();
-
-  console.log("Dragging Start  - ", event.clientX, " , ", event.clientY);
 
   let clientX = 0;
   let clientY = 0;
@@ -1350,7 +1650,7 @@ function mouse_down(event) {
         if (shape instanceof Diamond) {
           //TODO - Determine if yellow or purple Diamond, pass that into createShapeFromBlock
         }
-        console.log("BUILD");
+        // console.log("BUILD");
 
         newShape = shape.createShapeFromBlock();
         console.log(newShape.constructor.name);
@@ -1370,6 +1670,42 @@ function mouse_down(event) {
   }
 }
 
+function animateShapeToBuildingBlock(shape, buildingBlockOfShape) {
+  const animationSpeed = 0.2; // You can adjust the speed as needed
+  const dx = (buildingBlockOfShape.x - shape.x) * animationSpeed;
+  const dy = (buildingBlockOfShape.y - shape.y) * animationSpeed;
+
+  // Check if the shape is close enough to the buildingBlockOfShape
+  if (Math.abs(dx) < 1 && Math.abs(dy) < 1) {
+    // Snap the shape to the buildingBlockOfShape to avoid precision issues
+    shape.x = buildingBlockOfShape.x;
+    shape.y = buildingBlockOfShape.y;
+    drawShapes();
+
+    console.log(
+      shape.x,
+      shape.y,
+      "    ",
+      buildingBlockOfShape.x,
+      buildingBlockOfShape.y
+    );
+
+    return;
+  } else {
+    // Move the shape towards the buildingBlockOfShape
+    shape.x += dx;
+    shape.y += dy;
+  }
+
+  // Update Position on screen
+  drawShapes();
+
+  // Repeat the animation on the next frame
+  requestAnimationFrame(() => {
+    animateShapeToBuildingBlock(shape, buildingBlockOfShape);
+  });
+}
+
 function mouse_up(event) {
   console.log("UP");
   event.preventDefault();
@@ -1377,6 +1713,24 @@ function mouse_up(event) {
   if (current_shape_index === null) return;
 
   const shape = shapes[current_shape_index];
+
+  //Shape is not over correct shape, give feedback
+  if (shape.type != closest_shape_to_current.type) {
+    //Get Building Block so we can move shape back
+    let buildingBlockOfShape = null;
+
+    for (let buildingBlock of shapes.filter((s) => s.isBuildingBlock)) {
+      if (shape.type == buildingBlock.type) {
+        buildingBlockOfShape = buildingBlock;
+      }
+    }
+
+    showFeedbackText();
+
+    //Move shape back to Building Block
+    animateShapeToBuildingBlock(shape, buildingBlockOfShape);
+  }
+
   shape.mouseUp();
   current_shape_index = null;
 
@@ -1432,12 +1786,12 @@ function mouse_move(event) {
   prevMouseY = y;
   prevTimestamp = currentTime;
 
-  console.log(
-    "X acc - ",
-    Math.round(accelerationX_in_px_per_s_squared),
-    "   Y acc - ",
-    Math.round(accelerationY_in_px_per_s_squared)
-  );
+  // console.log(
+  //   "X acc - ",
+  //   Math.round(accelerationX_in_px_per_s_squared),
+  //   "   Y acc - ",
+  //   Math.round(accelerationY_in_px_per_s_squared)
+  // );
 
   // Check if enough time has passed since the last collection
   if (currentTime - lastCollectionTime >= throttlingInterval) {
@@ -1457,19 +1811,40 @@ function mouse_move(event) {
     }
   }
 
+  let closestDistanceToShape = null;
+
   const shape = shapes[current_shape_index];
-  for (let targetShape of shapes.filter((s) => s.isLevelShape)) {
+  for (let targetShape of shapes.filter(
+    (s) => s.isLevelShape || s.isBuildingBlock
+  )) {
+    //Calculate distance from dragging shape to level shape
+    const distance = shape.getDistanceToShape(targetShape);
+    if (closestDistanceToShape == null) {
+      closestDistanceToShape = distance;
+      closest_shape_to_current = targetShape; //Global Var
+    } else if (distance < closestDistanceToShape) {
+      closestDistanceToShape = distance;
+      closest_shape_to_current = targetShape; //Global Var
+    }
+
     // Check if the shape is close enough to a special shape and snap it if true
     shape.snapToTargetShape(targetShape);
     updateProgressBar();
   }
+
+  console.log(
+    "Closest - ",
+    closest_shape_to_current.type,
+    "  ",
+    closestDistanceToShape
+  );
 
   if (getProgressBarPercentage() == 100) {
     if (mouse_motion_array.length != 0) {
       postLevelMouseData(); //Create csv
     }
     setTimeout(() => {}, 1000); // Wait 1s
-    // window.location.href = "/scoring-page"; //Send to scoring page
+
     window.location.href = `/scoring_page?userID=${getLocalStorageOrNull(
       "userID"
     )}&level=${getLocalStorageOrNull("currentLevel")}`; //Goto scoring page
@@ -1498,6 +1873,8 @@ function drawShapes() {
   for (let shape of shapes) {
     shape.draw();
   }
+
+  calculateShortestEuclidianDistanceForCurrentLevel();
 }
 
 //Testing

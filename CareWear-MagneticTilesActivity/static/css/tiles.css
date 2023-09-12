@@ -1,3 +1,5 @@
+@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,500;1,200&family=Inter&display=swap");
+
 header {
   text-align: center;
   padding: 15px;
@@ -7,8 +9,14 @@ header {
   justify-content: center;
   align-items: center;
   gap: 20px;
-  font-family: "IBM Plex Sans", sans-serif;
+  font-family: "Inter", sans-serif;
   margin: 0 0 10px 0;
+}
+
+.level_indicator {
+  font-size: 1.6em;
+  font-family: "Inter", sans-serif;
+  font-weight: bold;
 }
 
 .mouse-data {
@@ -16,7 +24,7 @@ header {
   position: absolute;
   right: 20px;
   bottom: 40px;
-  font-family: "IBM Plex Sans", sans-serif;
+  font-family: "Inter", sans-serif;
 }
 
 .mouse-data-icon {
@@ -91,6 +99,7 @@ main {
 
 .canvas-container {
   flex-grow: 1; /* Make it take the available space in the main element */
+  position: relative;
 }
 
 canvas {
@@ -109,6 +118,9 @@ canvas {
   margin-left: auto;
   margin-right: auto;
   width: 300px;
+  font-family: "Inter", sans-serif;
+  font-weight: bold;
+  color: #478f96;
 }
 
 .progress-bar {
@@ -121,7 +133,7 @@ canvas {
 
 .progress-bar-inner {
   height: 100%;
-  background-color: #478f96; 
+  background-color: #478f96;
   width: 0%;
   transition: width 0.3s ease-in-out;
 }
