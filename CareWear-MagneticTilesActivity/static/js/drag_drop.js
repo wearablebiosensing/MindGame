@@ -1040,7 +1040,7 @@ function OrangeSquare(
   isBuildingBlock = false
 ) {
   const SQUARE_SIZE = 100;
-  let color = isLevelTile ? "#D9D9D9" : "#65A7FF";
+  let color = isLevelTile ? "#D9D9D9" : "#FFCC4D";
   return new Square(
     x,
     y,
@@ -1104,7 +1104,7 @@ function GreenTrapezoid(
 ) {
   const BASE = 200;
   const HEIGHT = 100;
-  let color = isLevelTile ? "#D9D9D9" : "#6D14A4";
+  let color = isLevelTile ? "#D9D9D9" : "#A36DBD";
   return new Trapezoid(
     x,
     y,
@@ -1145,7 +1145,7 @@ function BlueHexagon(
   isBuildingBlock = false
 ) {
   const SIDE_LENGTH = 100;
-  let color = isLevelTile ? "#D9D9D9" : "#82D1FE";
+  let color = isLevelTile ? "#D9D9D9" : "#81E5DB";
 
   return new Hexagon(
     x,
@@ -1167,7 +1167,7 @@ function YellowDiamond(
 ) {
   const WIDTH = 70;
   const HEIGHT = 200;
-  let color = isLevelTile ? "#D9D9D9" : "#81E5DB";
+  let color = isLevelTile ? "#D9D9D9" : "#E5CF81";
 
   return new Diamond(
     x,
@@ -1192,7 +1192,7 @@ function PurpleDiamond(
   // TODO: Change this.
   const WIDTH = 100;
   const HEIGHT = 200;
-  let color = isLevelTile ? "#D9D9D9" : "#9F9AFF";
+  let color = isLevelTile ? "#D9D9D9" : "#CA6B6E";
 
   return new Diamond(
     x,
@@ -1215,7 +1215,7 @@ function PinkQuarterCircle(
   isBuildingBlock = false
 ) {
   const RADIUS = 100;
-  let color = isLevelTile ? "#D9D9D9" : "#FFA800";
+  let color = isLevelTile ? "#D9D9D9" : "#727A9C";
   return new QuarterCircle(
     x,
     y,
