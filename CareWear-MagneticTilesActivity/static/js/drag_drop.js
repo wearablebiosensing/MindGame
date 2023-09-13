@@ -232,7 +232,7 @@ class Square extends Shape {
 
   createShapeFromBlock() {
     if (!this.isBuildingBlock) return;
-    return OrangeSquare(this.x, this.y);
+    return OrangeSquare(this.x, this.y, this.rotation);
   }
 
   draw() {
@@ -321,7 +321,7 @@ class Circle extends Shape {
   createShapeFromBlock() {
     if (!this.isBuildingBlock) return;
     console.log("Red");
-    return RedCircle(this.x - this.radius, this.y - this.radius);
+    return RedCircle(this.x - this.radius, this.y - this.radius, this.rotation);
   }
 
   snapToTargetShape(targetShape) {
@@ -405,7 +405,11 @@ class Trapezoid extends Shape {
 
   createShapeFromBlock() {
     if (!this.isBuildingBlock) return;
-    return GreenTrapezoid(this.x - this.base / 2, this.y - this.height / 2);
+    return GreenTrapezoid(
+      this.x - this.base / 2,
+      this.y - this.height / 2,
+      this.rotation
+    );
   }
 
   snapToTargetShape(targetShape) {
@@ -516,7 +520,7 @@ class RightTriangle extends Shape {
 
   createShapeFromBlock() {
     if (!this.isBuildingBlock) return;
-    return BlueRightTriangle(this.x, this.y);
+    return BlueRightTriangle(this.x, this.y, this.rotation);
   }
 
   snapToTargetShape(targetShape) {
@@ -638,8 +642,8 @@ class Diamond extends Shape {
   createShapeFromBlock() {
     if (!this.isBuildingBlock) return;
     return this.type == "Yellow Diamond"
-      ? YellowDiamond(this.x, this.y, 90)
-      : PurpleDiamond(this.x, this.y, 90);
+      ? YellowDiamond(this.x, this.y, this.rotation)
+      : PurpleDiamond(this.x, this.y, this.rotation);
     _;
   }
 
@@ -733,7 +737,7 @@ class EquilateralTriangle extends Shape {
 
   createShapeFromBlock() {
     if (!this.isBuildingBlock) return;
-    return GreenEquilateralTriangle(this.x, this.y);
+    return GreenEquilateralTriangle(this.x, this.y, this.rotation);
   }
 
   snapToTargetShape(targetShape) {
@@ -862,7 +866,7 @@ class Hexagon extends Shape {
 
   createShapeFromBlock() {
     if (!this.isBuildingBlock) return;
-    return BlueHexagon(this.x, this.y);
+    return BlueHexagon(this.x, this.y, this.rotation);
   }
 
   snapToTargetShape(targetShape) {
@@ -962,7 +966,7 @@ class QuarterCircle extends Shape {
 
   createShapeFromBlock() {
     if (!this.isBuildingBlock) return;
-    return PinkQuarterCircle(this.x, this.y);
+    return PinkQuarterCircle(this.x, this.y, this.rotation);
   }
 
   snapToTargetShape(targetShape) {
@@ -1190,7 +1194,7 @@ function PurpleDiamond(
   isBuildingBlock = false
 ) {
   // TODO: Change this.
-  const WIDTH = 100;
+  const WIDTH = 110;
   const HEIGHT = 200;
   let color = isLevelTile ? "#D9D9D9" : "#CA6B6E";
 
@@ -1307,17 +1311,35 @@ let prevTimestamp = 0;
 //====================================
 
 // Create an array with instances of different shapes
+
 const building_blocks = [
-  OrangeSquare((canvas.width * 0.55) / 4 - 20, 10, 0, false, true),
-  RedCircle((canvas.width * 0.25) / 10, 20, 0, false, true),
-  GreenTrapezoid((canvas.width * 0.25) / 4 - 20, 130, 180, false, true),
-  BlueRightTriangle((canvas.width * 0.25) / 4 - 20, 260, 0, false, true),
-  GreenEquilateralTriangle((canvas.width * 0.25) / 2 + 40, 310, 0, false, true),
-  BlueHexagon((canvas.width * 0.25) / 2 - 20, 440, 180, false, true),
-  YellowDiamond((canvas.width * 0.25) / 2 - 50, 480, 90, false, true),
-  PurpleDiamond((canvas.width * 0.25) / 2 - 60, 580, 90, false, true),
+  GreenEquilateralTriangle((canvas.width * 0.25) / 4, 80, 0, false, true),
+  OrangeSquare((canvas.width * 0.55) / 4 - 20, 20, 0, false, true),
+
+  RedCircle((canvas.width * 0.25) / 10, 180, 0, false, true),
+  GreenTrapezoid((canvas.width * 0.25) / 4 + 50, 180, 180, false, true),
+
+  BlueHexagon((canvas.width * 0.25) / 2 + 80, 420, 180, false, true),
+  PurpleDiamond((canvas.width * 0.25) / 2 - 170, 330, 40, false, true),
+
+  BlueRightTriangle((canvas.width * 0.25) / 4 - 50, 580, 0, false, true),
+  YellowDiamond((canvas.width * 0.25) / 2 + 30, 530, 140, false, true),
+
   PinkQuarterCircle((canvas.width * 0.25) / 2 - 60, 750, 0, false, true),
 ];
+
+// const building_blocks = [
+//   GreenEquilateralTriangle((canvas.width * 0.25) / 2 + 40, 310, 0, false, true),
+//   OrangeSquare((canvas.width * 0.55) / 4 - 20, 10, 0, false, true),
+//   RedCircle((canvas.width * 0.25) / 10, 20, 0, false, true),
+//   GreenTrapezoid((canvas.width * 0.25) / 4 - 20, 130, 180, false, true),
+//   BlueRightTriangle((canvas.width * 0.25) / 4 - 20, 260, 0, false, true),
+
+//   BlueHexagon((canvas.width * 0.25) / 2 - 20, 440, 180, false, true),
+//   YellowDiamond((canvas.width * 0.25) / 2 - 50, 480, 90, false, true),
+//   PurpleDiamond((canvas.width * 0.25) / 2 - 60, 580, 90, false, true),
+//   PinkQuarterCircle((canvas.width * 0.25) / 2 - 60, 750, 0, false, true),
+// ];
 
 // shapes.push(...building_blocks);
 
@@ -1674,12 +1696,14 @@ function animateShapeToBuildingBlock(shape, buildingBlockOfShape) {
   const animationSpeed = 0.2; // You can adjust the speed as needed
   const dx = (buildingBlockOfShape.x - shape.x) * animationSpeed;
   const dy = (buildingBlockOfShape.y - shape.y) * animationSpeed;
+  const dr = (buildingBlockOfShape.rotation - shape.rotation) * animationSpeed;
 
   // Check if the shape is close enough to the buildingBlockOfShape
   if (Math.abs(dx) < 1 && Math.abs(dy) < 1) {
     // Snap the shape to the buildingBlockOfShape to avoid precision issues
     shape.x = buildingBlockOfShape.x;
     shape.y = buildingBlockOfShape.y;
+    shape.rotation = buildingBlockOfShape.rotation;
     drawShapes();
 
     console.log(
@@ -1695,6 +1719,7 @@ function animateShapeToBuildingBlock(shape, buildingBlockOfShape) {
     // Move the shape towards the buildingBlockOfShape
     shape.x += dx;
     shape.y += dy;
+    shape.rotation += dr;
   }
 
   // Update Position on screen
