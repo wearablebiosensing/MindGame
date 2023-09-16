@@ -1281,6 +1281,9 @@ let shapes = [];
 let current_shape_index = null;
 let closest_shape_to_current = null;
 
+// Time When User hit the Start Button for the level
+const user_start_timestamp = Date.now();
+
 //Level Data
 let current_level = 1;
 let current_sub_level = 1;
@@ -1317,7 +1320,7 @@ const building_blocks = [
   OrangeSquare((canvas.width * 0.55) / 4 - 20, 20, 0, false, true),
 
   RedCircle((canvas.width * 0.25) / 10, 180, 0, false, true),
-  GreenTrapezoid((canvas.width * 0.25) / 4 + 50, 180, 180, false, true),
+  GreenTrapezoid((canvas.width * 0.25) / 4 + 70, 180, 180, false, true),
 
   BlueHexagon((canvas.width * 0.25) / 2 + 80, 420, 180, false, true),
   PurpleDiamond((canvas.width * 0.25) / 2 - 170, 330, 40, false, true),
@@ -1479,40 +1482,54 @@ function calculateMousePos(clientX, clientY) {
   return { x, y };
 }
 
+// function calculateTotalLevelTime() {
+//   console.log("BEFORE CALC - ", mouse_motion_array);
+//   const firstTimestamp = mouse_motion_array[0][2];
+//   const lastTimestamp = mouse_motion_array[mouse_motion_array.length - 1][2];
+//   console.log("Calc Time - ", firstTimestamp, lastTimestamp);
+
+//   // Assuming the time string format is "HH:mm:ss:SSS"
+//   const timeComponentsFirst = firstTimestamp.split(":");
+//   const timeComponentsLast = lastTimestamp.split(":");
+
+//   // Create Date objects with the time components
+//   const firstDate = new Date();
+//   firstDate.setHours(parseInt(timeComponentsFirst[0]));
+//   firstDate.setMinutes(parseInt(timeComponentsFirst[1]));
+//   firstDate.setSeconds(parseInt(timeComponentsFirst[2]));
+//   firstDate.setMilliseconds(parseInt(timeComponentsFirst[3]));
+
+//   const lastDate = new Date();
+//   lastDate.setHours(parseInt(timeComponentsLast[0]));
+//   lastDate.setMinutes(parseInt(timeComponentsLast[1]));
+//   lastDate.setSeconds(parseInt(timeComponentsLast[2]));
+//   lastDate.setMilliseconds(parseInt(timeComponentsLast[3]));
+
+//   console.log("Date! - ", firstDate, lastDate);
+
+//   const sub = lastDate - firstDate;
+//   console.log("DONE - ", sub); // This should now work correctly
+
+//   // Calculate minutes and seconds from the time difference
+//   const minutes = Math.floor(sub / (1000 * 60));
+//   const seconds = Math.floor((sub / 1000) % 60);
+
+//   console.log("Minutes:", minutes);
+//   console.log("Seconds:", seconds);
+// }
+
 function calculateTotalLevelTime() {
-  console.log("BEFORE CALC - ", mouse_motion_array);
-  const firstTimestamp = mouse_motion_array[0][2];
-  const lastTimestamp = mouse_motion_array[mouse_motion_array.length - 1][2];
-  console.log("Calc Time - ", firstTimestamp, lastTimestamp);
+  const user_end_timestamp = Date.now();
 
-  // Assuming the time string format is "HH:mm:ss:SSS"
-  const timeComponentsFirst = firstTimestamp.split(":");
-  const timeComponentsLast = lastTimestamp.split(":");
+  // Global - user_start_timestamp
+  const total_level_time = user_end_timestamp - user_start_timestamp;
+  const minutes = Math.floor(total_level_time / (1000 * 60));
+  const seconds = Math.floor((total_level_time / 1000) % 60);
 
-  // Create Date objects with the time components
-  const firstDate = new Date();
-  firstDate.setHours(parseInt(timeComponentsFirst[0]));
-  firstDate.setMinutes(parseInt(timeComponentsFirst[1]));
-  firstDate.setSeconds(parseInt(timeComponentsFirst[2]));
-  firstDate.setMilliseconds(parseInt(timeComponentsFirst[3]));
+  const timeString = `Minutes: ${minutes}   Seconds: ${seconds}`;
+  // console.log("100% Seconds:", seconds);
 
-  const lastDate = new Date();
-  lastDate.setHours(parseInt(timeComponentsLast[0]));
-  lastDate.setMinutes(parseInt(timeComponentsLast[1]));
-  lastDate.setSeconds(parseInt(timeComponentsLast[2]));
-  lastDate.setMilliseconds(parseInt(timeComponentsLast[3]));
-
-  console.log("Date! - ", firstDate, lastDate);
-
-  const sub = lastDate - firstDate;
-  console.log("DONE - ", sub); // This should now work correctly
-
-  // Calculate minutes and seconds from the time difference
-  const minutes = Math.floor(sub / (1000 * 60));
-  const seconds = Math.floor((sub / 1000) % 60);
-
-  console.log("Minutes:", minutes);
-  console.log("Seconds:", seconds);
+  return timeString;
 }
 
 function showFeedbackText() {
@@ -1532,6 +1549,7 @@ function euclideanDistance(x1, y1, x2, y2) {
 
 function calculateShortestEuclidianDistanceForCurrentLevel() {
   shortestEuclidDistances = {};
+  console.log(window.screen.width, window.screen.height);
   // console.log(shapes);
 
   for (let levelShape of shapes.filter((s) => s.isLevelShape)) {
@@ -1550,23 +1568,7 @@ function calculateShortestEuclidianDistanceForCurrentLevel() {
       levelShape.y
     );
 
-    // console.log(
-    //   "x1 - ",
-    //   buildingBlockOfSameLevelShape.x,
-    //   "  y1 - ",
-    //   buildingBlockOfSameLevelShape.y,
-    //   "    x2 - ",
-    //   levelShape.x,
-    //   "    y2 - ",
-    //   levelShape.y
-    // );
-
-    // console.log(
-    //   "Distance - ",
-    //   distance,
-    //   "    Shape - ",
-    //   buildingBlockOfSameLevelShape.type
-    // );
+    console.log("Shape - ", levelShape.type, distance);
 
     if (levelShape.type in shortestEuclidDistances) {
       //Add to Shortest Distance
@@ -1609,6 +1611,7 @@ function postMouseMotionData() {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
+      time_to_complete: calculateTotalLevelTime(), //Send how long it took user to complete level
       data: mouse_motion_array,
       level: current_level,
       userID: getLocalStorageOrNull("userID"),
@@ -1631,7 +1634,7 @@ function postLevelMouseData() {
     reset all of the accumulators
   */
 
-  calculateTotalLevelTime();
+  // calculateTotalLevelTime();
   console.log("End of motion - ", mouse_motion_array);
   postMouseMotionData();
 }
@@ -1704,15 +1707,10 @@ function animateShapeToBuildingBlock(shape, buildingBlockOfShape) {
     shape.x = buildingBlockOfShape.x;
     shape.y = buildingBlockOfShape.y;
     shape.rotation = buildingBlockOfShape.rotation;
-    drawShapes();
 
-    console.log(
-      shape.x,
-      shape.y,
-      "    ",
-      buildingBlockOfShape.x,
-      buildingBlockOfShape.y
-    );
+    // shapes.splice(current_shape_index, 1);
+
+    drawShapes();
 
     return;
   } else {
@@ -1794,6 +1792,8 @@ function mouse_move(event) {
 
   const { x, y } = calculateMousePos(clientX, clientY);
 
+  console.log("WEIRD - ", x, y, "   :   ", clientX, clientY);
+
   // Calculate the change in position and time
   const dx = x - prevMouseX;
   const dy = y - prevMouseY;
@@ -1823,8 +1823,8 @@ function mouse_move(event) {
     if (mouse_motion_array) {
       // console.log("Dragging Img - ", event.clientX, " , ", event.clientY);
       mouse_motion_array.push([
-        clientX,
-        clientY,
+        Math.round(x),
+        Math.round(y),
         getTimestamp(),
         shapes[current_shape_index].type,
         Math.round(accelerationX_in_px_per_s_squared),
@@ -1864,6 +1864,7 @@ function mouse_move(event) {
     closestDistanceToShape
   );
 
+  // LEVEL IS COMPLETE
   if (getProgressBarPercentage() == 100) {
     if (mouse_motion_array.length != 0) {
       postLevelMouseData(); //Create csv

@@ -359,6 +359,11 @@ def plot_acceleration_data(csv_file):
 
     return image_data
 
+
+
+
+
+
 # Specify the directory for the temporary file
 TEMP_FILE_DIRECTORY = './'
 
@@ -368,6 +373,9 @@ def processMouseMovementData():
     data = res["data"]
     level = res["level"] #Current level that posted data is from
     userID = res["userID"] #Used to differentiate csv files from differet subjects
+    
+    time_to_complete = res["time_to_complete"]
+    print(time_to_complete)
     
     
     # Generate a unique prefix for the tempfile using level and userID
