@@ -973,18 +973,26 @@ class QuarterCircle extends Shape {
     if (targetShape.isLevelShapeFilled) return;
 
     if (targetShape instanceof QuarterCircle) {
-      if (this.rotation % 360 != targetShape.rotation % 360) return; // Have to be the same rotation
+      // if (this.rotation % 360 != targetShape.rotation % 360) return; // Have to be the same rotation
 
       const distance = Math.sqrt(
         Math.pow(this.x - targetShape.x, 2) +
           Math.pow(this.y - targetShape.y, 2)
       );
 
+      console.log(
+        "QUAERT PINK DISTANCE - ",
+        distance,
+        this.snapDistanceThreshold
+      );
+
+      console.log("PINK - ", distance <= this.snapDistanceThreshold);
+
       if (this.canMoveShapeBackToOrigin(targetShape)) {
         return;
       }
 
-      if (distance <= this.snapDistanceThreshold) {
+      if (distance - 60 <= this.snapDistanceThreshold) {
         this.x = targetShape.x;
         this.y = targetShape.y;
         this.snapUpdate(targetShape);
@@ -1382,8 +1390,28 @@ const LEVELS = {
       BlueRightTriangle(LEVEL_X - 210, LEVEL_Y - 50, 180, true), // Left - Triangle],
     ],
 
-    2: [],
-    3: [],
+    2: [
+      //Horse
+      OrangeSquare(LEVEL_X - 50, LEVEL_Y - 100, 0, true), //Body
+      OrangeSquare(LEVEL_X + 60, LEVEL_Y - 100, 0, true), //Body
+      PinkQuarterCircle(LEVEL_X - 60, LEVEL_Y, 180, true), //Body
+      PinkQuarterCircle(LEVEL_X + 160, LEVEL_Y - 110, 180, true), //Body
+      BlueRightTriangle(LEVEL_X - 160, LEVEL_Y + 10, 0, true), // Leg
+      BlueRightTriangle(LEVEL_X + 60, LEVEL_Y + 10, 90, true), // Leg
+      BlueRightTriangle(LEVEL_X + 170, LEVEL_Y - 210, 270, true), // Head
+    ],
+    3: [
+      //Flower
+      BlueHexagon(LEVEL_X, LEVEL_Y - 150, 0, true), //Middle Flower
+      YellowDiamond(LEVEL_X - 35, LEVEL_Y - 70, 0, true), //Stem
+      PurpleDiamond(LEVEL_X + 25, LEVEL_Y - 30, 50, true), //Leaf
+      PurpleDiamond(LEVEL_X - 135, LEVEL_Y - 30, -50, true), //Leaf
+      GreenEquilateralTriangle(LEVEL_X + 95, LEVEL_Y - 95, 120, true),
+      GreenEquilateralTriangle(LEVEL_X + 100, LEVEL_Y - 200, 60, true),
+      GreenEquilateralTriangle(LEVEL_X + 0, LEVEL_Y - 260, 0, true),
+      GreenEquilateralTriangle(LEVEL_X - 100, LEVEL_Y - 200, -60, true),
+      GreenEquilateralTriangle(LEVEL_X - 95, LEVEL_Y - 90, -120, true),
+    ],
   },
   2: {
     1: [
@@ -1482,41 +1510,79 @@ function calculateMousePos(clientX, clientY) {
   return { x, y };
 }
 
-// function calculateTotalLevelTime() {
-//   console.log("BEFORE CALC - ", mouse_motion_array);
-//   const firstTimestamp = mouse_motion_array[0][2];
-//   const lastTimestamp = mouse_motion_array[mouse_motion_array.length - 1][2];
-//   console.log("Calc Time - ", firstTimestamp, lastTimestamp);
+//=====================================
+function euclideanDistance(x1, y1, x2, y2) {
+  return Math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2);
+}
 
-//   // Assuming the time string format is "HH:mm:ss:SSS"
-//   const timeComponentsFirst = firstTimestamp.split(":");
-//   const timeComponentsLast = lastTimestamp.split(":");
+function calculateUserEuclidDistances() {
+  const shapeDistances = {};
+  let currentStrokeData = [];
+  let prevX = null;
+  let prevY = null;
 
-//   // Create Date objects with the time components
-//   const firstDate = new Date();
-//   firstDate.setHours(parseInt(timeComponentsFirst[0]));
-//   firstDate.setMinutes(parseInt(timeComponentsFirst[1]));
-//   firstDate.setSeconds(parseInt(timeComponentsFirst[2]));
-//   firstDate.setMilliseconds(parseInt(timeComponentsFirst[3]));
+  for (const row of mouse_motion_array) {
+    if (row[0] === "END_OF_STROKE") {
+      const shape = currentStrokeData[0][2];
+      const distance = euclideanDistance(
+        currentStrokeData[0][0],
+        currentStrokeData[0][1],
+        currentStrokeData[currentStrokeData.length - 1][0],
+        currentStrokeData[currentStrokeData.length - 1][1]
+      );
+      console.log(
+        `x1 - ${currentStrokeData[0][0]}, y1 - ${
+          currentStrokeData[0][1]
+        }, x2 - ${currentStrokeData[currentStrokeData.length - 1][0]}, y2 - ${
+          currentStrokeData[currentStrokeData.length - 1][1]
+        }`
+      );
+      // console.log(`Distance - ${distance}, Shape - ${shape}`);
 
-//   const lastDate = new Date();
-//   lastDate.setHours(parseInt(timeComponentsLast[0]));
-//   lastDate.setMinutes(parseInt(timeComponentsLast[1]));
-//   lastDate.setSeconds(parseInt(timeComponentsLast[2]));
-//   lastDate.setMilliseconds(parseInt(timeComponentsLast[3]));
+      if (shape in shapeDistances) {
+        shapeDistances[shape] += distance;
+      } else {
+        shapeDistances[shape] = distance;
+      }
 
-//   console.log("Date! - ", firstDate, lastDate);
+      currentStrokeData = [];
+    } else {
+      const [x, y, shape] = [parseInt(row[0]), parseInt(row[1]), row[3]];
+      currentStrokeData.push([x, y, shape]);
+    }
+  }
 
-//   const sub = lastDate - firstDate;
-//   console.log("DONE - ", sub); // This should now work correctly
+  // Calculate and add the distance of the last stroke
+  if (currentStrokeData.length > 0) {
+    const shape = currentStrokeData[0][2];
+    const distance = euclideanDistance(
+      currentStrokeData[0][0],
+      currentStrokeData[0][1],
+      currentStrokeData[currentStrokeData.length - 1][0],
+      currentStrokeData[currentStrokeData.length - 1][1]
+    );
+    console.log(
+      `x1 - ${currentStrokeData[0][0]}, y1 - ${currentStrokeData[0][1]}, x2 - ${
+        currentStrokeData[currentStrokeData.length - 1][0]
+      }, y2 - ${currentStrokeData[currentStrokeData.length - 1][1]}`
+    );
+    console.log(`Distance - ${distance}, Shape - ${shape}`);
 
-//   // Calculate minutes and seconds from the time difference
-//   const minutes = Math.floor(sub / (1000 * 60));
-//   const seconds = Math.floor((sub / 1000) % 60);
+    if (shape in shapeDistances) {
+      shapeDistances[shape] += distance;
+    } else {
+      shapeDistances[shape] = distance;
+    }
+  }
 
-//   console.log("Minutes:", minutes);
-//   console.log("Seconds:", seconds);
-// }
+  // Print the total distances for each shape
+  // for (const shape in shapeDistances) {
+  //   console.log(`Shape: ${shape}, Total Distance: ${shapeDistances[shape]}`);
+  // }
+
+  return shapeDistances;
+}
+//=====================================
 
 function calculateTotalLevelTime() {
   const user_end_timestamp = Date.now();
@@ -1547,7 +1613,7 @@ function euclideanDistance(x1, y1, x2, y2) {
   return distance;
 }
 
-function calculateShortestEuclidianDistanceForCurrentLevel() {
+function calculateShortestEuclidianDistanceForLevel() {
   shortestEuclidDistances = {};
   console.log(window.screen.width, window.screen.height);
   // console.log(shapes);
@@ -1568,7 +1634,7 @@ function calculateShortestEuclidianDistanceForCurrentLevel() {
       levelShape.y
     );
 
-    console.log("Shape - ", levelShape.type, distance);
+    // console.log("Shape - ", levelShape.type, distance);
 
     if (levelShape.type in shortestEuclidDistances) {
       //Add to Shortest Distance
@@ -1578,7 +1644,9 @@ function calculateShortestEuclidianDistanceForCurrentLevel() {
     }
   }
 
-  console.log("Shortest Euclid Distance For Level - ", shortestEuclidDistances);
+  return shortestEuclidDistances;
+
+  // console.log("Shortest Euclid Distance For Level - ", shortestEuclidDistances);
 }
 
 //====================================
@@ -1612,7 +1680,9 @@ function postMouseMotionData() {
     },
     body: JSON.stringify({
       time_to_complete: calculateTotalLevelTime(), //Send how long it took user to complete level
-      data: mouse_motion_array,
+      user_euclid_movement_distances: calculateUserEuclidDistances(),
+      shortest_euclid_distances: calculateShortestEuclidianDistanceForLevel(),
+      data: mouse_motion_array, // Raw Mouse Data
       level: current_level,
       userID: getLocalStorageOrNull("userID"),
     }),
@@ -1635,7 +1705,7 @@ function postLevelMouseData() {
   */
 
   // calculateTotalLevelTime();
-  console.log("End of motion - ", mouse_motion_array);
+  // console.log("End of motion - ", mouse_motion_array);
   postMouseMotionData();
 }
 
@@ -1770,6 +1840,10 @@ function mouse_up(event) {
   ]);
 }
 
+//GLOBAL
+let isDataSentAlready = false;
+//+++++
+
 function mouse_move(event) {
   if (current_shape_index === null) return;
 
@@ -1866,14 +1940,20 @@ function mouse_move(event) {
 
   // LEVEL IS COMPLETE
   if (getProgressBarPercentage() == 100) {
-    if (mouse_motion_array.length != 0) {
-      postLevelMouseData(); //Create csv
-    }
-    setTimeout(() => {}, 1000); // Wait 1s
+    console.log("LEVEL IS DONE - ", isDataSentAlready);
+    if (isDataSentAlready == false) {
+      if (mouse_motion_array.length != 0) {
+        console.log("POSING");
+        postLevelMouseData(); //Create csv
+      }
+      setTimeout(() => {}, 1000); // Wait 1s
 
-    window.location.href = `/scoring_page?userID=${getLocalStorageOrNull(
-      "userID"
-    )}&level=${getLocalStorageOrNull("currentLevel")}`; //Goto scoring page
+      window.location.href = `/scoring_page?userID=${getLocalStorageOrNull(
+        "userID"
+      )}&level=${getLocalStorageOrNull("currentLevel")}`; //Goto scoring page
+    }
+
+    isDataSentAlready = true;
   }
 
   shapes[current_shape_index].mouseMove(x, y);
@@ -1900,7 +1980,7 @@ function drawShapes() {
     shape.draw();
   }
 
-  calculateShortestEuclidianDistanceForCurrentLevel();
+  // calculateShortestEuclidianDistanceForCurrentLevel();
 }
 
 //Testing

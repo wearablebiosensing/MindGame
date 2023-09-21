@@ -1,0 +1,5 @@
+Shortest Euclidian Distances: 
+{'Square': 2060.916461819527, 'Circle': 1649.755329730694, 'Right Triangle': 1526.7123645373313}
+
+User Eucclidian Distances: 
+{'Square': 2109.8766751220146, 'Circle': 1617.1608981975626, 'Right Triangle': 1512.735057610725}

@@ -10,7 +10,7 @@ import firebase_admin
 from firebase_admin import credentials, storage, db
 import pandas as pd
 import numpy as np
-import scipy.signal as signal
+# import scipy.signal as signal
 import matplotlib
 matplotlib.use('Agg')
 from matplotlib import pyplot as plt
@@ -194,7 +194,7 @@ def scoring_page():
 #The scoring page calls to this route when loading to get the graph based on input
 @app.route('/mouse_movement_graph/<userID>/<level>')
 def scoring_graph(userID, level):
-    csv_file = f"Level_{level} - user{userID}.csv"  # Adjust the file naming pattern as needed
+    csv_file = f"mouse_data/Level_{level} - user{userID}.csv"  # Adjust the file naming pattern as needed
     with csv_lock:
         image_data = plot_mouse_movement(csv_file)
     return Response(image_data, mimetype='image/png')
@@ -202,7 +202,7 @@ def scoring_graph(userID, level):
 
 @app.route('/acceleration_graph/<userID>/<level>')
 def acceleration_graph(userID, level):
-    csv_file = f"Level_{level} - user{userID}.csv"  # Adjust the file naming pattern as needed
+    csv_file = f"mouse_data/Level_{level} - user{userID}.csv"  # Adjust the file naming pattern as needed
     with csv_lock:
         image_data = plot_acceleration_data(csv_file)
     return Response(image_data, mimetype='image/png')
@@ -211,7 +211,7 @@ def acceleration_graph(userID, level):
 # Route to return completion time
 @app.route('/completion_time/<userID>/<level>')
 def completion_time(userID, level):
-    csv_file = f"Level_{level} - user{userID}.csv"  # Adjust the file naming pattern as needed
+    csv_file = f"mouse_data/Level_{level} - user{userID}.csv"  # Adjust the file naming pattern as needed
 
     level_completion_time = calculate_completion_time(csv_file)
     return level_completion_time
@@ -374,12 +374,50 @@ def processMouseMovementData():
     level = res["level"] #Current level that posted data is from
     userID = res["userID"] #Used to differentiate csv files from differet subjects
     
+    
+    #Save time to file
     time_to_complete = res["time_to_complete"]
-    print(time_to_complete)
+    time_file_name = f"ttc/TTC - Level-{level}, User-{userID}.txt"
+    os.makedirs("ttc/", exist_ok=True)
+    
+        
+    try:
+        with open(time_file_name, mode="w") as time_file:
+            time_file.write(time_to_complete)
+    except Exception as e:
+        print(f"An error occurred: {str(e)}")
+    
+    
+    #Save Eulid Distances
+    user_euclid_distances = res["user_euclid_movement_distances"]
+    shortest_euclid_distances = res["shortest_euclid_distances"]
+    
+    os.makedirs("euclid/", exist_ok=True)
+    
+    
+    euclid_file_name = f"euclid/Euclid - Level-{level}, User-{userID}.txt"
+    os.makedirs("euclid/", exist_ok=True)
+    print("User Euclid - ", user_euclid_distances)
+    
+    try:
+        with open(euclid_file_name, mode="w") as euclid_file:
+            euclid_file.write("Shortest Euclidian Distances: \n")
+            euclid_file.write(str(shortest_euclid_distances) + "\n")
+            
+            euclid_file.write("\n")
+            
+            euclid_file.write("User Eucclidian Distances: \n")
+            euclid_file.write(str(user_euclid_distances))
+    except Exception as e:
+        print(f"An error occurred: {str(e)}")
+    
+    
+    
+    
     
     
     # Generate a unique prefix for the tempfile using level and userID
-    temp_file_name = f"Level_{level} - user{userID}.csv"
+    temp_file_name = f"mouse_data/Level_{level} - user{userID}.csv"
 
     # Create a named temporary file in memory
     # with tempfile.NamedTemporaryFile(prefix=temp_file_prefix, mode="w+b", delete=False, suffix=".csv", dir=TEMP_FILE_DIRECTORY) as temp_file:
