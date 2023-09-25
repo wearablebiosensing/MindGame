@@ -1425,7 +1425,40 @@ const LEVELS = {
       YellowDiamond(LEVEL_X + 150, LEVEL_Y - 380, 75, true), //R Top Wing
       YellowDiamond(LEVEL_X + 150, LEVEL_Y - 260, 110, true), //R Bottom Wing
     ],
+    2: [
+      //Cat
+      PinkQuarterCircle(LEVEL_X - 80, LEVEL_Y - 200, 180, true), //Head
+      PinkQuarterCircle(LEVEL_X - 70, LEVEL_Y - 200, 270, true), //Head
+
+      PinkQuarterCircle(LEVEL_X - 80, LEVEL_Y - 190, 90, true), //Head
+      PinkQuarterCircle(LEVEL_X - 70, LEVEL_Y - 190, 0, true), //Head
+
+      GreenEquilateralTriangle(LEVEL_X - 70, LEVEL_Y - 340, 0, true), //Ear
+      GreenEquilateralTriangle(LEVEL_X - 220, LEVEL_Y - 200, 270, true), //Ear
+
+      BlueHexagon(LEVEL_X + 80, LEVEL_Y - 90, 60, true), //Body
+      PurpleDiamond(LEVEL_X - 25, LEVEL_Y - 50, 62, true), //Feet
+
+      GreenTrapezoid(LEVEL_X + 70, LEVEL_Y - 20, -60, true), //Back
+
+      YellowDiamond(LEVEL_X + 220, LEVEL_Y - 200, 10, true), //Tail
+    ],
+
+    3: [
+      //Horse 2
+      BlueRightTriangle(LEVEL_X - 220, LEVEL_Y - 300, 180, true), // Head
+      BlueRightTriangle(LEVEL_X - 160, LEVEL_Y - 270, 135, true), // Head
+      BlueRightTriangle(LEVEL_X - 80, LEVEL_Y - 190, 45, true), // Head
+
+      GreenTrapezoid(LEVEL_X - 100, LEVEL_Y - 130, 0, true), // Body
+
+      PurpleDiamond(LEVEL_X + 55, LEVEL_Y - 120, -2, true), //Feet
+      YellowDiamond(LEVEL_X - 135, LEVEL_Y - 130, -5, true), //Feet
+
+      YellowDiamond(LEVEL_X + 100, LEVEL_Y - 320, 20, true), //Tail
+    ],
   },
+
   3: {
     1: [
       OrangeSquare(LEVEL_X - 50, LEVEL_Y - 370, 0, true), // Body
@@ -1511,38 +1544,34 @@ function calculateMousePos(clientX, clientY) {
 }
 
 //=====================================
-function euclideanDistance(x1, y1, x2, y2) {
-  return Math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2);
-}
 
 function calculateUserEuclidDistances() {
   const shapeDistances = {};
   let currentStrokeData = [];
+  let totalDistance = 0; // Initialize totalDistance to 0
   let prevX = null;
   let prevY = null;
 
   for (const row of mouse_motion_array) {
     if (row[0] === "END_OF_STROKE") {
       const shape = currentStrokeData[0][2];
-      const distance = euclideanDistance(
-        currentStrokeData[0][0],
-        currentStrokeData[0][1],
-        currentStrokeData[currentStrokeData.length - 1][0],
-        currentStrokeData[currentStrokeData.length - 1][1]
-      );
-      console.log(
-        `x1 - ${currentStrokeData[0][0]}, y1 - ${
-          currentStrokeData[0][1]
-        }, x2 - ${currentStrokeData[currentStrokeData.length - 1][0]}, y2 - ${
-          currentStrokeData[currentStrokeData.length - 1][1]
-        }`
-      );
-      // console.log(`Distance - ${distance}, Shape - ${shape}`);
 
+      // Calculate the distance traveled for the current stroke
+      let strokeDistance = 0;
+      for (let i = 1; i < currentStrokeData.length; i++) {
+        const [x1, y1] = currentStrokeData[i - 1];
+        const [x2, y2] = currentStrokeData[i];
+        strokeDistance += euclideanDistance(x1, y1, x2, y2);
+      }
+
+      // Add the strokeDistance to totalDistance
+      totalDistance += strokeDistance;
+
+      // Store the total distance for the shape
       if (shape in shapeDistances) {
-        shapeDistances[shape] += distance;
+        shapeDistances[shape] += strokeDistance;
       } else {
-        shapeDistances[shape] = distance;
+        shapeDistances[shape] = strokeDistance;
       }
 
       currentStrokeData = [];
@@ -1555,33 +1584,40 @@ function calculateUserEuclidDistances() {
   // Calculate and add the distance of the last stroke
   if (currentStrokeData.length > 0) {
     const shape = currentStrokeData[0][2];
-    const distance = euclideanDistance(
-      currentStrokeData[0][0],
-      currentStrokeData[0][1],
-      currentStrokeData[currentStrokeData.length - 1][0],
-      currentStrokeData[currentStrokeData.length - 1][1]
-    );
-    console.log(
-      `x1 - ${currentStrokeData[0][0]}, y1 - ${currentStrokeData[0][1]}, x2 - ${
-        currentStrokeData[currentStrokeData.length - 1][0]
-      }, y2 - ${currentStrokeData[currentStrokeData.length - 1][1]}`
-    );
-    console.log(`Distance - ${distance}, Shape - ${shape}`);
 
+    // Calculate the distance traveled for the last stroke
+    let strokeDistance = 0;
+    for (let i = 1; i < currentStrokeData.length; i++) {
+      const [x1, y1] = currentStrokeData[i - 1];
+      const [x2, y2] = currentStrokeData[i];
+      strokeDistance += euclideanDistance(x1, y1, x2, y2);
+    }
+
+    // Add the strokeDistance to totalDistance
+    totalDistance += strokeDistance;
+
+    // Store the total distance for the shape
     if (shape in shapeDistances) {
-      shapeDistances[shape] += distance;
+      shapeDistances[shape] += strokeDistance;
     } else {
-      shapeDistances[shape] = distance;
+      shapeDistances[shape] = strokeDistance;
     }
   }
 
+  console.log(`Total Distance Traveled: ${totalDistance}`);
+
   // Print the total distances for each shape
-  // for (const shape in shapeDistances) {
-  //   console.log(`Shape: ${shape}, Total Distance: ${shapeDistances[shape]}`);
-  // }
+  for (const shape in shapeDistances) {
+    console.log(`Shape: ${shape}, Total Distance: ${shapeDistances[shape]}`);
+  }
 
   return shapeDistances;
 }
+
+function euclideanDistance(x1, y1, x2, y2) {
+  return Math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2);
+}
+
 //=====================================
 
 function calculateTotalLevelTime() {
@@ -1592,8 +1628,11 @@ function calculateTotalLevelTime() {
   const minutes = Math.floor(total_level_time / (1000 * 60));
   const seconds = Math.floor((total_level_time / 1000) % 60);
 
-  const timeString = `Minutes: ${minutes}   Seconds: ${seconds}`;
-  // console.log("100% Seconds:", seconds);
+  // Ensure minutes and seconds have two digits with leading zeros
+  const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes;
+  const formattedSeconds = seconds < 10 ? `0${seconds}` : seconds;
+
+  const timeString = `${formattedMinutes}:${formattedSeconds}`;
 
   return timeString;
 }
@@ -1866,7 +1905,7 @@ function mouse_move(event) {
 
   const { x, y } = calculateMousePos(clientX, clientY);
 
-  console.log("WEIRD - ", x, y, "   :   ", clientX, clientY);
+  // console.log("WEIRD - ", x, y, "   :   ", clientX, clientY);
 
   // Calculate the change in position and time
   const dx = x - prevMouseX;

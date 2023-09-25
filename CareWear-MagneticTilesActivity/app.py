@@ -4,6 +4,7 @@ import csv
 import re
 import os
 from datetime import datetime
+import json
 
 from flask import Flask, render_template, request, jsonify, redirect,url_for, Response
 import firebase_admin
@@ -374,16 +375,40 @@ def processMouseMovementData():
     level = res["level"] #Current level that posted data is from
     userID = res["userID"] #Used to differentiate csv files from differet subjects
     
+    # print(data)
+    # print(type(data))
     
     #Save time to file
     time_to_complete = res["time_to_complete"]
-    time_file_name = f"ttc/TTC - Level-{level}, User-{userID}.txt"
-    os.makedirs("ttc/", exist_ok=True)
+    info_file_name = f"level_info/Level_{level} - User_{userID}.txt"
+    os.makedirs("level_info/", exist_ok=True)
     
         
     try:
-        with open(time_file_name, mode="w") as time_file:
+        with open(info_file_name, mode="w") as time_file:
+            SCREEN_WIDTH_INDEX = 6
+            SCREEN_HEIGHT_INDEX = 7
+            time_file.write("Screen Size: \n")
+            time_file.write(f'{data[0][SCREEN_WIDTH_INDEX]}x{data[0][SCREEN_HEIGHT_INDEX]}')
+            time_file.write("\n")
+            time_file.write("\n")
+            
+            
+            time_file.write("Level: \n")
+            time_file.write(str(level))
+            time_file.write("\n")
+            time_file.write("\n")
+            
+            time_file.write("UserID: \n")
+            time_file.write(str(userID))
+            time_file.write("\n")
+            time_file.write("\n")
+            
+            
+            time_file.write("Time to Complete Level: \n")
             time_file.write(time_to_complete)
+            time_file.write("\n")
+            time_file.write("\n")
     except Exception as e:
         print(f"An error occurred: {str(e)}")
     
@@ -395,19 +420,24 @@ def processMouseMovementData():
     os.makedirs("euclid/", exist_ok=True)
     
     
-    euclid_file_name = f"euclid/Euclid - Level-{level}, User-{userID}.txt"
-    os.makedirs("euclid/", exist_ok=True)
-    print("User Euclid - ", user_euclid_distances)
+    shortest_euclid_file_name = f"euclid/Shortest - Level_{level} - User_{userID}.json"
+    user_euclid_file_name = f"euclid/User - Level_{level} - User_{userID}.json"
+    
+
+
     
     try:
-        with open(euclid_file_name, mode="w") as euclid_file:
-            euclid_file.write("Shortest Euclidian Distances: \n")
-            euclid_file.write(str(shortest_euclid_distances) + "\n")
+        with open(shortest_euclid_file_name, mode="w") as euclid_file:
             
-            euclid_file.write("\n")
-            
-            euclid_file.write("User Eucclidian Distances: \n")
-            euclid_file.write(str(user_euclid_distances))
+            euclid_file.write(json.dumps(shortest_euclid_distances))
+    except Exception as e:
+        print(f"An error occurred: {str(e)}")
+        
+        
+        
+    try:
+        with open(user_euclid_file_name, mode="w") as euclid_file:
+            euclid_file.write(json.dumps(user_euclid_distances))
     except Exception as e:
         print(f"An error occurred: {str(e)}")
     
