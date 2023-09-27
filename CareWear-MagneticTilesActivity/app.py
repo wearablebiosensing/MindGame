@@ -181,6 +181,10 @@ def home():
 def tiles_game():
   return render_template("tiles.html")
 
+@app.route('/updated_scoring', methods=['GET','POST'])
+def updated_scoring():
+  return render_template("updated_scoring.html")
+
 
 # ----------- Routes for the scoring Page -----------------
 

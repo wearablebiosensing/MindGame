@@ -169,6 +169,12 @@ class Shape {
       return;
     }
 
+    console.log(
+      "SnapUpdate - ",
+      targetShape.type,
+      targetShape.isLevelShape,
+      this.isLevelShapeFilled
+    );
     this.isSnapped = true;
     targetShape.isLevelShapeFilled = true;
     this.rotation = targetShape.rotation;
@@ -992,7 +998,13 @@ class QuarterCircle extends Shape {
         return;
       }
 
+      if (!this.isDragging) {
+        //THIS IS A FIX DO NOT REMOVE OR IT BREAKS THE QUARTER CIRCLE
+        return;
+      }
+
       if (distance - 60 <= this.snapDistanceThreshold) {
+        console.log("SNAP PINK - ", shapes);
         this.x = targetShape.x;
         this.y = targetShape.y;
         this.snapUpdate(targetShape);
@@ -1970,12 +1982,12 @@ function mouse_move(event) {
     updateProgressBar();
   }
 
-  console.log(
-    "Closest - ",
-    closest_shape_to_current.type,
-    "  ",
-    closestDistanceToShape
-  );
+  // console.log(
+  //   "Closest - ",
+  //   closest_shape_to_current.type,
+  //   "  ",
+  //   closestDistanceToShape
+  // );
 
   // LEVEL IS COMPLETE
   if (getProgressBarPercentage() == 100) {
