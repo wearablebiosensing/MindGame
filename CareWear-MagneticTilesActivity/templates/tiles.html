@@ -61,6 +61,7 @@
       <header>
         <!-- Shows what level user is on -->
         <p class="level_indicator">Level <span id="level"></span></p>
+        <p class="onlineStatus"></p>
 
         <!-- <div>User ID: <span id="userID"></span> </div> -->
       </header>
@@ -104,6 +105,20 @@
     <script src="{{ url_for('static', filename='js/drag_drop.js') }}"></script>
 
     <script>
+      //Check offline or online
+      /*let onlineStatus = document.querySelector(".onlineStatus");
+        window.addEventListener("online", () => {
+          onlineStatus.innerHTML = "Online";
+          onlineStatus.style.color = "green";
+        });
+        window.addEventListener("offline", () => {
+          onlineStatus.innerHTML = "Offline";
+          onlineStatus.style.color = "red";
+        });
+
+        onlineStatus.innerHTML = "Offline";
+        onlineStatus.style.color = "red";*/
+
       const userID_display = document.getElementById("userID");
       const currentLevel_display = document.getElementById("level");
 

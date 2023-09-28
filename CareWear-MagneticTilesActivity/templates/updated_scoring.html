@@ -14,10 +14,54 @@
       rel="stylesheet"
       href="{{ url_for('static', filename='css/global.css') }}"
     />
+
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/updated_scoring.css') }}"
+    />
   </head>
   <body>
     <header>
       <p class="level_indicator">Level <span id="level"> : Scoring</span></p>
     </header>
+
+    <div class="updated_scoring_page_container">
+      <!-- Mouse Data Score -->
+      <div class="updated_scoring_mouse_data_wrapper">
+        <h2 class="updated_scoring_mouse_data_title">Mouse Data Score</h2>
+        <div class="updated_scoring_mouse_data_container">
+          <!-- Emoji containers -->
+          <div class="updated_scoring_mouse_data_item">
+            <img
+              src="{{ url_for('static', filename='images/veryHappyGreenEmoji.svg') }}"
+            />
+          </div>
+
+          <div class="updated_scoring_mouse_data_item">
+            <img
+              src="{{ url_for('static', filename='images/happyGreenEmoji.svg') }}"
+            />
+          </div>
+
+          <div class="updated_scoring_mouse_data_item">
+            <img
+              src="{{ url_for('static', filename='images/sadYellowEmoji.svg') }}"
+            />
+          </div>
+
+          <div class="updated_scoring_mouse_data_item">
+            <img
+              src="{{ url_for('static', filename='images/verySadYellowEmoji.svg') }}"
+            />
+          </div>
+        </div>
+      </div>
+
+      <!-- Time to Complete -->
+      <div class="updated_scoring_ttc_wrapper">
+        <h2 class="updated_scoring_ttc_title">Time to Complete Task</h2>
+        <div class="updated_scoring_ttc_container"></div>
+      </div>
+    </div>
   </body>
 </html>

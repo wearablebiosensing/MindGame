@@ -1,0 +1,50 @@
+/* @import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,500;1,200&display=swap"); */
+
+.updated_scoring_page_container {
+}
+
+/* Mouse Data */
+.updated_scoring_mouse_data_wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.updated_scoring_mouse_data_title {
+  font-family: "IBM Plex Sans", sans-serif;
+  color: #478f96;
+}
+
+.updated_scoring_mouse_data_container {
+  outline: 2px solid #478f96;
+  border-radius: 15px;
+
+  padding: 10px;
+  display: flex;
+  width: 95%;
+  gap: 5%;
+}
+
+.updated_scoring_mouse_data_item {
+  width: 25%;
+  background-color: #f2f2f2;
+  padding: 5%;
+}
+
+.updated_scoring_mouse_data_item img {
+  width: 100%;
+  height: auto;
+}
+
+/* Time to Complete */
+.updated_scoring_ttc_wrapper {
+}
+
+.updated_scoring_ttc_title {
+  font-family: "IBM Plex Sans", sans-serif;
+  color: #478f96;
+}
+
+.updated_scoring_ttc_container {
+}

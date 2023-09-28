@@ -6,7 +6,7 @@ import os
 from datetime import datetime
 import json
 
-from flask import Flask, render_template, request, jsonify, redirect,url_for, Response
+from flask import Flask, render_template, request, jsonify, redirect,url_for, Response, session
 import firebase_admin
 from firebase_admin import credentials, storage, db
 import pandas as pd
@@ -366,6 +366,26 @@ def plot_acceleration_data(csv_file):
 
 
 
+def calculateEuclidanPercentChange(shortestData, userData):
+    percent_change_acc = 0
+    total_shapes = 0
+    
+    for key in shortestData.keys():
+        shortestDistance = shortestData[key]
+        userDistance = userData[key]
+        print("Percent Change values ", shortestDistance, ", ", userDistance)
+        
+        percent_change = (abs(shortestDistance - userDistance) / ((shortestDistance + userDistance) / 2)) * 100
+        percent_change_acc += percent_change
+        total_shapes += 1 #Used in average
+        print(f"Percent Change for {key} = {percent_change}")
+        
+    averaged_percent_change = percent_change_acc / total_shapes
+    print(f"Averaged Percent Change = {averaged_percent_change}")
+    return averaged_percent_change
+
+
+
 
 
 
@@ -379,15 +399,14 @@ def processMouseMovementData():
     level = res["level"] #Current level that posted data is from
     userID = res["userID"] #Used to differentiate csv files from differet subjects
     
-    # print(data)
-    # print(type(data))
+
     
     #Save time to file
     time_to_complete = res["time_to_complete"]
     info_file_name = f"level_info/Level_{level} - User_{userID}.txt"
     os.makedirs("level_info/", exist_ok=True)
     
-        
+    #Create the Info File (Metadata)
     try:
         with open(info_file_name, mode="w") as time_file:
             SCREEN_WIDTH_INDEX = 6
@@ -420,16 +439,18 @@ def processMouseMovementData():
     #Save Eulid Distances
     user_euclid_distances = res["user_euclid_movement_distances"]
     shortest_euclid_distances = res["shortest_euclid_distances"]
+
+    #Averaged Percent Change for the Euclidan Distances for each level
+    session["AverageEuclidanPercentChange"] = calculateEuclidanPercentChange(shortest_euclid_distances, user_euclid_distances)
     
+    #File Names
     os.makedirs("euclid/", exist_ok=True)
-    
-    
     shortest_euclid_file_name = f"euclid/Shortest - Level_{level} - User_{userID}.json"
     user_euclid_file_name = f"euclid/User - Level_{level} - User_{userID}.json"
     
 
 
-    
+    #Shortest Distances JSON
     try:
         with open(shortest_euclid_file_name, mode="w") as euclid_file:
             
@@ -438,7 +459,7 @@ def processMouseMovementData():
         print(f"An error occurred: {str(e)}")
         
         
-        
+    #User Distances JSON
     try:
         with open(user_euclid_file_name, mode="w") as euclid_file:
             euclid_file.write(json.dumps(user_euclid_distances))
