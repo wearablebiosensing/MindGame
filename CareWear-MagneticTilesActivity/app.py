@@ -5,6 +5,7 @@ import re
 import os
 from datetime import datetime
 import json
+import math
 
 from flask import Flask, render_template, request, jsonify, redirect,url_for, Response, session
 import firebase_admin
@@ -23,6 +24,8 @@ import threading
 csv_lock = threading.Lock()
 
 app = Flask(__name__)
+app.secret_key = "super secret key"
+
 root = "/Users/shehjarsadhu/Desktop/UniversityOfRhodeIsland/Graduate/WBL/Project_Carehub/CareWear-PortalView/CareWear-MagneticTilesActivity/"
 
 cred = credentials.Certificate('./carewear-77d8e-b0c3a74e907c.json') 
@@ -201,16 +204,19 @@ def scoring_page():
 def scoring_graph(userID, level):
     csv_file = f"mouse_data/Level_{level} - user{userID}.csv"  # Adjust the file naming pattern as needed
     with csv_lock:
-        image_data = plot_mouse_movement(csv_file)
-    return Response(image_data, mimetype='image/png')
+        image_data = "Gone" #plot_mouse_movement(csv_file)
+    # return Response(image_data, mimetype='image/png')
+    return image_data
+    
 
 
 @app.route('/acceleration_graph/<userID>/<level>')
 def acceleration_graph(userID, level):
     csv_file = f"mouse_data/Level_{level} - user{userID}.csv"  # Adjust the file naming pattern as needed
     with csv_lock:
-        image_data = plot_acceleration_data(csv_file)
-    return Response(image_data, mimetype='image/png')
+        image_data = "Gone"  #plot_acceleration_data(csv_file)
+    # return Response(image_data, mimetype='image/png')
+    return image_data
 
 
 # Route to return completion time
@@ -218,155 +224,23 @@ def acceleration_graph(userID, level):
 def completion_time(userID, level):
     csv_file = f"mouse_data/Level_{level} - user{userID}.csv"  # Adjust the file naming pattern as needed
 
-    level_completion_time = calculate_completion_time(csv_file)
+    level_completion_time = 1 #calculate_completion_time(csv_file)
     return level_completion_time
 
 #================= Helper Functions =============================
 
-# Function to calculate time taken to complete a level
-def calculate_completion_time(csv_file):
-    timestamps = []
-    
-    with open(csv_file, 'r') as file:
-        csv_reader = csv.DictReader(file)
-        for row in csv_reader:
-            if row['timestamp'] != '0':
-                timestamps.append(row['timestamp'])
-                
-    # Parse the timestamps and calculate the time duration            
-    first_timestamp = timestamps[0]
-    last_timestamp = timestamps[-1]
-    
-    format_str = '%H:%M:%S:%f'
-    first_time = datetime.strptime(first_timestamp, format_str)
-    last_time = datetime.strptime(last_timestamp, format_str)
-    duration = last_time - first_time
-
-    # Convert duration to a formatted string
-    total_seconds = duration.total_seconds()
-    minutes = int(total_seconds // 60)
-    seconds = int(total_seconds % 60)
-    return f"{minutes} minutes {seconds} seconds"
-
-#Retuns the image data of the mouse movment graph given a csv file
-def plot_mouse_movement(csv_file):
-    colors = {'Square': '#ec940e', 'Circle': '#F29595', 'Right Triangle': '#90C0FF', 'Hexagon': '#1184e2', 'Trapezoid': '#61a962', 'Equilateral Triangle': '#a1e87e', 'Yellow Diamond': '#FFCC4D', 'Purple Diamond': '#9F9AFF'}
-
-
-    df = pd.read_csv(csv_file)
-    strokes = []
-    current_stroke = []
-    unique_shapes = set()  # To keep track of unique shapes
-
-    for _, row in df.iterrows():
-        if row['x'] == "END_OF_STROKE":
-            if current_stroke:
-                strokes.append(current_stroke)
-                current_stroke = []
-        else:
-            current_stroke.append(row)
-            unique_shapes.add(row['shape'])  # Add the shape to the unique_shapes set
-
-    if current_stroke:
-        strokes.append(current_stroke)
-
-    # Set a larger figure size for the graph (adjust the numbers as needed)
-    fig, ax = plt.subplots(figsize=(12, 6))
-    ax.invert_yaxis()  # Flip the y-axis
-
-    for stroke in strokes:
-        if len(stroke) > 1:
-            shape = stroke[-1]['shape']  # Get the shape from the last row of the stroke
-            # screenWidth = stroke[-1]['screenWidth']
-            # screenHeight = stroke[-1]['screenHeight']
-            
-            #Plot Data
-            data = pd.DataFrame(stroke)
-            color = colors.get(shape, 'black')
-            
-            # Convert 'x' values to numeric
-            data['x'] = pd.to_numeric(data['x'])
-            # print(data['x'])
-            
-            plt.plot(data['x'], data['y'], color=color, label=shape)
 
 
 
-    plt.xlabel('X Position')
-    plt.ylabel('Y Position')
-    plt.title('Mouse Movement Strokes')
+def calculateEuclidanPercentChange(shortestData: dict, userData:dict) -> float:
+    """
+    Args:
+        shortestData (dict): Key is the shape, value is the euclidan distance
+        userData (dict): Key is the shape, value is the euclidan distance
 
-    # Generate a single legend entry for each unique shape
-    handles, labels = ax.get_legend_handles_labels()
-    by_label = dict(zip(labels, handles))
-    unique_legend = [by_label[shape] for shape in unique_shapes]
-    plt.legend(handles=unique_legend, labels=unique_shapes)
-
-    # plt.gca().set_aspect('equal')  # Set aspect ratio to preserve the screen's aspect ratio
-
-
-
-    # Add custom x-ticks with rotation
-    screenWidth = strokes[-1][-1]['screenWidth']  # Get the screenWidth from the last stroke
-    screenHeight = strokes[-1][-1]['screenHeight']  # Get the screenWidth from the last stroke
-    
-        
-    
-    plt.xticks([val for val in range(0, screenWidth + 1, int(screenWidth / 20))],
-            [str(val) for val in range(0, screenWidth + 1, int(screenWidth / 20))], rotation=90)
-
-    plt.grid()  # Add grid lines for better visualization
-
-    # Convert the plot to a PNG image in memory
-    image_stream = io.BytesIO()
-    FigureCanvas(fig).print_png(image_stream)
-    plt.close(fig)
-
-    # Get the image data as a base64-encoded string
-    image_data = image_stream.getvalue()
-    
-
-    return image_data
-
-def plot_acceleration_data(csv_file):
-    df = pd.read_csv(csv_file)
-
-    # Remove rows with 'END_OF_STROKE' entries
-    df = df[df['x(px/s^2)'] != 'END_OF_STROKE']
-
-    # Convert timestamp column to datetime format
-    df['timestamp'] = pd.to_datetime(df['timestamp'], format='%H:%M:%S:%f')
-
-    # Convert acceleration columns to numeric values
-    df['x(px/s^2)'] = pd.to_numeric(df['x(px/s^2)'])
-    df['y(px/s^2)'] = pd.to_numeric(df['y(px/s^2)'])
-
-    # Create a new figure
-    fig, ax = plt.subplots(figsize=(10, 6))
-
-    # Plot acceleration x and y over time
-    ax.plot(df['timestamp'], df['x(px/s^2)'], label='Acceleration x')
-    ax.plot(df['timestamp'], df['y(px/s^2)'], label='Acceleration y')
-
-    # Set plot labels and title
-    ax.set_xlabel('Time')
-    ax.set_ylabel('Acceleration')
-    ax.set_title(f'Acceleration x and y over Time - {csv_file}')
-    ax.legend()
-
-    # Convert the plot to a PNG image in memory
-    image_stream = io.BytesIO()
-    FigureCanvas(fig).print_png(image_stream)
-    plt.close(fig)
-
-    # Get the image data as a base64-encoded string
-    image_data = image_stream.getvalue()
-
-    return image_data
-
-
-
-def calculateEuclidanPercentChange(shortestData, userData):
+    Returns:
+        float: The averaged percent change for the distances moved
+    """
     percent_change_acc = 0
     total_shapes = 0
     
@@ -376,6 +250,8 @@ def calculateEuclidanPercentChange(shortestData, userData):
         print("Percent Change values ", shortestDistance, ", ", userDistance)
         
         percent_change = (abs(shortestDistance - userDistance) / ((shortestDistance + userDistance) / 2)) * 100
+        # percent_change = (abs(shortestDistance - userDistance) / ((shortestDistance)) * 100
+        
         percent_change_acc += percent_change
         total_shapes += 1 #Used in average
         print(f"Percent Change for {key} = {percent_change}")
@@ -387,120 +263,171 @@ def calculateEuclidanPercentChange(shortestData, userData):
 
 
 
+    
+    
+    
+def createAndUpload(filePath: str, fileName: str, data: bytes):
+    """Abstracts the way we create the data files and upload
+    them to Firebase
+
+    Args:
+        filePath (str): Sub folder to put the file in
+        fileName (_type_): name of the file
+        data (_type_): utf8 encoded bytes??
+    """
+    try:
+        with open(f"{filePath}/{fileName}", mode="w+b") as file:
+            
+            file.write(data)
+            
+            file.seek(0)  # Rewind the file pointer to the beginning
+            bucket = storage.bucket()
+            blob = bucket.blob(f"MagneticTiles/{filePath}/{fileName}") 
+            blob.upload_from_file(file_obj=file, rewind=True)
+            
+    except Exception as e:
+        print(f"An error occurred (createAndUpload):({fileName}) -> {str(e)}")
 
 
-# Specify the directory for the temporary file
-TEMP_FILE_DIRECTORY = './'
+
+
+
+
+# Specify the expected time to complete Level
+
+EXPECTED_TTC = {
+    #-- Level --
+    1:{
+        #-- SubLevel --
+        
+        #Train
+        1: {
+            "minutes": 0,
+            "seconds" : 10,
+        },
+        
+        2: {
+            "minutes": 0,
+            "seconds" : 20,
+        },
+        3: {
+            "minutes": 0,
+            "seconds" : 15,
+        },
+    }
+}
+
 
 @app.route('/process-mouse-data', methods=['POST'])
 def processMouseMovementData():
+    
+    #Retrive Data from Post request
     res = request.get_json()
     data = res["data"]
     level = res["level"] #Current level that posted data is from
+    sub_level = res["sub_level"]
     userID = res["userID"] #Used to differentiate csv files from differet subjects
-    
-
-    
-    #Save time to file
     time_to_complete = res["time_to_complete"]
-    info_file_name = f"level_info/Level_{level} - User_{userID}.txt"
-    os.makedirs("level_info/", exist_ok=True)
-    
-    #Create the Info File (Metadata)
-    try:
-        with open(info_file_name, mode="w") as time_file:
-            SCREEN_WIDTH_INDEX = 6
-            SCREEN_HEIGHT_INDEX = 7
-            time_file.write("Screen Size: \n")
-            time_file.write(f'{data[0][SCREEN_WIDTH_INDEX]}x{data[0][SCREEN_HEIGHT_INDEX]}')
-            time_file.write("\n")
-            time_file.write("\n")
-            
-            
-            time_file.write("Level: \n")
-            time_file.write(str(level))
-            time_file.write("\n")
-            time_file.write("\n")
-            
-            time_file.write("UserID: \n")
-            time_file.write(str(userID))
-            time_file.write("\n")
-            time_file.write("\n")
-            
-            
-            time_file.write("Time to Complete Level: \n")
-            time_file.write(time_to_complete)
-            time_file.write("\n")
-            time_file.write("\n")
-    except Exception as e:
-        print(f"An error occurred: {str(e)}")
-    
-    
-    #Save Eulid Distances
     user_euclid_distances = res["user_euclid_movement_distances"]
     shortest_euclid_distances = res["shortest_euclid_distances"]
-
-    #Averaged Percent Change for the Euclidan Distances for each level
-    session["AverageEuclidanPercentChange"] = calculateEuclidanPercentChange(shortest_euclid_distances, user_euclid_distances)
     
-    #File Names
+
+
+    #Save Relevent Data to session to be used in scoring page
+    session["AverageEuclidanPercentChange"] = math.floor(calculateEuclidanPercentChange(shortest_euclid_distances, user_euclid_distances))
+    session["TimeToCompleteLevel"] = time_to_complete
+    session["ExpectedTimeToCompleteLevel"] = EXPECTED_TTC[level][sub_level]
+    
+
+    
+    
+    #======================================    
+    #              INFO FILE
+    #======================================
+        
+    info_file_path = "level_info"
+    info_file_name = f"Info_{level}-{sub_level}_{userID}.txt"
+    os.makedirs("level_info/", exist_ok=True)
+    
+
+    # Define the string with indentation
+    SCREEN_WIDTH_INDEX = 6
+    SCREEN_HEIGHT_INDEX = 7
+    info_file_string = f"""
+        Screen Size: 
+        {data[0][SCREEN_WIDTH_INDEX]}x{data[0][SCREEN_HEIGHT_INDEX]}
+
+        Level: 
+        {str(level)}, {str(sub_level)}
+
+        UserID: 
+        {str(userID)}
+
+        Time to Complete Level: 
+        {time_to_complete['ttc_minutes']}:{time_to_complete['ttc_seconds']}
+    """
+
+    # Remove leading spaces from each line in the string
+    info_file_string = '\n'.join(line.lstrip() for line in info_file_string.splitlines())
+    info_file_data = info_file_string.encode("utf-8")
+    
+    #Info File
+    createAndUpload(info_file_path, info_file_name, info_file_data)
+    
+    
+
+    
+    
+
+    
+    #======================================    
+    #              EUCLID FILES
+    #======================================
     os.makedirs("euclid/", exist_ok=True)
-    shortest_euclid_file_name = f"euclid/Shortest - Level_{level} - User_{userID}.json"
-    user_euclid_file_name = f"euclid/User - Level_{level} - User_{userID}.json"
+    euclid_path = "euclid"
+    shortest_euclid_file_name = f"Shortest_{level}-{sub_level}_{userID}.json"
+    user_euclid_file_name = f"User_{level}-{sub_level}_{userID}.json"
     
-
 
     #Shortest Distances JSON
-    try:
-        with open(shortest_euclid_file_name, mode="w") as euclid_file:
-            
-            euclid_file.write(json.dumps(shortest_euclid_distances))
-    except Exception as e:
-        print(f"An error occurred: {str(e)}")
-        
+    shortest_euclid_data = json.dumps(shortest_euclid_distances).encode("utf-8")
+    createAndUpload(euclid_path, shortest_euclid_file_name, shortest_euclid_data)
+       
         
     #User Distances JSON
-    try:
-        with open(user_euclid_file_name, mode="w") as euclid_file:
-            euclid_file.write(json.dumps(user_euclid_distances))
-    except Exception as e:
-        print(f"An error occurred: {str(e)}")
+    user_euclid_data = json.dumps(user_euclid_distances).encode("utf-8")
+    createAndUpload(euclid_path, user_euclid_file_name, user_euclid_data)
     
     
     
     
     
     
-    # Generate a unique prefix for the tempfile using level and userID
-    temp_file_name = f"mouse_data/Level_{level} - user{userID}.csv"
+    
+    #======================================    
+    #              MOUSE FILE
+    #======================================
+    mouse_data_path = "mouse_data"
+    mouse_data_file_name = f"Mouse_{level}-{sub_level}_{userID}.csv"
+    
+    # Create the header row
+    header_row = ['x', 'y', 'timestamp', 'shape', 'x(px/s^2)', 'y(px/s^2)', 'screenWidth', 'screenHeight']
+    csv_data = [header_row] + data
 
+    # Convert the accumulated data to a CSV string
+    csv_data = '\n'.join([','.join(map(str, row)) for row in csv_data])
+    csv_data = csv_data.encode('utf-8')
+    
+    #Upload Mouse Data
+    createAndUpload(mouse_data_path, mouse_data_file_name, csv_data)
+    
+    
     # Create a named temporary file in memory
     # with tempfile.NamedTemporaryFile(prefix=temp_file_prefix, mode="w+b", delete=False, suffix=".csv", dir=TEMP_FILE_DIRECTORY) as temp_file:
     
-    with open(temp_file_name, mode="w+b") as temp_file:
 
         
-        # Create the header row
-        header_row = ['x', 'y', 'timestamp', 'shape', 'x(px/s^2)', 'y(px/s^2)', 'screenWidth', 'screenHeight']
-        csv_data = [header_row] + data
-
-        # Convert the accumulated data to a CSV string
-        csv_data = '\n'.join([','.join(map(str, row)) for row in csv_data])
-        csv_data = csv_data.encode('utf-8')
-
-        # Write the CSV data to the temporary file
-        temp_file.write(csv_data)
-
-        # Reset the file position back to the beginning
-        temp_file.seek(0)
-
-        # Upload the CSV file to Firebase Storage
-        #UNCOMMENT BELOW TO UPLOAD TO FIREBASE
-        # bucket = storage.bucket()
-        # file_name = temp_file.name.split('\\')[-1]
-        # print(file_name)
-        # blob = bucket.blob('MagneticTiles/' + file_name)  # Use the temp file name as the blob name
-        # blob.upload_from_file(temp_file)
+        
     response = {'message': 'Data received and processed successfully'}
     return jsonify(response)
 

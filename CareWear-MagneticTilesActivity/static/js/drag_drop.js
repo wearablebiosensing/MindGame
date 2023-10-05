@@ -1472,6 +1472,7 @@ const LEVELS = {
   },
 
   3: {
+    //Butterfly
     1: [
       OrangeSquare(LEVEL_X - 50, LEVEL_Y - 370, 0, true), // Body
       OrangeSquare(LEVEL_X - 50, LEVEL_Y - 260, 0, true), // Body
@@ -1492,17 +1493,24 @@ const LEVELS = {
       GreenEquilateralTriangle(LEVEL_X - 245, LEVEL_Y + 10, 30, true), //Bottom Left Wing
       PurpleDiamond(LEVEL_X - 10, LEVEL_Y + 120, 115, true), //Stinger
     ],
+
+    //Tree
+    2: [],
+
+    //Tortoise
+    3: [],
   },
 };
 
 function changeCurrentLevel(level, sub_level) {
+  //Update Global Varaibles
   current_level = level;
   current_sub_level = sub_level;
 
   //Reset All Shapes on screen
   shapes = [];
 
-  //Add Back and Draw needed blocks
+  //Add Back and Draw needed blocks for new level
   shapes.push(...building_blocks);
   shapes.push(...LEVELS[current_level][current_sub_level]);
 
@@ -1640,13 +1648,18 @@ function calculateTotalLevelTime() {
   const minutes = Math.floor(total_level_time / (1000 * 60));
   const seconds = Math.floor((total_level_time / 1000) % 60);
 
+  return {
+    ttc_minutes: minutes,
+    ttc_seconds: seconds,
+  };
+
   // Ensure minutes and seconds have two digits with leading zeros
-  const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes;
-  const formattedSeconds = seconds < 10 ? `0${seconds}` : seconds;
+  // const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes;
+  // const formattedSeconds = seconds < 10 ? `0${seconds}` : seconds;
 
-  const timeString = `${formattedMinutes}:${formattedSeconds}`;
+  // const timeString = `${formattedMinutes}:${formattedSeconds}`;
 
-  return timeString;
+  // return timeString;
 }
 
 function showFeedbackText() {
@@ -1724,6 +1737,9 @@ function getTimestamp() {
 
 function postMouseMotionData() {
   console.log("Right before - ", mouse_motion_array);
+
+  // const {ttc_minutes, ttc_seconds} = calculateTotalLevelTime()
+
   fetch("/process-mouse-data", {
     method: "POST",
     headers: {
@@ -1735,6 +1751,7 @@ function postMouseMotionData() {
       shortest_euclid_distances: calculateShortestEuclidianDistanceForLevel(),
       data: mouse_motion_array, // Raw Mouse Data
       level: current_level,
+      sub_level: current_sub_level,
       userID: getLocalStorageOrNull("userID"),
     }),
   })
@@ -1997,11 +2014,13 @@ function mouse_move(event) {
         console.log("POSING");
         postLevelMouseData(); //Create csv
       }
-      setTimeout(() => {}, 1000); // Wait 1s
+      setTimeout(() => {
+        window.location.href = `/updated_scoring`;
+      }, 500); // Wait 0.5s
 
-      window.location.href = `/scoring_page?userID=${getLocalStorageOrNull(
-        "userID"
-      )}&level=${getLocalStorageOrNull("currentLevel")}`; //Goto scoring page
+      // window.location.href = `/scoring_page?userID=${getLocalStorageOrNull(
+      //   "userID"
+      // )}&level=${getLocalStorageOrNull("currentLevel")}`;
     }
 
     isDataSentAlready = true;

@@ -126,7 +126,9 @@
       Make sure it is included before this is called*/
       //This function will change the specific level user is on
       const currentLevel = Number(getLocalStorageOrNull("currentLevel"));
-      changeCurrentLevel(currentLevel, 1); //NOTHING WILL WORK WITHOUT THIS
+      const currentSubLevel = Number(getLocalStorageOrNull("currentSubLevel"));
+
+      changeCurrentLevel(currentLevel, currentSubLevel); //NOTHING WILL WORK WITHOUT THIS
 
       //Update text on page
       // userID_display.innerText = getLocalStorageOrNull("userID") ?? "";
