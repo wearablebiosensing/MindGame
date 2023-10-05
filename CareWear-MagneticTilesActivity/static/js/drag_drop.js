@@ -169,6 +169,12 @@ class Shape {
       return;
     }
 
+    console.log(
+      "SnapUpdate - ",
+      targetShape.type,
+      targetShape.isLevelShape,
+      this.isLevelShapeFilled
+    );
     this.isSnapped = true;
     targetShape.isLevelShapeFilled = true;
     this.rotation = targetShape.rotation;
@@ -232,7 +238,7 @@ class Square extends Shape {
 
   createShapeFromBlock() {
     if (!this.isBuildingBlock) return;
-    return OrangeSquare(this.x, this.y);
+    return OrangeSquare(this.x, this.y, this.rotation);
   }
 
   draw() {
@@ -321,7 +327,7 @@ class Circle extends Shape {
   createShapeFromBlock() {
     if (!this.isBuildingBlock) return;
     console.log("Red");
-    return RedCircle(this.x - this.radius, this.y - this.radius);
+    return RedCircle(this.x - this.radius, this.y - this.radius, this.rotation);
   }
 
   snapToTargetShape(targetShape) {
@@ -405,7 +411,11 @@ class Trapezoid extends Shape {
 
   createShapeFromBlock() {
     if (!this.isBuildingBlock) return;
-    return GreenTrapezoid(this.x - this.base / 2, this.y - this.height / 2);
+    return GreenTrapezoid(
+      this.x - this.base / 2,
+      this.y - this.height / 2,
+      this.rotation
+    );
   }
 
   snapToTargetShape(targetShape) {
@@ -516,7 +526,7 @@ class RightTriangle extends Shape {
 
   createShapeFromBlock() {
     if (!this.isBuildingBlock) return;
-    return BlueRightTriangle(this.x, this.y);
+    return BlueRightTriangle(this.x, this.y, this.rotation);
   }
 
   snapToTargetShape(targetShape) {
@@ -638,8 +648,8 @@ class Diamond extends Shape {
   createShapeFromBlock() {
     if (!this.isBuildingBlock) return;
     return this.type == "Yellow Diamond"
-      ? YellowDiamond(this.x, this.y, 90)
-      : PurpleDiamond(this.x, this.y, 90);
+      ? YellowDiamond(this.x, this.y, this.rotation)
+      : PurpleDiamond(this.x, this.y, this.rotation);
     _;
   }
 
@@ -733,7 +743,7 @@ class EquilateralTriangle extends Shape {
 
   createShapeFromBlock() {
     if (!this.isBuildingBlock) return;
-    return GreenEquilateralTriangle(this.x, this.y);
+    return GreenEquilateralTriangle(this.x, this.y, this.rotation);
   }
 
   snapToTargetShape(targetShape) {
@@ -862,7 +872,7 @@ class Hexagon extends Shape {
 
   createShapeFromBlock() {
     if (!this.isBuildingBlock) return;
-    return BlueHexagon(this.x, this.y);
+    return BlueHexagon(this.x, this.y, this.rotation);
   }
 
   snapToTargetShape(targetShape) {
@@ -962,25 +972,39 @@ class QuarterCircle extends Shape {
 
   createShapeFromBlock() {
     if (!this.isBuildingBlock) return;
-    return PinkQuarterCircle(this.x, this.y);
+    return PinkQuarterCircle(this.x, this.y, this.rotation);
   }
 
   snapToTargetShape(targetShape) {
     if (targetShape.isLevelShapeFilled) return;
 
     if (targetShape instanceof QuarterCircle) {
-      if (this.rotation % 360 != targetShape.rotation % 360) return; // Have to be the same rotation
+      // if (this.rotation % 360 != targetShape.rotation % 360) return; // Have to be the same rotation
 
       const distance = Math.sqrt(
         Math.pow(this.x - targetShape.x, 2) +
           Math.pow(this.y - targetShape.y, 2)
       );
 
+      console.log(
+        "QUAERT PINK DISTANCE - ",
+        distance,
+        this.snapDistanceThreshold
+      );
+
+      console.log("PINK - ", distance <= this.snapDistanceThreshold);
+
       if (this.canMoveShapeBackToOrigin(targetShape)) {
         return;
       }
 
-      if (distance <= this.snapDistanceThreshold) {
+      if (!this.isDragging) {
+        //THIS IS A FIX DO NOT REMOVE OR IT BREAKS THE QUARTER CIRCLE
+        return;
+      }
+
+      if (distance - 60 <= this.snapDistanceThreshold) {
+        console.log("SNAP PINK - ", shapes);
         this.x = targetShape.x;
         this.y = targetShape.y;
         this.snapUpdate(targetShape);
@@ -1190,7 +1214,7 @@ function PurpleDiamond(
   isBuildingBlock = false
 ) {
   // TODO: Change this.
-  const WIDTH = 100;
+  const WIDTH = 110;
   const HEIGHT = 200;
   let color = isLevelTile ? "#D9D9D9" : "#CA6B6E";
 
@@ -1277,6 +1301,9 @@ let shapes = [];
 let current_shape_index = null;
 let closest_shape_to_current = null;
 
+// Time When User hit the Start Button for the level
+const user_start_timestamp = Date.now();
+
 //Level Data
 let current_level = 1;
 let current_sub_level = 1;
@@ -1307,17 +1334,35 @@ let prevTimestamp = 0;
 //====================================
 
 // Create an array with instances of different shapes
+
 const building_blocks = [
-  OrangeSquare((canvas.width * 0.55) / 4 - 20, 10, 0, false, true),
-  RedCircle((canvas.width * 0.25) / 10, 20, 0, false, true),
-  GreenTrapezoid((canvas.width * 0.25) / 4 - 20, 130, 180, false, true),
-  BlueRightTriangle((canvas.width * 0.25) / 4 - 20, 260, 0, false, true),
-  GreenEquilateralTriangle((canvas.width * 0.25) / 2 + 40, 310, 0, false, true),
-  BlueHexagon((canvas.width * 0.25) / 2 - 20, 440, 180, false, true),
-  YellowDiamond((canvas.width * 0.25) / 2 - 50, 480, 90, false, true),
-  PurpleDiamond((canvas.width * 0.25) / 2 - 60, 580, 90, false, true),
+  GreenEquilateralTriangle((canvas.width * 0.25) / 4, 80, 0, false, true),
+  OrangeSquare((canvas.width * 0.55) / 4 - 20, 20, 0, false, true),
+
+  RedCircle((canvas.width * 0.25) / 10, 180, 0, false, true),
+  GreenTrapezoid((canvas.width * 0.25) / 4 + 70, 180, 180, false, true),
+
+  BlueHexagon((canvas.width * 0.25) / 2 + 80, 420, 180, false, true),
+  PurpleDiamond((canvas.width * 0.25) / 2 - 170, 330, 40, false, true),
+
+  BlueRightTriangle((canvas.width * 0.25) / 4 - 50, 580, 0, false, true),
+  YellowDiamond((canvas.width * 0.25) / 2 + 30, 530, 140, false, true),
+
   PinkQuarterCircle((canvas.width * 0.25) / 2 - 60, 750, 0, false, true),
 ];
+
+// const building_blocks = [
+//   GreenEquilateralTriangle((canvas.width * 0.25) / 2 + 40, 310, 0, false, true),
+//   OrangeSquare((canvas.width * 0.55) / 4 - 20, 10, 0, false, true),
+//   RedCircle((canvas.width * 0.25) / 10, 20, 0, false, true),
+//   GreenTrapezoid((canvas.width * 0.25) / 4 - 20, 130, 180, false, true),
+//   BlueRightTriangle((canvas.width * 0.25) / 4 - 20, 260, 0, false, true),
+
+//   BlueHexagon((canvas.width * 0.25) / 2 - 20, 440, 180, false, true),
+//   YellowDiamond((canvas.width * 0.25) / 2 - 50, 480, 90, false, true),
+//   PurpleDiamond((canvas.width * 0.25) / 2 - 60, 580, 90, false, true),
+//   PinkQuarterCircle((canvas.width * 0.25) / 2 - 60, 750, 0, false, true),
+// ];
 
 // shapes.push(...building_blocks);
 
@@ -1357,8 +1402,28 @@ const LEVELS = {
       BlueRightTriangle(LEVEL_X - 210, LEVEL_Y - 50, 180, true), // Left - Triangle],
     ],
 
-    2: [],
-    3: [],
+    2: [
+      //Horse
+      OrangeSquare(LEVEL_X - 50, LEVEL_Y - 100, 0, true), //Body
+      OrangeSquare(LEVEL_X + 60, LEVEL_Y - 100, 0, true), //Body
+      PinkQuarterCircle(LEVEL_X - 60, LEVEL_Y, 180, true), //Body
+      PinkQuarterCircle(LEVEL_X + 160, LEVEL_Y - 110, 180, true), //Body
+      BlueRightTriangle(LEVEL_X - 160, LEVEL_Y + 10, 0, true), // Leg
+      BlueRightTriangle(LEVEL_X + 60, LEVEL_Y + 10, 90, true), // Leg
+      BlueRightTriangle(LEVEL_X + 170, LEVEL_Y - 210, 270, true), // Head
+    ],
+    3: [
+      //Flower
+      BlueHexagon(LEVEL_X, LEVEL_Y - 150, 0, true), //Middle Flower
+      YellowDiamond(LEVEL_X - 35, LEVEL_Y - 70, 0, true), //Stem
+      PurpleDiamond(LEVEL_X + 25, LEVEL_Y - 30, 50, true), //Leaf
+      PurpleDiamond(LEVEL_X - 135, LEVEL_Y - 30, -50, true), //Leaf
+      GreenEquilateralTriangle(LEVEL_X + 95, LEVEL_Y - 95, 120, true),
+      GreenEquilateralTriangle(LEVEL_X + 100, LEVEL_Y - 200, 60, true),
+      GreenEquilateralTriangle(LEVEL_X + 0, LEVEL_Y - 260, 0, true),
+      GreenEquilateralTriangle(LEVEL_X - 100, LEVEL_Y - 200, -60, true),
+      GreenEquilateralTriangle(LEVEL_X - 95, LEVEL_Y - 90, -120, true),
+    ],
   },
   2: {
     1: [
@@ -1372,8 +1437,42 @@ const LEVELS = {
       YellowDiamond(LEVEL_X + 150, LEVEL_Y - 380, 75, true), //R Top Wing
       YellowDiamond(LEVEL_X + 150, LEVEL_Y - 260, 110, true), //R Bottom Wing
     ],
+    2: [
+      //Cat
+      PinkQuarterCircle(LEVEL_X - 80, LEVEL_Y - 200, 180, true), //Head
+      PinkQuarterCircle(LEVEL_X - 70, LEVEL_Y - 200, 270, true), //Head
+
+      PinkQuarterCircle(LEVEL_X - 80, LEVEL_Y - 190, 90, true), //Head
+      PinkQuarterCircle(LEVEL_X - 70, LEVEL_Y - 190, 0, true), //Head
+
+      GreenEquilateralTriangle(LEVEL_X - 70, LEVEL_Y - 340, 0, true), //Ear
+      GreenEquilateralTriangle(LEVEL_X - 220, LEVEL_Y - 200, 270, true), //Ear
+
+      BlueHexagon(LEVEL_X + 80, LEVEL_Y - 90, 60, true), //Body
+      PurpleDiamond(LEVEL_X - 25, LEVEL_Y - 50, 62, true), //Feet
+
+      GreenTrapezoid(LEVEL_X + 70, LEVEL_Y - 20, -60, true), //Back
+
+      YellowDiamond(LEVEL_X + 220, LEVEL_Y - 200, 10, true), //Tail
+    ],
+
+    3: [
+      //Horse 2
+      BlueRightTriangle(LEVEL_X - 220, LEVEL_Y - 300, 180, true), // Head
+      BlueRightTriangle(LEVEL_X - 160, LEVEL_Y - 270, 135, true), // Head
+      BlueRightTriangle(LEVEL_X - 80, LEVEL_Y - 190, 45, true), // Head
+
+      GreenTrapezoid(LEVEL_X - 100, LEVEL_Y - 130, 0, true), // Body
+
+      PurpleDiamond(LEVEL_X + 55, LEVEL_Y - 120, -2, true), //Feet
+      YellowDiamond(LEVEL_X - 135, LEVEL_Y - 130, -5, true), //Feet
+
+      YellowDiamond(LEVEL_X + 100, LEVEL_Y - 320, 20, true), //Tail
+    ],
   },
+
   3: {
+    //Butterfly
     1: [
       OrangeSquare(LEVEL_X - 50, LEVEL_Y - 370, 0, true), // Body
       OrangeSquare(LEVEL_X - 50, LEVEL_Y - 260, 0, true), // Body
@@ -1394,17 +1493,24 @@ const LEVELS = {
       GreenEquilateralTriangle(LEVEL_X - 245, LEVEL_Y + 10, 30, true), //Bottom Left Wing
       PurpleDiamond(LEVEL_X - 10, LEVEL_Y + 120, 115, true), //Stinger
     ],
+
+    //Tree
+    2: [],
+
+    //Tortoise
+    3: [],
   },
 };
 
 function changeCurrentLevel(level, sub_level) {
+  //Update Global Varaibles
   current_level = level;
   current_sub_level = sub_level;
 
   //Reset All Shapes on screen
   shapes = [];
 
-  //Add Back and Draw needed blocks
+  //Add Back and Draw needed blocks for new level
   shapes.push(...building_blocks);
   shapes.push(...LEVELS[current_level][current_sub_level]);
 
@@ -1457,40 +1563,103 @@ function calculateMousePos(clientX, clientY) {
   return { x, y };
 }
 
+//=====================================
+
+function calculateUserEuclidDistances() {
+  const shapeDistances = {};
+  let currentStrokeData = [];
+  let totalDistance = 0; // Initialize totalDistance to 0
+  let prevX = null;
+  let prevY = null;
+
+  for (const row of mouse_motion_array) {
+    if (row[0] === "END_OF_STROKE") {
+      const shape = currentStrokeData[0][2];
+
+      // Calculate the distance traveled for the current stroke
+      let strokeDistance = 0;
+      for (let i = 1; i < currentStrokeData.length; i++) {
+        const [x1, y1] = currentStrokeData[i - 1];
+        const [x2, y2] = currentStrokeData[i];
+        strokeDistance += euclideanDistance(x1, y1, x2, y2);
+      }
+
+      // Add the strokeDistance to totalDistance
+      totalDistance += strokeDistance;
+
+      // Store the total distance for the shape
+      if (shape in shapeDistances) {
+        shapeDistances[shape] += strokeDistance;
+      } else {
+        shapeDistances[shape] = strokeDistance;
+      }
+
+      currentStrokeData = [];
+    } else {
+      const [x, y, shape] = [parseInt(row[0]), parseInt(row[1]), row[3]];
+      currentStrokeData.push([x, y, shape]);
+    }
+  }
+
+  // Calculate and add the distance of the last stroke
+  if (currentStrokeData.length > 0) {
+    const shape = currentStrokeData[0][2];
+
+    // Calculate the distance traveled for the last stroke
+    let strokeDistance = 0;
+    for (let i = 1; i < currentStrokeData.length; i++) {
+      const [x1, y1] = currentStrokeData[i - 1];
+      const [x2, y2] = currentStrokeData[i];
+      strokeDistance += euclideanDistance(x1, y1, x2, y2);
+    }
+
+    // Add the strokeDistance to totalDistance
+    totalDistance += strokeDistance;
+
+    // Store the total distance for the shape
+    if (shape in shapeDistances) {
+      shapeDistances[shape] += strokeDistance;
+    } else {
+      shapeDistances[shape] = strokeDistance;
+    }
+  }
+
+  console.log(`Total Distance Traveled: ${totalDistance}`);
+
+  // Print the total distances for each shape
+  for (const shape in shapeDistances) {
+    console.log(`Shape: ${shape}, Total Distance: ${shapeDistances[shape]}`);
+  }
+
+  return shapeDistances;
+}
+
+function euclideanDistance(x1, y1, x2, y2) {
+  return Math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2);
+}
+
+//=====================================
+
 function calculateTotalLevelTime() {
-  console.log("BEFORE CALC - ", mouse_motion_array);
-  const firstTimestamp = mouse_motion_array[0][2];
-  const lastTimestamp = mouse_motion_array[mouse_motion_array.length - 1][2];
-  console.log("Calc Time - ", firstTimestamp, lastTimestamp);
+  const user_end_timestamp = Date.now();
 
-  // Assuming the time string format is "HH:mm:ss:SSS"
-  const timeComponentsFirst = firstTimestamp.split(":");
-  const timeComponentsLast = lastTimestamp.split(":");
+  // Global - user_start_timestamp
+  const total_level_time = user_end_timestamp - user_start_timestamp;
+  const minutes = Math.floor(total_level_time / (1000 * 60));
+  const seconds = Math.floor((total_level_time / 1000) % 60);
 
-  // Create Date objects with the time components
-  const firstDate = new Date();
-  firstDate.setHours(parseInt(timeComponentsFirst[0]));
-  firstDate.setMinutes(parseInt(timeComponentsFirst[1]));
-  firstDate.setSeconds(parseInt(timeComponentsFirst[2]));
-  firstDate.setMilliseconds(parseInt(timeComponentsFirst[3]));
+  return {
+    ttc_minutes: minutes,
+    ttc_seconds: seconds,
+  };
 
-  const lastDate = new Date();
-  lastDate.setHours(parseInt(timeComponentsLast[0]));
-  lastDate.setMinutes(parseInt(timeComponentsLast[1]));
-  lastDate.setSeconds(parseInt(timeComponentsLast[2]));
-  lastDate.setMilliseconds(parseInt(timeComponentsLast[3]));
+  // Ensure minutes and seconds have two digits with leading zeros
+  // const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes;
+  // const formattedSeconds = seconds < 10 ? `0${seconds}` : seconds;
 
-  console.log("Date! - ", firstDate, lastDate);
+  // const timeString = `${formattedMinutes}:${formattedSeconds}`;
 
-  const sub = lastDate - firstDate;
-  console.log("DONE - ", sub); // This should now work correctly
-
-  // Calculate minutes and seconds from the time difference
-  const minutes = Math.floor(sub / (1000 * 60));
-  const seconds = Math.floor((sub / 1000) % 60);
-
-  console.log("Minutes:", minutes);
-  console.log("Seconds:", seconds);
+  // return timeString;
 }
 
 function showFeedbackText() {
@@ -1508,8 +1677,9 @@ function euclideanDistance(x1, y1, x2, y2) {
   return distance;
 }
 
-function calculateShortestEuclidianDistanceForCurrentLevel() {
+function calculateShortestEuclidianDistanceForLevel() {
   shortestEuclidDistances = {};
+  console.log(window.screen.width, window.screen.height);
   // console.log(shapes);
 
   for (let levelShape of shapes.filter((s) => s.isLevelShape)) {
@@ -1528,23 +1698,7 @@ function calculateShortestEuclidianDistanceForCurrentLevel() {
       levelShape.y
     );
 
-    // console.log(
-    //   "x1 - ",
-    //   buildingBlockOfSameLevelShape.x,
-    //   "  y1 - ",
-    //   buildingBlockOfSameLevelShape.y,
-    //   "    x2 - ",
-    //   levelShape.x,
-    //   "    y2 - ",
-    //   levelShape.y
-    // );
-
-    // console.log(
-    //   "Distance - ",
-    //   distance,
-    //   "    Shape - ",
-    //   buildingBlockOfSameLevelShape.type
-    // );
+    // console.log("Shape - ", levelShape.type, distance);
 
     if (levelShape.type in shortestEuclidDistances) {
       //Add to Shortest Distance
@@ -1554,7 +1708,9 @@ function calculateShortestEuclidianDistanceForCurrentLevel() {
     }
   }
 
-  console.log("Shortest Euclid Distance For Level - ", shortestEuclidDistances);
+  return shortestEuclidDistances;
+
+  // console.log("Shortest Euclid Distance For Level - ", shortestEuclidDistances);
 }
 
 //====================================
@@ -1581,14 +1737,21 @@ function getTimestamp() {
 
 function postMouseMotionData() {
   console.log("Right before - ", mouse_motion_array);
+
+  // const {ttc_minutes, ttc_seconds} = calculateTotalLevelTime()
+
   fetch("/process-mouse-data", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      data: mouse_motion_array,
+      time_to_complete: calculateTotalLevelTime(), //Send how long it took user to complete level
+      user_euclid_movement_distances: calculateUserEuclidDistances(),
+      shortest_euclid_distances: calculateShortestEuclidianDistanceForLevel(),
+      data: mouse_motion_array, // Raw Mouse Data
       level: current_level,
+      sub_level: current_sub_level,
       userID: getLocalStorageOrNull("userID"),
     }),
   })
@@ -1609,8 +1772,8 @@ function postLevelMouseData() {
     reset all of the accumulators
   */
 
-  calculateTotalLevelTime();
-  console.log("End of motion - ", mouse_motion_array);
+  // calculateTotalLevelTime();
+  // console.log("End of motion - ", mouse_motion_array);
   postMouseMotionData();
 }
 
@@ -1674,27 +1837,25 @@ function animateShapeToBuildingBlock(shape, buildingBlockOfShape) {
   const animationSpeed = 0.2; // You can adjust the speed as needed
   const dx = (buildingBlockOfShape.x - shape.x) * animationSpeed;
   const dy = (buildingBlockOfShape.y - shape.y) * animationSpeed;
+  const dr = (buildingBlockOfShape.rotation - shape.rotation) * animationSpeed;
 
   // Check if the shape is close enough to the buildingBlockOfShape
   if (Math.abs(dx) < 1 && Math.abs(dy) < 1) {
     // Snap the shape to the buildingBlockOfShape to avoid precision issues
     shape.x = buildingBlockOfShape.x;
     shape.y = buildingBlockOfShape.y;
-    drawShapes();
+    shape.rotation = buildingBlockOfShape.rotation;
 
-    console.log(
-      shape.x,
-      shape.y,
-      "    ",
-      buildingBlockOfShape.x,
-      buildingBlockOfShape.y
-    );
+    // shapes.splice(current_shape_index, 1);
+
+    drawShapes();
 
     return;
   } else {
     // Move the shape towards the buildingBlockOfShape
     shape.x += dx;
     shape.y += dy;
+    shape.rotation += dr;
   }
 
   // Update Position on screen
@@ -1747,6 +1908,10 @@ function mouse_up(event) {
   ]);
 }
 
+//GLOBAL
+let isDataSentAlready = false;
+//+++++
+
 function mouse_move(event) {
   if (current_shape_index === null) return;
 
@@ -1768,6 +1933,8 @@ function mouse_move(event) {
   const currentTime = Date.now();
 
   const { x, y } = calculateMousePos(clientX, clientY);
+
+  // console.log("WEIRD - ", x, y, "   :   ", clientX, clientY);
 
   // Calculate the change in position and time
   const dx = x - prevMouseX;
@@ -1798,8 +1965,8 @@ function mouse_move(event) {
     if (mouse_motion_array) {
       // console.log("Dragging Img - ", event.clientX, " , ", event.clientY);
       mouse_motion_array.push([
-        clientX,
-        clientY,
+        Math.round(x),
+        Math.round(y),
         getTimestamp(),
         shapes[current_shape_index].type,
         Math.round(accelerationX_in_px_per_s_squared),
@@ -1832,22 +1999,31 @@ function mouse_move(event) {
     updateProgressBar();
   }
 
-  console.log(
-    "Closest - ",
-    closest_shape_to_current.type,
-    "  ",
-    closestDistanceToShape
-  );
+  // console.log(
+  //   "Closest - ",
+  //   closest_shape_to_current.type,
+  //   "  ",
+  //   closestDistanceToShape
+  // );
 
+  // LEVEL IS COMPLETE
   if (getProgressBarPercentage() == 100) {
-    if (mouse_motion_array.length != 0) {
-      postLevelMouseData(); //Create csv
-    }
-    setTimeout(() => {}, 1000); // Wait 1s
+    console.log("LEVEL IS DONE - ", isDataSentAlready);
+    if (isDataSentAlready == false) {
+      if (mouse_motion_array.length != 0) {
+        console.log("POSING");
+        postLevelMouseData(); //Create csv
+      }
+      setTimeout(() => {
+        window.location.href = `/updated_scoring`;
+      }, 500); // Wait 0.5s
 
-    window.location.href = `/scoring_page?userID=${getLocalStorageOrNull(
-      "userID"
-    )}&level=${getLocalStorageOrNull("currentLevel")}`; //Goto scoring page
+      // window.location.href = `/scoring_page?userID=${getLocalStorageOrNull(
+      //   "userID"
+      // )}&level=${getLocalStorageOrNull("currentLevel")}`;
+    }
+
+    isDataSentAlready = true;
   }
 
   shapes[current_shape_index].mouseMove(x, y);
@@ -1874,7 +2050,7 @@ function drawShapes() {
     shape.draw();
   }
 
-  calculateShortestEuclidianDistanceForCurrentLevel();
+  // calculateShortestEuclidianDistanceForCurrentLevel();
 }
 
 //Testing
