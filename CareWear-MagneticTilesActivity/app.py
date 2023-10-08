@@ -314,7 +314,49 @@ EXPECTED_TTC = {
             "minutes": 0,
             "seconds" : 15,
         },
+    },
+    
+    
+    #Level 2
+    2:{
+        #-- SubLevel --
+        
+
+        1: {
+            "minutes": 0,
+            "seconds" : 10,
+        },
+        
+        2: {
+            "minutes": 0,
+            "seconds" : 20,
+        },
+        3: {
+            "minutes": 0,
+            "seconds" : 15,
+        },
+    },
+    
+    #Level
+    3:{
+        #-- SubLevel --
+        
+
+        1: {
+            "minutes": 0,
+            "seconds" : 10,
+        },
+        
+        2: {
+            "minutes": 0,
+            "seconds" : 20,
+        },
+        3: {
+            "minutes": 0,
+            "seconds" : 15,
+        },
     }
+    
 }
 
 
@@ -331,12 +373,18 @@ def processMouseMovementData():
     user_euclid_distances = res["user_euclid_movement_distances"]
     shortest_euclid_distances = res["shortest_euclid_distances"]
     
+    # print("WHY", calculateEuclidanPercentChange(shortest_euclid_distances, user_euclid_distances))
+    
 
 
     #Save Relevent Data to session to be used in scoring page
     session["AverageEuclidanPercentChange"] = math.floor(calculateEuclidanPercentChange(shortest_euclid_distances, user_euclid_distances))
     session["TimeToCompleteLevel"] = time_to_complete
     session["ExpectedTimeToCompleteLevel"] = EXPECTED_TTC[level][sub_level]
+    
+    print("HOPE", session.get("AverageEuclidanPercentChange"))
+    print("HOPE", session.get("TimeToCompleteLevel"))
+    
     
 
     

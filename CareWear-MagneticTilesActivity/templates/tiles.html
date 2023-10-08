@@ -54,6 +54,56 @@
         transform: translateX(-50%);
         display: none;
       }
+
+      .finished {
+        width: 100vw;
+        height: 100%;
+        position: absolute;
+        top: 0;
+
+        background-color: rgba(0, 0, 0, 0.4);
+        z-index: 100;
+        display: none;
+      }
+
+      .spinner {
+        display: none;
+        animation: rotate 2s linear infinite;
+        z-index: 200;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        margin: -25px 0 0 -25px;
+        width: 50px;
+        height: 50px;
+
+        & .path {
+          stroke: hsl(0, 0%, 100%);
+          stroke-linecap: round;
+          animation: dash 1.5s ease-in-out infinite;
+        }
+      }
+
+      @keyframes rotate {
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      @keyframes dash {
+        0% {
+          stroke-dasharray: 1, 150;
+          stroke-dashoffset: 0;
+        }
+        50% {
+          stroke-dasharray: 90, 150;
+          stroke-dashoffset: -35;
+        }
+        100% {
+          stroke-dasharray: 90, 150;
+          stroke-dashoffset: -124;
+        }
+      }
     </style>
   </head>
   <body>
@@ -99,6 +149,20 @@
         <div class="progress-bar-inner" id="progressBar"></div>
       </div>
     </div>
+
+    <div class="finished"></div>
+
+    <!-- Spinner -->
+    <svg class="spinner" viewBox="0 0 50 50">
+      <circle
+        class="path"
+        cx="25"
+        cy="25"
+        r="20"
+        fill="none"
+        stroke-width="5"
+      ></circle>
+    </svg>
 
     <script src="{{ url_for('static', filename='js/popup.js') }}"></script>
     <script src="{{ url_for('static', filename='js/mouse_movement.js') }}"></script>

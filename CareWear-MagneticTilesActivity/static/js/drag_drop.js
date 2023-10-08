@@ -119,14 +119,14 @@ class Shape {
       const dy = Math.abs(this.dragStartY - targetShape.y);
       const threshold = this.snapDistanceThreshold + thresholdOffset;
 
-      console.log(
-        "SnapOrigin:  dx - ",
-        dx,
-        "   dy - ",
-        dy,
-        "   thresh - ",
-        threshold
-      );
+      // console.log(
+      //   "SnapOrigin:  dx - ",
+      //   dx,
+      //   "   dy - ",
+      //   dy,
+      //   "   thresh - ",
+      //   threshold
+      // );
 
       if (dx > threshold || dy > threshold) {
         // this.canSnapBack = false; // The shape can't snap back yet
@@ -1736,9 +1736,18 @@ function getTimestamp() {
 }
 
 function postMouseMotionData() {
-  console.log("Right before - ", mouse_motion_array);
+  console.log(
+    "user_euclid_movement_distances:",
+    calculateUserEuclidDistances(),
+    "shortest_euclid_distances:",
+    calculateShortestEuclidianDistanceForLevel()
+  );
 
-  // const {ttc_minutes, ttc_seconds} = calculateTotalLevelTime()
+  const spinner = document.querySelector(".spinner");
+  const finished = document.querySelector(".finished");
+
+  finished.style.display = "block";
+  spinner.style.display = "block";
 
   fetch("/process-mouse-data", {
     method: "POST",
@@ -1756,9 +1765,7 @@ function postMouseMotionData() {
     }),
   })
     .then((res) => {
-      //RESET
-      // mouse_motion_accumulator = 0;
-      // mouse_motion_array = [];
+      window.location.href = `/updated_scoring`;
     })
     .catch((err) => console.log(err));
 
@@ -2008,15 +2015,15 @@ function mouse_move(event) {
 
   // LEVEL IS COMPLETE
   if (getProgressBarPercentage() == 100) {
-    console.log("LEVEL IS DONE - ", isDataSentAlready);
+    // console.log("LEVEL IS DONE - ", isDataSentAlready);
     if (isDataSentAlready == false) {
       if (mouse_motion_array.length != 0) {
         console.log("POSING");
         postLevelMouseData(); //Create csv
       }
-      setTimeout(() => {
-        window.location.href = `/updated_scoring`;
-      }, 500); // Wait 0.5s
+      // setTimeout(() => {
+      //   window.location.href = `/updated_scoring`;
+      // }, 500); // Wait 0.5s
 
       // window.location.href = `/scoring_page?userID=${getLocalStorageOrNull(
       //   "userID"

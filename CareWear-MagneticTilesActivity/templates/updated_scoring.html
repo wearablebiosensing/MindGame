@@ -53,7 +53,7 @@
 
           <div class="updated_scoring_mouse_data_item">
 
-            {% if session.get("AverageEuclidanPercentChange") and session.get("AverageEuclidanPercentChange") > 10 and session.get("AverageEuclidanPercentChange") <= 20 %}
+            {% if session.get("AverageEuclidanPercentChange") and (session.get("AverageEuclidanPercentChange") > 10) and (session.get("AverageEuclidanPercentChange") <= 20) %}
             <div class="emoji_wrapper active">
             {% else %}
             <div class="emoji_wrapper">
@@ -77,7 +77,7 @@
 
 
 
-            {% if session.get("AverageEuclidanPercentChange") and session.get("AverageEuclidanPercentChange") > 20 and session.get("AverageEuclidanPercentChange") <= 30 %}
+            {% if session.get("AverageEuclidanPercentChange") and (session.get("AverageEuclidanPercentChange") > 20) and (session.get("AverageEuclidanPercentChange") <= 30) %}
             <div class="emoji_wrapper active">
             {% else %}
             <div class="emoji_wrapper">
@@ -97,7 +97,7 @@
 
           <div class="updated_scoring_mouse_data_item">
 
-          {% if session.get("AverageEuclidanPercentChange") and session.get("AverageEuclidanPercentChange") > 30 %}
+          {% if session.get("AverageEuclidanPercentChange") and (session.get("AverageEuclidanPercentChange") > 30) %}
             <div class="emoji_wrapper active">
             {% else %}
             <div class="emoji_wrapper">
@@ -158,6 +158,23 @@
       console.log("PPP")
       let current_level = Number(localStorage.getItem("currentLevel"));
       let sub = Number(localStorage.getItem("currentSubLevel"));
+
+      if(current_level == 3 && sub == 1){
+        window.location.href = `/`;
+        return;
+      }
+
+      if(sub % 3 == 0){
+        console.log("SUB")
+        current_level += 1;
+        sub = 1;
+
+        localStorage.setItem("currentLevel", current_level ); 
+        localStorage.setItem("currentSubLevel", sub ); 
+
+        window.location.href = `/tiles_game`;
+        return;
+      }
 
       localStorage.setItem("currentLevel", current_level ); // Next Level + 1
       localStorage.setItem("currentSubLevel", sub + 1); // Next Level
