@@ -12,6 +12,7 @@
   flex-direction: column;
   align-items: center;
   gap: 10px;
+  /* flex-direction: column-reverse; */
 }
 
 .updated_scoring_mouse_data_title {
