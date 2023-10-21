@@ -264,7 +264,7 @@ def calculateEuclidanPercentChange(shortestData: dict, userData:dict) -> float:
 
 
 #Constant
-SAVE_FILES_TO_LOCAL_SYSTEM = False
+SAVE_FILES_TO_LOCAL_SYSTEM = True
     
     
 def createAndUpload(filePath: str, fileName: str, data: bytes):

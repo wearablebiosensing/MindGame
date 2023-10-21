@@ -164,9 +164,20 @@
       ></circle>
     </svg>
 
-    <script src="{{ url_for('static', filename='js/popup.js') }}"></script>
+    <!-- <script src="{{ url_for('static', filename='js/popup.js') }}"></script> -->
+
+    <!-- Used to display the mouse metrics on the side of the screen -->
     <script src="{{ url_for('static', filename='js/mouse_movement.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/drag_drop.js') }}"></script>
+
+    <!-- Engine  - ORDER MATTERS DO NOT MOVE -->
+    <!-- <script src="{{ url_for('static', filename='js/drag_drop.js') }}"></script> -->
+    <script src="{{ url_for('static', filename='js/engine/engine_globals.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/engine/engine_helperFuncs.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/engine/engine_shapes.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/engine/engine_levels.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/engine/engine_calculate_metrics.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/engine/engine_events.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/engine/engine_entry.js') }}"></script>
 
     <script>
       //Check offline or online
