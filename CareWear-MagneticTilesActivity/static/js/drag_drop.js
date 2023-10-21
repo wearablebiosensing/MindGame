@@ -22,7 +22,7 @@ class Shape {
     this.isLevelShape = isLevelShape; // Flag to indicate if it's a special shape
     this.isLevelShapeFilled = false; //Flag to indicate if a level shape is already filled
     this.isSnapped = false; // Flag to track if a shape is snapped to this target
-    this.snapDistanceThreshold = 50; //Flag to indicate how close a shape must be to Level shape to snap to it
+    this.snapDistanceThreshold = 60; //Flag to indicate how close a shape must be to Level shape to snap to it
 
     this.isBuildingBlock = isBuildingBlock;
 
@@ -555,7 +555,7 @@ class RightTriangle extends Shape {
         return;
       }
 
-      if (distance <= this.snapDistanceThreshold) {
+      if (distance <= this.snapDistanceThreshold + 50) {
         // Snap the RightTriangle shape to the target RightTriangle shape
         const dx = targetShape.x - this.x;
         const dy = targetShape.y - this.y;
