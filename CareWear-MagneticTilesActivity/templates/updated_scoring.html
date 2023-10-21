@@ -32,22 +32,40 @@
         <div class="updated_scoring_mouse_data_container">
           <!-- Emoji containers -->
 
-
           <div class="updated_scoring_mouse_data_item">
-            <!-- <p class="updated_scoring_mouse_data_item_desc">>10%</p> -->
 
-          {% if session.get("AverageEuclidanPercentChange") and session.get("AverageEuclidanPercentChange") > 0 and session.get("AverageEuclidanPercentChange") <= 10  %}
-          <div class="emoji_wrapper active">
-          {% else %}
+          {% if session.get("AverageEuclidanPercentChange") and (session.get("AverageEuclidanPercentChange") > 30) %}
+            <div class="emoji_wrapper active">
+            {% else %}
             <div class="emoji_wrapper">
-          {% endif %}
+            {% endif %}
               <img
-                src="{{ url_for('static', filename='images/veryHappyGreenEmoji.svg') }}"
+                src="{{ url_for('static', filename='images/verySadYellowEmoji.svg') }}"
               />
             </div>
-            <p class="updated_scoring_mouse_data_item_desc">Good</p>
+            <p class="updated_scoring_mouse_data_item_desc">Very Poor</p>
+
           </div>
 
+
+          
+          <div class="updated_scoring_mouse_data_item">
+
+            {% if session.get("AverageEuclidanPercentChange") and (session.get("AverageEuclidanPercentChange") > 20) and (session.get("AverageEuclidanPercentChange") <= 30) %}
+            <div class="emoji_wrapper active">
+            {% else %}
+            <div class="emoji_wrapper">
+            {% endif %}
+
+              <img
+                src="{{ url_for('static', filename='images/sadYellowEmoji.svg') }}"
+              />
+            </div>
+            <!-- <p class="updated_scoring_mouse_data_item_desc">&nbsp;</p> -->
+            <p class="updated_scoring_mouse_data_item_desc">Poor</p>
+
+
+          </div>
 
 
 
@@ -64,7 +82,7 @@
                 src="{{ url_for('static', filename='images/happyGreenEmoji.svg') }}"
               />
             </div>
-            <p class="updated_scoring_mouse_data_item_desc">&nbsp;</p>
+            <p class="updated_scoring_mouse_data_item_desc">Good</p>
 
           </div>
 
@@ -73,43 +91,27 @@
 
 
           <div class="updated_scoring_mouse_data_item">
+            <!-- <p class="updated_scoring_mouse_data_item_desc">>10%</p> -->
 
-
-
-
-            {% if session.get("AverageEuclidanPercentChange") and (session.get("AverageEuclidanPercentChange") > 20) and (session.get("AverageEuclidanPercentChange") <= 30) %}
-            <div class="emoji_wrapper active">
-            {% else %}
+          {% if session.get("AverageEuclidanPercentChange") and session.get("AverageEuclidanPercentChange") > 0 and session.get("AverageEuclidanPercentChange") <= 10  %}
+          <div class="emoji_wrapper active">
+          {% else %}
             <div class="emoji_wrapper">
-            {% endif %}
-
+          {% endif %}
               <img
-                src="{{ url_for('static', filename='images/sadYellowEmoji.svg') }}"
+                src="{{ url_for('static', filename='images/veryHappyGreenEmoji.svg') }}"
               />
             </div>
-            <p class="updated_scoring_mouse_data_item_desc">&nbsp;</p>
-
+            <p class="updated_scoring_mouse_data_item_desc">Very Good</p>
           </div>
 
 
 
-
-
-          <div class="updated_scoring_mouse_data_item">
-
-          {% if session.get("AverageEuclidanPercentChange") and (session.get("AverageEuclidanPercentChange") > 30) %}
-            <div class="emoji_wrapper active">
-            {% else %}
-            <div class="emoji_wrapper">
-            {% endif %}
-              <img
-                src="{{ url_for('static', filename='images/verySadYellowEmoji.svg') }}"
-              />
-            </div>
-            <p class="updated_scoring_mouse_data_item_desc">Bad</p>
-
-          </div>
         </div>
+
+
+
+
       </div>
 
       <br />

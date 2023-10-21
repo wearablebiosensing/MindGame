@@ -263,7 +263,8 @@ def calculateEuclidanPercentChange(shortestData: dict, userData:dict) -> float:
 
 
 
-    
+#Constant
+SAVE_FILES_TO_LOCAL_SYSTEM = False
     
     
 def createAndUpload(filePath: str, fileName: str, data: bytes):
@@ -276,14 +277,25 @@ def createAndUpload(filePath: str, fileName: str, data: bytes):
         data (_type_): utf8 encoded bytes??
     """
     try:
-        with open(f"{filePath}/{fileName}", mode="w+b") as file:
+        if(SAVE_FILES_TO_LOCAL_SYSTEM):
+            with open(f"{filePath}/{fileName}", mode="w+b") as file:
+                
+                file.write(data)
+                
+                file.seek(0)  # Rewind the file pointer to the beginning
+                bucket = storage.bucket()
+                blob = bucket.blob(f"MagneticTiles/{filePath}/{fileName}") 
+                blob.upload_from_file(file_obj=file, rewind=True)
+        else:
             
-            file.write(data)
-            
-            file.seek(0)  # Rewind the file pointer to the beginning
-            bucket = storage.bucket()
-            blob = bucket.blob(f"MagneticTiles/{filePath}/{fileName}") 
-            blob.upload_from_file(file_obj=file, rewind=True)
+            with tempfile.NamedTemporaryFile(delete=False) as file:
+                file.write(data)
+                
+                file.seek(0)  # Rewind the file pointer to the beginning
+                bucket = storage.bucket()
+                blob = bucket.blob(f"MagneticTiles/{filePath}/{fileName}") 
+                blob.upload_from_file(file_obj=file, rewind=True)
+        
             
     except Exception as e:
         print(f"An error occurred (createAndUpload):({fileName}) -> {str(e)}")
