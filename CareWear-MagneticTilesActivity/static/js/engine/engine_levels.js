@@ -29,6 +29,11 @@ const building_blocks = [
     the top level numbers represent the level, inside
     each of those levels are sub levels where you will
     add new levels if needed
+
+    These variables are declared in engine_globals.js
+    ------------------------------
+    let LEVEL_X = canvas.width / 2;
+    let LEVEL_Y = canvas.height / 2;
 */
 const LEVELS = {
   1: {

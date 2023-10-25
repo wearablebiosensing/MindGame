@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tutorial</title>
+
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/tutorial.css') }}"
+    />
+  </head>
+  <body>
+    <div class="tutorial_container">
+      <div class="tutorial_title">Let's learn how to play the game!</div>
+      <div class="tutorial_desc">
+        Welcome to this tutorial, where we'll show you the ropes of playing and
+        smoothly navigating the Mind Game. We'll take you through it step by
+        step, making sure you grasp the basics of gameplay. Plus, we'll dish out
+        some tips on how to make the most out of this app. Let's get started on
+        this fun learning journey!
+      </div>
+      <img id="tutorial_media" />
+
+      <button class="tutorial_btn" id="tutorial_next_btn">Next</button>
+    </div>
+    <div class="tutiorial_progress_bar_container">
+      <div class="tutorial_progress_bar"></div>
+    </div>
+  </body>
+
+  <script>
+    const TOTAL_TUTORIAL_STEPS = 4;
+    var current_tutorial_step = 1;
+
+    const tutorial_title = document.querySelector(".tutorial_title");
+    const tutorial_desc = document.querySelector(".tutorial_desc");
+    const tutorial_next_btn = document.getElementById("tutorial_next_btn");
+    const tutorial_image_element = document.getElementById("tutorial_media");
+    const tutorial_progress_bar = document.querySelector(
+      ".tutorial_progress_bar"
+    );
+
+    const TUTORIAL_STEP_MEDIA_FILES = {
+      2: "/static/tutorial/tutorial_game_layout.png",
+      3: "/static/tutorial/tutorial_game_mechanics.gif",
+      4: "/static/tutorial/tutorial_game_layout.png",
+    };
+    const TUTORIAL_STEP_TEXT = {
+      1: {
+        title: "Let's learn how to play the game!",
+        desc: ` Welcome to this tutorial, where we'll show you the ropes of playing and
+            smoothly navigating the Mind Game. We'll take you through it step by
+            step, making sure you grasp the basics of gameplay. Plus, we'll dish out
+            some tips on how to make the most out of this app. Let's get started on
+            this fun learning journey!`,
+      },
+      2: {
+        title: "Tutorial 1: Game Mechanics",
+        desc: ` In this section of the tutorial, we will help you understand the game mechanics of the Mind Game puzzle activity.
+            In the image below there are section outlined in different colors to help us understand. The part outlined in <span style="color:orange; font-weight: bold;">Orange (Left)</span>
+            is where you can select any of the shapes that you want to drag. The part outlined in <span style="color:green;font-weight: bold;">Green (Middle)</span> is the current puzzle
+            you are trying to solve with those shapes on the left. Outlined in <span style="color:purple;font-weight: bold;">Purple (Right)</span> is some fun and usefull data about your mouse movement and position.
+            The <span style="color:pink;font-weight: bold;">Pink (Top)</span> indicates what level you are currently on.
+        `,
+      },
+      3: {
+        title: "Tutorial 2: Game Mechanics",
+        desc: ` In this section of the tutorial, we will help you understand the game mechanics of the Mind Game puzzle activity. Below is a gif showing you the first puzzle of Mind Game.
+        As you can see, shapes can be dragged from the left side of the screen and are snapped into place in the puzzle when they are close enough. If you pick the wrong shape it will
+        be automatically moved back to its origin on the left, and a message will pop up letting you know what happened. After all of the shapes in the puzzel are filled in you will see a loading screen and then will be taken to the scoring page which we will talk about in the next section.
+        `,
+      },
+      4: {
+        title: "Tutorial 3: Scoring Page",
+        desc: ` In this section of the tutorial, we will help you understand the scoring page of the Mind Game puzzle activity.
+        `,
+      },
+    };
+
+    tutorial_next_btn.addEventListener("click", () => {
+      //Go to next section of the tutorial
+      current_tutorial_step += 1;
+      updateTutorialUI();
+    });
+
+    function updateTutorialUI() {
+      //Update the text
+      tutorial_title.innerHTML =
+        TUTORIAL_STEP_TEXT[current_tutorial_step].title;
+      tutorial_desc.innerHTML = TUTORIAL_STEP_TEXT[current_tutorial_step].desc;
+
+      //Update the media
+      if (current_tutorial_step > 1) {
+        tutorial_image_element.src =
+          TUTORIAL_STEP_MEDIA_FILES[current_tutorial_step];
+      }
+
+      //Update progress Bar
+      tutorial_progress_bar.style.width = `${
+        (current_tutorial_step / TOTAL_TUTORIAL_STEPS) * 100
+      }%`;
+    }
+
+    //Inital tutorial page
+    updateTutorialUI();
+  </script>
+</html>

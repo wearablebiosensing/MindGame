@@ -189,6 +189,17 @@ def updated_scoring():
   return render_template("updated_scoring.html")
 
 
+@app.route('/tutorial', methods=['GET','POST'])
+def tutorial():
+  return render_template("tutorial.html")
+
+
+
+
+
+
+
+
 # ----------- Routes for the scoring Page -----------------
 
 #Shows renders the scoring page with some parameters
