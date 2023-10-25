@@ -104,6 +104,31 @@
           stroke-dashoffset: -124;
         }
       }
+
+      .playground_level_done {
+        visibility: hidden;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .playground_level_done button {
+        background-color: #478f96; /* Green */
+        border-radius: 10px;
+        border: none;
+        color: white;
+        padding: 15px 32px;
+        width: 150px;
+
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 25px;
+        cursor: pointer;
+        font-weight: bold;
+        font-family: "IBM Plex Sans", sans-serif;
+      }
     </style>
   </head>
   <body>
@@ -135,6 +160,12 @@
             <div class="mouse_analytics_item">
               Acc Y : &nbsp<span id="mouse_analytics_yacc"></span>&nbsp px/s^2
             </div>
+
+            <div class="playground_level_done">
+              <!-- <div>Great Job!</div> -->
+              <button id="playground_retry">Retry</button>
+              <button id="playground_end">Finish</button>
+            </div>
           </div>
 
           <canvas id="canvas"></canvas>
@@ -164,13 +195,35 @@
       ></circle>
     </svg>
 
-    <!-- <script src="{{ url_for('static', filename='js/popup.js') }}"></script> -->
+    <script>
+      function isPlaygroundModeEnabled() {
+        const queryString = window.location.search;
+        const urlParams = new URLSearchParams(queryString);
+
+        //Example - www.test.com/game?playground=true
+        const enabled = urlParams.get("playground");
+
+        return enabled ? true : false;
+      }
+
+      //When goign through the tutorial we need some way
+      //in the code to determine if we should not collect
+      //and post data if in a certain mode
+      const isPlaygroundMode = isPlaygroundModeEnabled();
+
+      //Change title of game when in playground mode
+      if (isPlaygroundMode) {
+        document.querySelector(".level_indicator").innerHTML =
+          "Playground Mode";
+      }
+
+      console.log("IsPlayground - ", isPlaygroundMode);
+    </script>
 
     <!-- Used to display the mouse metrics on the side of the screen -->
     <script src="{{ url_for('static', filename='js/mouse_movement.js') }}"></script>
 
     <!-- Engine  - ORDER MATTERS DO NOT MOVE -->
-    <!-- <script src="{{ url_for('static', filename='js/drag_drop.js') }}"></script> -->
     <script src="{{ url_for('static', filename='js/engine/engine_globals.js') }}"></script>
     <script src="{{ url_for('static', filename='js/engine/engine_helperFuncs.js') }}"></script>
     <script src="{{ url_for('static', filename='js/engine/engine_shapes.js') }}"></script>
@@ -180,20 +233,6 @@
     <script src="{{ url_for('static', filename='js/engine/engine_entry.js') }}"></script>
 
     <script>
-      //Check offline or online
-      /*let onlineStatus = document.querySelector(".onlineStatus");
-        window.addEventListener("online", () => {
-          onlineStatus.innerHTML = "Online";
-          onlineStatus.style.color = "green";
-        });
-        window.addEventListener("offline", () => {
-          onlineStatus.innerHTML = "Offline";
-          onlineStatus.style.color = "red";
-        });
-
-        onlineStatus.innerHTML = "Offline";
-        onlineStatus.style.color = "red";*/
-
       const userID_display = document.getElementById("userID");
       const currentLevel_display = document.getElementById("level");
 

@@ -326,16 +326,16 @@ EXPECTED_TTC = {
         #Train
         1: {
             "minutes": 0,
-            "seconds" : 10,
+            "seconds" : 33,
         },
         
         2: {
             "minutes": 0,
-            "seconds" : 20,
+            "seconds" : 25,
         },
         3: {
             "minutes": 0,
-            "seconds" : 15,
+            "seconds" : 24,
         },
     },
     
@@ -347,16 +347,16 @@ EXPECTED_TTC = {
 
         1: {
             "minutes": 0,
-            "seconds" : 10,
+            "seconds" : 24,
         },
         
         2: {
             "minutes": 0,
-            "seconds" : 20,
+            "seconds" : 23,
         },
         3: {
             "minutes": 0,
-            "seconds" : 15,
+            "seconds" : 31,
         },
     },
     
@@ -376,7 +376,7 @@ EXPECTED_TTC = {
         },
         3: {
             "minutes": 0,
-            "seconds" : 15,
+            "seconds" : 30,
         },
     }
     

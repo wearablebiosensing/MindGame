@@ -143,16 +143,8 @@ function mouse_move(event) {
     updateProgressBar();
   }
 
-  // console.log(
-  //   "Closest - ",
-  //   closest_shape_to_current.type,
-  //   "  ",
-  //   closestDistanceToShape
-  // );
-
   // LEVEL IS COMPLETE
   if (getProgressBarPercentage() == 100) {
-    // console.log("LEVEL IS DONE - ", isDataSentAlready);
     if (isDataSentAlready == false) {
       if (mouse_motion_array.length != 0) {
         console.log("POSING");

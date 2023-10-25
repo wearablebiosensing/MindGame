@@ -169,8 +169,25 @@ function postLevelMouseData() {
       reset all of the accumulators
     */
 
-  // calculateTotalLevelTime();
-  // console.log("End of motion - ", mouse_motion_array);
+  //Dont post data when in playground mode!
+  if (isPlaygroundMode) {
+    document.querySelector(".playground_level_done").style.visibility =
+      "visible";
+
+    document
+      .getElementById("playground_retry")
+      .addEventListener("click", () => {
+        // changeCurrentLevel(1, 1);
+        window.location.href = "/tiles_game?playground=true";
+      });
+
+    document.getElementById("playground_end").addEventListener("click", () => {
+      window.location.href = "/";
+    });
+
+    return;
+  }
+
   postMouseMotionData();
 }
 

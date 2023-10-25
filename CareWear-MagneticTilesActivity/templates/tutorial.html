@@ -44,7 +44,7 @@
     const TUTORIAL_STEP_MEDIA_FILES = {
       2: "/static/tutorial/tutorial_game_layout.png",
       3: "/static/tutorial/tutorial_game_mechanics.gif",
-      4: "/static/tutorial/tutorial_game_layout.png",
+      4: "/static/tutorial/tutorial_scoring.png",
     };
     const TUTORIAL_STEP_TEXT = {
       1: {
@@ -56,7 +56,7 @@
             this fun learning journey!`,
       },
       2: {
-        title: "Tutorial 1: Game Mechanics",
+        title: "Tutorial 1: Game Layout",
         desc: ` In this section of the tutorial, we will help you understand the game mechanics of the Mind Game puzzle activity.
             In the image below there are section outlined in different colors to help us understand. The part outlined in <span style="color:orange; font-weight: bold;">Orange (Left)</span>
             is where you can select any of the shapes that you want to drag. The part outlined in <span style="color:green;font-weight: bold;">Green (Middle)</span> is the current puzzle
@@ -73,7 +73,7 @@
       },
       4: {
         title: "Tutorial 3: Scoring Page",
-        desc: ` In this section of the tutorial, we will help you understand the scoring page of the Mind Game puzzle activity.
+        desc: ` In this section of the tutorial, we will help you understand the scoring page of the Mind Game puzzle activity. On the top of the game where it says "Mouse Data Score" it shows you how well you did moving the shapes around in the puzzle. The box below labeled "Time to complete Task" gives you the time you took to complete the puzzle as well as a predefined average time to complete the puzzle.
         `,
       },
     };
@@ -85,6 +85,15 @@
     });
 
     function updateTutorialUI() {
+      if (current_tutorial_step == TOTAL_TUTORIAL_STEPS) {
+        tutorial_next_btn.innerText = "Playground";
+      }
+
+      //Go to practice
+      if (current_tutorial_step > TOTAL_TUTORIAL_STEPS) {
+        window.location.href = "/tiles_game?playground=true";
+      }
+
       //Update the text
       tutorial_title.innerHTML =
         TUTORIAL_STEP_TEXT[current_tutorial_step].title;
