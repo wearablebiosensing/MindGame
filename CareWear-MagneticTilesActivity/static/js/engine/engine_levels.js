@@ -140,9 +140,42 @@ const LEVELS = {
     ],
 
     //Tree
-    2: [],
+    2: [
+      GreenTrapezoid(LEVEL_X - 100, LEVEL_Y + 250, 180, true), //Base of Tree
+
+      GreenTrapezoid(LEVEL_X - 100, LEVEL_Y + 145, 180, true), //First Layer Middle
+      PurpleDiamond(LEVEL_X - 195, LEVEL_Y + 95, 58, true), //First Layer Left
+      PurpleDiamond(LEVEL_X + 85, LEVEL_Y + 95, -58, true), //First Layer Right
+
+      GreenTrapezoid(LEVEL_X - 100, LEVEL_Y + 30, 180, true), //Second Layer Middle
+      PurpleDiamond(LEVEL_X - 195, LEVEL_Y - 20, 58, true), //Second Layer Left
+      PurpleDiamond(LEVEL_X + 85, LEVEL_Y - 20, -58, true), //Second Layer Right
+
+      GreenEquilateralTriangle(LEVEL_X, LEVEL_Y - 10, 0, true), //Third Layer Middle
+      PurpleDiamond(LEVEL_X - 145, LEVEL_Y - 130, 58, true), //Third Layer Left
+      PurpleDiamond(LEVEL_X + 35, LEVEL_Y - 130, -58, true), //Third Layer Right
+
+      GreenEquilateralTriangle(LEVEL_X, LEVEL_Y - 120, 0, true), //Fourth Layer Middle
+      PurpleDiamond(LEVEL_X - 145, LEVEL_Y - 235, 58, true), //Fourth Layer Left
+      PurpleDiamond(LEVEL_X + 35, LEVEL_Y - 235, -58, true), //Fourth Layer Right
+
+      GreenTrapezoid(LEVEL_X - 100, LEVEL_Y - 300, 180, true), //Fifth Layer Middle
+      GreenEquilateralTriangle(LEVEL_X, LEVEL_Y - 340, 0, true), //Top of Tree
+    ],
 
     //Tortoise
-    3: [],
+    3: [
+      BlueHexagon(LEVEL_X + 250, LEVEL_Y - 200, 0, true), //Head
+      PurpleDiamond(LEVEL_X + 100, LEVEL_Y - 200, 0, true), //Neck
+      GreenTrapezoid(LEVEL_X, LEVEL_Y - 20, 60, true), //Chest
+      PurpleDiamond(LEVEL_X + 110, LEVEL_Y + 60, -62, true), //Front Right Leg
+      PurpleDiamond(LEVEL_X - 70, LEVEL_Y - 40, -60, true), //Behind Chest
+      GreenTrapezoid(LEVEL_X - 260, LEVEL_Y + 15, 180, true), //Belly
+      BlueHexagon(LEVEL_X - 10, LEVEL_Y - 80, 0, true), //Right Top Shell
+      GreenEquilateralTriangle(LEVEL_X - 110, LEVEL_Y - 25, 0, true), //Middle Shell
+      GreenTrapezoid(LEVEL_X - 265, LEVEL_Y - 155, 125, true), //Back Shell
+      PurpleDiamond(LEVEL_X - 355, LEVEL_Y - 35, 58, true), //Bottom Left Shell
+      PurpleDiamond(LEVEL_X - 300, LEVEL_Y + 80, 58, true), //Back Left Leg
+    ],
   },
 };

@@ -178,6 +178,8 @@ function postLevelMouseData() {
       .getElementById("playground_retry")
       .addEventListener("click", () => {
         // changeCurrentLevel(1, 1);
+        document.querySelector(".playground_level_done").style.visibility =
+          "hidden";
         window.location.href = "/tiles_game?playground=true";
       });
 

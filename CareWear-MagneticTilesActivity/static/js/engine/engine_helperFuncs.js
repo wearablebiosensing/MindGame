@@ -249,6 +249,10 @@ function changeCurrentLevel(level, sub_level) {
   shapes.push(...building_blocks);
   shapes.push(...LEVELS[current_level][current_sub_level]);
 
+  LEVELS[current_level][current_sub_level].forEach((shape) => {
+    shape.isLevelShapeFilled = false;
+  });
+
   //Update UI
   drawShapes();
   updateProgressBar();
