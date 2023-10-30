@@ -1679,8 +1679,6 @@ function euclideanDistance(x1, y1, x2, y2) {
 
 function calculateShortestEuclidianDistanceForLevel() {
   shortestEuclidDistances = {};
-  console.log(window.screen.width, window.screen.height);
-  // console.log(shapes);
 
   for (let levelShape of shapes.filter((s) => s.isLevelShape)) {
     //Getting Building Block

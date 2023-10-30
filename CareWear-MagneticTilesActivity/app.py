@@ -189,6 +189,17 @@ def updated_scoring():
   return render_template("updated_scoring.html")
 
 
+@app.route('/tutorial', methods=['GET','POST'])
+def tutorial():
+  return render_template("tutorial.html")
+
+
+
+
+
+
+
+
 # ----------- Routes for the scoring Page -----------------
 
 #Shows renders the scoring page with some parameters
@@ -264,7 +275,7 @@ def calculateEuclidanPercentChange(shortestData: dict, userData:dict) -> float:
 
 
 #Constant
-SAVE_FILES_TO_LOCAL_SYSTEM = False
+SAVE_FILES_TO_LOCAL_SYSTEM = True
     
     
 def createAndUpload(filePath: str, fileName: str, data: bytes):
@@ -315,16 +326,16 @@ EXPECTED_TTC = {
         #Train
         1: {
             "minutes": 0,
-            "seconds" : 10,
+            "seconds" : 33,
         },
         
         2: {
             "minutes": 0,
-            "seconds" : 20,
+            "seconds" : 25,
         },
         3: {
             "minutes": 0,
-            "seconds" : 15,
+            "seconds" : 24,
         },
     },
     
@@ -336,16 +347,16 @@ EXPECTED_TTC = {
 
         1: {
             "minutes": 0,
-            "seconds" : 10,
+            "seconds" : 24,
         },
         
         2: {
             "minutes": 0,
-            "seconds" : 20,
+            "seconds" : 23,
         },
         3: {
             "minutes": 0,
-            "seconds" : 15,
+            "seconds" : 31,
         },
     },
     
@@ -365,7 +376,7 @@ EXPECTED_TTC = {
         },
         3: {
             "minutes": 0,
-            "seconds" : 15,
+            "seconds" : 30,
         },
     }
     
