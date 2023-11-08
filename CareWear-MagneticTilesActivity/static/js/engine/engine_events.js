@@ -22,7 +22,7 @@ function mouse_down(event) {
 
   const { x, y } = calculateMousePos(clientX, clientY);
 
-  // Check if the mouse is inside any shape
+  // Check if the mouse position is inside any shape
   for (let i = shapes.length - 1; i >= 0; i--) {
     const shape = shapes[i];
 
@@ -33,13 +33,8 @@ function mouse_down(event) {
       if (shape.isBuildingBlock) {
         let newShape;
 
-        if (shape instanceof Diamond) {
-          //TODO - Determine if yellow or purple Diamond, pass that into createShapeFromBlock
-        }
-        // console.log("BUILD");
-
+        //Creates a new shape from building block
         newShape = shape.createShapeFromBlock();
-        console.log(newShape.constructor.name);
         shapes.push(newShape);
         current_shape_index = shapes.length - 1;
         newShape.mouseDown(x, y);
@@ -78,8 +73,6 @@ function mouse_move(event) {
 
   const { x, y } = calculateMousePos(clientX, clientY);
 
-  // console.log("WEIRD - ", x, y, "   :   ", clientX, clientY);
-
   // Calculate the change in position and time
   const dx = x - prevMouseX;
   const dy = y - prevMouseY;
@@ -97,17 +90,9 @@ function mouse_move(event) {
   prevMouseY = y;
   prevTimestamp = currentTime;
 
-  // console.log(
-  //   "X acc - ",
-  //   Math.round(accelerationX_in_px_per_s_squared),
-  //   "   Y acc - ",
-  //   Math.round(accelerationY_in_px_per_s_squared)
-  // );
-
   // Check if enough time has passed since the last collection
   if (currentTime - lastCollectionTime >= throttlingInterval) {
     if (mouse_motion_array) {
-      // console.log("Dragging Img - ", event.clientX, " , ", event.clientY);
       mouse_motion_array.push([
         Math.round(x),
         Math.round(y),
@@ -161,7 +146,6 @@ function mouse_move(event) {
 }
 
 function mouse_up(event) {
-  console.log("UP");
   event.preventDefault();
 
   if (current_shape_index === null) return;

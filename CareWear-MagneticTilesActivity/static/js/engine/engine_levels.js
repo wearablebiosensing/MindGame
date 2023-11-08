@@ -1,26 +1,4 @@
 //====================================
-//          Building Blocks
-//====================================
-
-//Shapes on the left side of the screen, the cannto be dragged but will create a new instance
-//Of the block that you can drag
-const building_blocks = [
-  GreenEquilateralTriangle((canvas.width * 0.25) / 4, 80, 0, false, true),
-  OrangeSquare((canvas.width * 0.55) / 4 - 20, 20, 0, false, true),
-
-  RedCircle((canvas.width * 0.25) / 10, 180, 0, false, true),
-  GreenTrapezoid((canvas.width * 0.25) / 4 + 70, 180, 180, false, true),
-
-  BlueHexagon((canvas.width * 0.25) / 2 + 80, 420, 180, false, true),
-  PurpleDiamond((canvas.width * 0.25) / 2 - 170, 330, 40, false, true),
-
-  BlueRightTriangle((canvas.width * 0.25) / 4 - 50, 580, 0, false, true),
-  YellowDiamond((canvas.width * 0.25) / 2 + 30, 530, 140, false, true),
-
-  PinkQuarterCircle((canvas.width * 0.25) / 2 - 60, 750, 0, false, true),
-];
-
-//====================================
 //              Levels
 //====================================
 
@@ -178,4 +156,36 @@ const LEVELS = {
       PurpleDiamond(LEVEL_X - 300, LEVEL_Y + 80, 58, true), //Back Left Leg
     ],
   },
+
+  // 4: {
+  //   //Level 4-1
+  //   1: [
+  //     OrangeSquare(LEVEL_X, LEVEL_Y, 0, true), //First Shape
+  //     OrangeSquare(LEVEL_X, LEVEL_Y - 110, 0, true), //Second Shape
+  //     GreenTrapezoid(LEVEL_X - 160, LEVEL_Y - 50, 90, true), // Third Shape
+  //     GreenEquilateralTriangle(LEVEL_X - 145, LEVEL_Y, 30, true), // Fourth Shape
+  //   ],
+  // },
 };
+
+//====================================
+//          Building Blocks
+//====================================
+
+//Shapes on the left side of the screen, the cannot be dragged but will create a new instance
+//Of the block that you can drag
+const building_blocks = [
+  GreenEquilateralTriangle((canvas.width * 0.25) / 4, 80, 0, false, true),
+  OrangeSquare((canvas.width * 0.55) / 4 - 20, 20, 0, false, true),
+
+  RedCircle((canvas.width * 0.25) / 10, 180, 0, false, true),
+  GreenTrapezoid((canvas.width * 0.25) / 4 + 70, 180, 180, false, true),
+
+  BlueHexagon((canvas.width * 0.25) / 2 + 80, 420, 180, false, true),
+  PurpleDiamond((canvas.width * 0.25) / 2 - 170, 330, 40, false, true),
+
+  BlueRightTriangle((canvas.width * 0.25) / 4 - 50, 580, 0, false, true),
+  YellowDiamond((canvas.width * 0.25) / 2 + 30, 530, 140, false, true),
+
+  PinkQuarterCircle((canvas.width * 0.25) / 2 - 60, 750, 0, false, true),
+];
