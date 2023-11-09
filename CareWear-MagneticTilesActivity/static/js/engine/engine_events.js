@@ -134,6 +134,7 @@ function mouse_move(event) {
       if (mouse_motion_array.length != 0) {
         console.log("POSING");
         postLevelMouseData(); //Create csv
+        stop_mqtt_data_collection();
       }
     }
 

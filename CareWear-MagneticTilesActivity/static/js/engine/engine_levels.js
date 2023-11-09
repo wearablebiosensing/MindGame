@@ -156,6 +156,13 @@ const LEVELS = {
       PurpleDiamond(LEVEL_X - 300, LEVEL_Y + 80, 58, true), //Back Left Leg
     ],
   },
+  4:{
+    1:[
+      OrangeSquare(LEVEL_X + 10, LEVEL_Y - 200, 0, true),
+      OrangeSquare(LEVEL_X + 10, LEVEL_Y - 310, 0, true),
+
+    ]
+  }
 
   // 4: {
   //   //Level 4-1

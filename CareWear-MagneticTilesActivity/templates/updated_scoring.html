@@ -20,6 +20,14 @@
       href="{{ url_for('static', filename='css/updated_scoring.css') }}"
     />
   </head>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.1.2/socket.io.js"></script>
+  <script>
+      const socket = io.connect('http://' + document.domain + ':' + location.port);
+      socket.on('mqtt_message', function(msg) {
+          document.getElementById('mqtt-data').innerHTML = msg.data;
+      });
+  </script>
+
   <body>
     <header>
       <p class="level_indicator">Level <span id="level"> : Scoring</span></p>
@@ -141,7 +149,8 @@
       </button>
     </div>
 
-
+ <div>Received MQTT Data:</div>
+        <div id="mqtt-data"></div>
   </body>
 
   <script src="{{ url_for('static', filename='js/helper_functions.js') }}"></script>

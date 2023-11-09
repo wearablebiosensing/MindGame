@@ -88,12 +88,7 @@
       }
     </style>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.1.2/socket.io.js"></script>
-        <script>
-            const socket = io.connect('http://' + document.domain + ':' + location.port);
-            socket.on('mqtt_message', function(msg) {
-                document.getElementById('mqtt-data').innerHTML = msg.data;
-            });
-        </script>
+
   </head>
   <body>
     <div class="user_ID">{{ userID }}</div>
@@ -120,8 +115,7 @@
         <div class="complete_time_wrapper">
           It took <span id="completion_time"></span> to complete this Level
         </div> -->
-        <div>Received MQTT Data:</div>
-        <div id="mqtt-data"></div>
+   
         <!-- <div
           class="image-container"
           id="acceleration_graph"
