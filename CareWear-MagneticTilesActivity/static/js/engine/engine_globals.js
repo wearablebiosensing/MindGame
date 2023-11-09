@@ -40,6 +40,9 @@ let closest_shape_to_current = null;
 // Time When User hit the Start Button for the level
 const user_start_timestamp = Date.now();
 
+
+
+
 //Level Data
 let current_level = 1;
 let current_sub_level = 1;

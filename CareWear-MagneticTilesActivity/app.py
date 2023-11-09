@@ -19,11 +19,98 @@ from matplotlib import pyplot as plt
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from flask_socketio import SocketIO
 import paho.mqtt.client as mqtt
+import csv
+from functools import partial  # Import functools.partial
+
+
 # pip3 install -r flask firebase-admin pandas scipy numpy matplotlib
 import threading
 csv_lock = threading.Lock()
+#####################
+# CORE_MQTT.py
+#####################
+# running = True #0= not collecting.
+sample_count = 0
+
+MAX_SAMPLES = 10
+# Create an MQTT client
+client = mqtt.Client()
+
+root = "/Users/shehjarsadhu/Desktop/UniversityOfRhodeIsland/Graduate/WBL/Project_MindGame/GitHub/CareWear-MagneticTilesActivity/"
+# filename = "./mqtt_data.csv"
+
+# Define callback functions for MQTT events
+def on_connect(client, userdata, flags, rc):
+    if rc == 0:
+        print("Connected to MQTT broker")
+        client.subscribe("M5StackcPlus/hello")  # Subscribe to the MQTT topic you're interested in
+        client.subscribe("M5StackcPlus/acceleration")  # Subscribe to the MQTT topic you're interested in
+
+    else:
+        print(f"Failed to connect, return code: {rc}")
+accelerometer_data_list = []
+def on_message(client, userdata, message):
+    # print("level,sub_level,userID: ",level,sub_level,userID)
+    print("client: ",client)
+    print("userdata: ",userdata)
+    print("message: ",message)
+    #print(f"Received message '{message.payload.decode()}' on topic '{message.topic}'")
+    if message.topic == "M5StackcPlus/acceleration":
+        # print("level,sub_level,userID: ",level,sub_level,userID)
+        acc_data_msg = message.payload.decode()
+        print("message.topic: ",acc_data_msg)
+        save_to_csv(acc_data_msg)
+        # if sample_count >= :
+            # print("Stoop Data Collection")
+            # stop_data_collection()
+       # accelerometer_data_list.append(acc_data_msg)
+       # print("accelerometer_data_list: ",len(accelerometer_data_list),accelerometer_data_list)
+
+def on_disconnect(client, userdata, rc):
+    if rc != 0:
+        print(f"Unexpected disconnection, return code: {rc}")
+
+def save_to_csv(data,header=None):
+    global filename  # Reference the global filename variable
+    print("save_to_csv: ",filename)
+    file_exists = os.path.exists("./" +filename + ".csv")
+
+    print("data saving....", data)
+    # Open the file in append mode with a+ which creates the file if it doesn't exist
+    with open("./"+filename+ ".csv", "a", newline='') as csv_file:
+        csv_writer = csv.writer(csv_file)
+        # If the file didn't exist and header is provided, write the header
+        if not file_exists and header is not None:
+            csv_writer.writerow(header)
+        # Write the data row
+        csv_writer.writerow([data])
+
+def stop_data_collection():
+    # Disconnect the MQTT client
+    client.disconnect()
+    client.loop_stop()  # Stop the MQTT client loop
+
+def start_data_collection(level,sub_level,userID):
+#   level,sub_level,userID
+    # Set the callback functions
+    client.on_connect = on_connect
+   # on_message_callback = partial(on_message_custom, level,sub_level,userID)
+    client.on_message = on_message
+
+    # client.on_message = on_message
+    client.on_disconnect = on_disconnect
+
+    # Connect to the MQTT broker
+    client.connect("test.mosquitto.org", 1883)  # Replace with your MQTT broker's address and port
+    # Start the MQTT client loop (this is a non-blocking call)
+    client.loop_forever()
+#####################
+# CORE_MQTT.py STOP
+#####################
 
 app = Flask(__name__)
+socketio = SocketIO(app)
+
 app.secret_key = "super secret key"
 
 root = "/Users/shehjarsadhu/Desktop/UniversityOfRhodeIsland/Graduate/WBL/Project_Carehub/CareWear-PortalView/CareWear-MagneticTilesActivity/"
@@ -44,41 +131,15 @@ firebase_admin.initialize_app(cred, {
         'databaseURL': 'https://carewear-77d8e-default-rtdb.firebaseio.com/'
 })
 ref = db.reference('/sensors_message')  # Path to your sensor data node in the database
-socketio = SocketIO(app)
 # Subscribe to multiple topics
 # topics = [("M5StackcPlus/acceleration", 0), ("M5StackcPlus/hello", 0)]  # Replace with your desired topics and QoS level
 
-# MQTT callback functions
-def on_connect(client, userdata, flags, rc):
-    if rc == 0:
-        print("Connected to MQTT broker")
-    # for topic, qos in topics:
-    client.subscribe("M5StackcPlus/acceleration",0)  # Subscribe to the MQTT topic
-
-def on_message(client, userdata, message):
-    topic = message.topic
-    payload = message.payload.decode("utf-8")
-    print(f"Received message on topic '{topic}': {payload}")
-    # if topic.split("/") == "hello":
-    #     data = message.payload.decode()
-    #     print(f"Received message Hello Topic: {topic}")
-    #     print(f"Received message: {data}")
-    #     socketio.emit('mqtt_message2', {'data': data})
-    data = message.payload.decode()
-    print(f"Received message acceleration: {topic}")
-    print(f"Received message: {data}")
-    socketio.emit('mqtt_message', {'data': data})
 
 
 
-mqtt_client = mqtt.Client()
-mqtt_client.on_connect = on_connect
-mqtt_client.on_message = on_message
-mqtt_client.connect("test.mosquitto.org", 1883)
-
-@app.route('/mqtt_connect_page')
-def mqtt_connect():
-    return render_template('mqtt_template.html')
+# @app.route('/mqtt_connect_page')
+# def mqtt_connect():
+#     return render_template('mqtt_template.html')
 
 @socketio.on('connect')
 def handle_connect():
@@ -203,11 +264,11 @@ def tutorial():
 # ----------- Routes for the scoring Page -----------------
 
 #Shows renders the scoring page with some parameters
-@app.route('/scoring_page', methods=['GET','POST'])
-def scoring_page():
-    userID = request.args.get('userID')
-    level = int(request.args.get('level'))
-    return render_template("scoring_module.html", userID=userID, level=level)
+# @app.route('/scoring_page', methods=['GET','POST'])
+# def scoring_page():
+#     userID = request.args.get('userID')
+#     level = int(request.args.get('level'))
+#     return render_template("scoring_module.html", userID=userID, level=level)
 
 
 #The scoring page calls to this route when loading to get the graph based on input
@@ -240,8 +301,23 @@ def completion_time(userID, level):
 
 #================= Helper Functions =============================
 
-
-
+### 
+@app.route("/start_mqtt",methods=['GET','POST'])
+def start_mqtt_collection():
+    global filename
+    #Retrive Data from Post request
+    res = request.get_json()
+    level = res["level"] #Current level that posted data is from
+    sub_level = res["sub_level"]
+    userID = res["userID"] #Used to differentiate csv files from differet subjects
+    filename = str(level) + "_" + str(sub_level)+ "_" + str(userID)
+    print("start_mqtt_collection(): /",filename)
+    start_data_collection(level,sub_level,userID)
+    return "",201
+@app.route("/stop_mqtt",methods=['GET','POST'])
+def stop_mqtt_collection():
+    stop_data_collection()
+    return "",201
 
 def calculateEuclidanPercentChange(shortestData: dict, userData:dict) -> float:
     """
@@ -275,7 +351,7 @@ def calculateEuclidanPercentChange(shortestData: dict, userData:dict) -> float:
 
 
 #Constant
-SAVE_FILES_TO_LOCAL_SYSTEM = False
+SAVE_FILES_TO_LOCAL_SYSTEM = True
     
     
 def createAndUpload(filePath: str, fileName: str, data: bytes):
