@@ -44,7 +44,7 @@ def on_connect(client, userdata, flags, rc):
     if rc == 0:
         print("Connected to MQTT broker")
         client.subscribe("M5StackcPlus/hello")  # Subscribe to the MQTT topic you're interested in
-        client.subscribe("M5StackcPlus/acceleration")  # Subscribe to the MQTT topic you're interested in
+        client.subscribe("AndroidWatch/acceleration")  # Subscribe to the MQTT topic you're interested in
 
     else:
         print(f"Failed to connect, return code: {rc}")
@@ -55,7 +55,7 @@ def on_message(client, userdata, message):
     print("userdata: ",userdata)
     print("message: ",message)
     #print(f"Received message '{message.payload.decode()}' on topic '{message.topic}'")
-    if message.topic == "M5StackcPlus/acceleration":
+    if message.topic == "AndroidWatch/acceleration":
         # print("level,sub_level,userID: ",level,sub_level,userID)
         acc_data_msg = message.payload.decode()
         print("message.topic: ",acc_data_msg)
@@ -73,11 +73,11 @@ def on_disconnect(client, userdata, rc):
 def save_to_csv(data,header=None):
     global filename  # Reference the global filename variable
     print("save_to_csv: ",filename)
-    file_exists = os.path.exists("./" +filename + ".csv")
+    file_exists = os.path.exists("./watch_data/" +filename + ".csv")
 
     print("data saving....", data)
     # Open the file in append mode with a+ which creates the file if it doesn't exist
-    with open("./"+filename+ ".csv", "a", newline='') as csv_file:
+    with open(filename+ ".csv", "a", newline='') as csv_file:
         csv_writer = csv.writer(csv_file)
         # If the file didn't exist and header is provided, write the header
         if not file_exists and header is not None:
@@ -580,6 +580,6 @@ def processMouseMovementData():
 
 
 
-if __name__ == '__main__':
-    mqtt_client.loop_start()
-    socketio.run(app, debug=True)
+# if __name__ == '__main__':
+#     mqtt_client.loop_start()
+#     socketio.run(app, debug=True)
