@@ -254,6 +254,9 @@ def updated_scoring():
 def tutorial():
   return render_template("tutorial.html")
 
+@app.route('/nogo', methods=['GET','POST'])
+def nogo():
+  return render_template("nogo.html")
 
 
 
@@ -577,6 +580,51 @@ def processMouseMovementData():
         
     response = {'message': 'Data received and processed successfully'}
     return jsonify(response)
+
+
+
+@app.route('/process-nogo-data', methods=['POST'])
+def processnogo():
+    
+    #Retrive Data from Post request
+    res = request.get_json()
+    data = res["data"]
+    userID = res["userID"] #Used to differentiate csv files from differet subjects
+    
+    print(data)
+    
+    # Create a StringIO object to write the CSV data into a string
+    output = io.StringIO()
+
+    # Create a CSV writer
+    writer = csv.DictWriter(output, fieldnames=data[0].keys())
+
+    # Write header and rows
+    writer.writeheader()
+    for row in data:
+        writer.writerow(row)
+
+    # Get the CSV string from the StringIO object
+    csv_string = output.getvalue()
+
+    
+    #======================================    
+    #              NOGO FILES
+    #======================================
+    os.makedirs("nogo/", exist_ok=True)
+    nogo_path = "nogo"
+    nogo_file_name = f"nogo_{userID}.csv"
+    
+
+    #Shortest Distances JSON
+    nogo_data = csv_string.encode("utf-8")
+    createAndUpload(nogo_path, nogo_file_name, nogo_data)
+    
+    response = {'message': 'Data received and processed successfully'}
+    return jsonify(response)
+    
+    
+
 
 
 
