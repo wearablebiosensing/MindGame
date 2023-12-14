@@ -1,0 +1,31 @@
+body {
+  background-color: rgb(234, 233, 233);
+}
+
+#nogo_container {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  visibility: hidden;
+  background-color: black;
+}
+
+.nogo_square {
+  width: 18%;
+  height: 35%;
+  background-color: rgb(97, 246, 137);
+  /* box-shadow: 1px 3px 10px 2px rgb(185, 182, 182); */
+  /* box-shadow: 1px 3px 5px 2px rgb(95, 206, 132); */
+}
+
+.nogo_circle {
+  width: 18%;
+  height: 35%;
+  border-radius: 50%;
+  background-color: rgb(246, 103, 92);
+  /* box-shadow: 1px 3px 5px 2px rgb(241, 157, 157); */
+
+  /* box-shadow: 1px 3px 10px 2px rgb(185, 182, 182); */
+}
