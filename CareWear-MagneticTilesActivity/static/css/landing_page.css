@@ -87,3 +87,114 @@ button[type="submit"]:focus {
   border-color: #0099ff;
   outline: none;
 }
+
+.gfg {
+  margin: 3%;
+  position: relative;
+}
+
+/*This CSS code is defining the styles for a container that holds text*/
+.text-container {
+  font-family: "IBM Plex Sans", sans-serif;
+  position: absolute;
+  color: #478f96;
+  text-align: center;
+  font-size: calc(4vh + 3vw);
+  left: 18rem;
+  top: -3rem;
+  margin-left: 15%;
+  /* background-color: rgb(41, 41, 41, 0.8); */
+  padding: 0 1rem;
+}
+
+.text_container {
+  font-family: "IBM Plex Sans", sans-serif;
+  color: #478f96;
+  text-align: center;
+  font-size: calc(4vh + 3vw);
+
+  /* background-color: rgb(41, 41, 41, 0.8); */
+  padding: 0 1rem;
+}
+
+.text-container-m5connection {
+  font-family: "IBM Plex Sans", sans-serif;
+  position: absolute;
+  color: #979797;
+  text-align: center;
+  font-size: 30px;
+  left: 18rem;
+  top: 34rem;
+  margin-left: 15%;
+  /* background-color: rgb(41, 41, 41, 0.8); */
+  padding: 0 1rem;
+}
+
+.text_container_m5connection {
+  font-family: "IBM Plex Sans", sans-serif;
+  color: #979797;
+  text-align: center;
+  font-size: 30px;
+  /* background-color: rgb(41, 41, 41, 0.8); */
+  padding: 0 1rem;
+  position: relative;
+  top: -100px;
+}
+
+.start-button {
+  position: absolute;
+  background-color: #478f96; /* Green */
+  border-radius: 10px;
+  border: none;
+  color: white;
+  padding: 15px 32px;
+  width: 150px;
+  left: 18rem;
+  top: 38rem;
+  margin-left: 24%;
+
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 25px;
+  cursor: pointer;
+  font-weight: bold;
+  font-family: "IBM Plex Sans", sans-serif;
+}
+
+.start_button {
+  position: relative;
+  top: -50px;
+
+  background-color: #478f96; /* Green */
+  border-radius: 10px;
+  border: none;
+  color: white;
+  padding: 15px 32px;
+  width: 150px;
+
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 25px;
+  cursor: pointer;
+  font-weight: bold;
+  font-family: "IBM Plex Sans", sans-serif;
+}
+
+.btn_container {
+  display: flex;
+  gap: 20px;
+}
+
+.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.center {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
