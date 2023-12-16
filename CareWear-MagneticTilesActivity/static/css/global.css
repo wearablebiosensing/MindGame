@@ -39,6 +39,20 @@ h1 {
   }
 }
 
+.second_spinner {
+  display: none;
+  animation: rotate 2s linear infinite;
+  z-index: 200;
+  width: 30px;
+  height: 30px;
+}
+
+.second_spinner .path {
+  stroke: hsl(0, 0%, 4%);
+  stroke-linecap: round;
+  animation: dash 1.5s ease-in-out infinite;
+}
+
 @keyframes rotate {
   100% {
     transform: rotate(360deg);

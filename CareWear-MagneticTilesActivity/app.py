@@ -158,6 +158,60 @@ def stop_mqtt_collection():
     return "", 201
 
 
+
+@app.route("/check_mqtt_connection", methods=['GET', 'POST'])
+def check_mqtt_connection():
+    #Get data from request
+    res = request.get_json()
+    watchID = res["watchID"]
+    
+    if check_topic_activity(watchID):
+        response = {'status': "online"}
+        return jsonify(response)
+    else:
+        response = {'status': "offline"}
+        return jsonify(response)
+    
+
+
+def check_topic_activity(watchID, timeout=5):
+    """
+    Check if a specific topic is receiving data.
+
+    Args:
+    watchID (str): The ID of the watch.
+    timeout (int): Time in seconds to wait for a message.
+
+    Returns:
+    bool: True if the topic is active, False otherwise.
+    """
+    temp_client = mqtt.Client()
+
+    # Define a flag to indicate if a message is received
+    message_received = [False]
+
+    # Define the callback for when a message is received
+    def temp_on_message(client, userdata, message):
+        print(f"Temp message received on topic {message.topic}")
+        message_received[0] = True
+        temp_client.disconnect()  # Disconnect after receiving a message
+
+    # Set up the temporary client
+    temp_client.on_message = temp_on_message
+    temp_client.connect("test.mosquitto.org", 1883)
+    temp_client.subscribe(f"AndroidWatch/acceleration/{watchID}")
+    temp_client.loop_start()
+
+    # Wait for a message or until the timeout
+    start_time = time.time()
+    while not message_received[0] and time.time() - start_time < timeout:
+        time.sleep(0.1)
+
+    temp_client.loop_stop()
+    return message_received[0]
+
+
+
 #User inputs ID they see on watch
 #Watch will be publishing on the topic /acceleration/id
 #Start_mqtt we will send the ID from the watch so we will listen on the right topic /acceleration/id
