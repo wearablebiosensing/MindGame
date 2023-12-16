@@ -241,6 +241,13 @@ class Square extends Shape {
     return OrangeSquare(this.x, this.y, this.rotation);
   }
 
+  resize(newWidth, newHeight) {
+    this.width *= newWidth;
+    this.height *= newHeight;
+    this.x *= newWidth;
+    this.y *= newHeight;
+  }
+
   draw() {
     // ctx.fillStyle = this.isSnapped ? "green" : this.color;
     //ctx.globalAlpha = this.isSnapped ? 0.5 : 1; //Adjust transparency;

@@ -18,6 +18,27 @@ const container = document.getElementById("container");
 canvas.width = container.clientWidth + 300;
 canvas.height = container.clientHeight + 300;
 
+// window.addEventListener("resize", resizeCanvas);
+
+// function resizeShapes() {
+//   const scaleX = canvas.width / originalCanvasWidth;
+//   const scaleY = canvas.height / originalCanvasHeight;
+
+//   shapes.forEach((shape) => {
+//     if (shape instanceof Square) {
+//       shape.resize(scaleX, scaleY);
+//     }
+//   });
+// }
+
+// function resizeCanvas() {
+
+//   canvas.width = window.innerWidth;
+//   canvas.height = window.innerHeight;
+//   resizeShapes(); // Function to resize shapes
+//   drawShapes();
+// }
+
 //Used for creating the levels of the game realtive to the center
 let LEVEL_X = canvas.width / 2;
 let LEVEL_Y = canvas.height / 2;
@@ -39,9 +60,6 @@ let closest_shape_to_current = null;
 
 // Time When User hit the Start Button for the level
 const user_start_timestamp = Date.now();
-
-
-
 
 //Level Data
 let current_level = 1;

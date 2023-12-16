@@ -20,11 +20,16 @@
       <div class="center">
         <div class="text_container">Mind Game</div>
         <img 
-        style="width:min(100%, 850px); height: auto ; ",
+        style="width:min(100%, 650px); height: auto ; ",
         src="{{ url_for('static', filename='images/landing_page_logo.png') }}"
         alt="Group">
 
-        <div class="text_container_m5connection">Waiting for M5 to connect... </div>
+        <!-- <div class="text_container_m5connection">Waiting for M5 to connect... </div> -->
+
+        <div class="input-container">
+          <input type="text" placeholder="Watch ID" id="userID" />
+        </div>
+
         <div class="btn_container">
           <button id="submitBtn"  class="start_button" required> Start </button>
           <a href="{{ url_for('tutorial') }}"><button class="start_button" >Tutorial</button></a>
@@ -35,13 +40,7 @@
       </div>
       
 
-      <!-- <div class="input-wrapper">
-        <div class="input-container">
-          <input type="text" placeholder="Watch ID" id="userID" />
-        </div>
 
-        <button type="submit" id="submitBtn" required>Submit</button>
-      </div> -->
     </div>
 
     <script>

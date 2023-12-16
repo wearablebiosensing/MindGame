@@ -20,103 +20,19 @@ from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from flask_socketio import SocketIO
 import paho.mqtt.client as mqtt
 import csv
+import time
 from functools import partial  # Import functools.partial
 import threading
 csv_lock = threading.Lock()
 
-
-#####################
-# CORE_MQTT.py
-#####################
-# running = True #0= not collecting.
-sample_count = 0
-
-MAX_SAMPLES = 10
-# Create an MQTT client
-client = mqtt.Client()
-
-
-# filename = "./mqtt_data.csv"
-
-# Define callback functions for MQTT events
-def on_connect(client, userdata, flags, rc):
-    if rc == 0:
-        print("Connected to MQTT broker")
-        client.subscribe("M5StackcPlus/hello")  # Subscribe to the MQTT topic you're interested in
-        client.subscribe("AndroidWatch/acceleration")  # Subscribe to the MQTT topic you're interested in
-
-    else:
-        print(f"Failed to connect, return code: {rc}")
-accelerometer_data_list = []
-def on_message(client, userdata, message):
-    # print("level,sub_level,userID: ",level,sub_level,userID)
-    print("client: ",client)
-    print("userdata: ",userdata)
-    print("message: ",message)
-    #print(f"Received message '{message.payload.decode()}' on topic '{message.topic}'")
-    if message.topic == "AndroidWatch/acceleration":
-        # print("level,sub_level,userID: ",level,sub_level,userID)
-        acc_data_msg = message.payload.decode()
-        print("message.topic: ",acc_data_msg)
-        save_to_csv(acc_data_msg)
-        # if sample_count >= :
-            # print("Stoop Data Collection")
-            # stop_data_collection()
-       # accelerometer_data_list.append(acc_data_msg)
-       # print("accelerometer_data_list: ",len(accelerometer_data_list),accelerometer_data_list)
-
-def on_disconnect(client, userdata, rc):
-    if rc != 0:
-        print(f"Unexpected disconnection, return code: {rc}")
-
-def save_to_csv(data,header=None):
-    global filename  # Reference the global filename variable
-    print("save_to_csv: ",filename)
-    file_exists = os.path.exists("./watch_data/" +filename + ".csv")
-
-    print("data saving....", data)
-    # Open the file in append mode with a+ which creates the file if it doesn't exist
-    with open(filename+ ".csv", "a", newline='') as csv_file:
-        csv_writer = csv.writer(csv_file)
-        # If the file didn't exist and header is provided, write the header
-        if not file_exists and header is not None:
-            csv_writer.writerow(header)
-        # Write the data row
-        csv_writer.writerow([data])
-
-def stop_data_collection():
-    # Disconnect the MQTT client
-    client.disconnect()
-    client.loop_stop()  # Stop the MQTT client loop
-
-def start_data_collection(level,sub_level,userID):
-#   level,sub_level,userID
-    # Set the callback functions
-    client.on_connect = on_connect
-   # on_message_callback = partial(on_message_custom, level,sub_level,userID)
-    client.on_message = on_message
-
-    # client.on_message = on_message
-    client.on_disconnect = on_disconnect
-
-    # Connect to the MQTT broker
-    client.connect("test.mosquitto.org", 1883)  # Replace with your MQTT broker's address and port
-    # Start the MQTT client loop (this is a non-blocking call)
-    client.loop_forever()
-#####################
-# CORE_MQTT.py STOP
-#####################
-
-
-
+#Flask Config
 app = Flask(__name__)
-socketio = SocketIO(app)
+# socketio = SocketIO(app)
 app.secret_key = "super secret key"
 
 
-
+#Firebase Config
 cred = credentials.Certificate('./carewear-77d8e-b0c3a74e907c.json') 
-
 firebaseConfig = {
   "apiKey": "AIzaSyDyjHLuokjuGEPr3HOSsX8FP16qxyS62W8",
   "authDomain": "carewear-77d8e.firebaseapp.com",
@@ -131,6 +47,112 @@ firebase_admin.initialize_app(cred, {
         'databaseURL': 'https://carewear-77d8e-default-rtdb.firebaseio.com/'
 })
 ref = db.reference('/sensors_message')  # Path to your sensor data node in the database
+
+
+
+
+
+
+
+#####################
+# CORE_MQTT.py
+#####################
+
+
+# Create an MQTT client
+client = mqtt.Client()
+
+
+# Callback for when the client receives a CONNACK response from the server
+def on_connect(client, userdata, flags, rc):
+    if rc == 0:
+        print("Connected to MQTT broker")
+        client.subscribe("AndroidWatch/acceleration/dea81fff")
+    else:
+        print(f"Failed to connect, return code: {rc}")
+
+# Callback for when a PUBLISH message is received from the server
+def on_message(client, userdata, message, filename):
+    print(f"Message received on topic {message.topic}")
+    if message.topic == "AndroidWatch/acceleration/dea81fff":
+        acc_data_msg = message.payload.decode()
+        save_to_csv(acc_data_msg, filename)
+
+# Callback for when the client disconnects from the server
+def on_disconnect(client, userdata, rc):
+    if rc != 0:
+        print(f"Unexpected disconnection, return code: {rc}")
+
+# Function to save data to CSV
+def save_to_csv(data, filename, header=None):
+    # Correct directory name
+    directory = "watch_data/"
+    os.makedirs(directory, exist_ok=True)
+
+    # Correct file path
+    file_path = f"{directory}{filename}.csv"
+
+    # Check if file exists before opening it
+    file_exists = os.path.exists(file_path)
+
+    with open(file_path, "a", newline='') as csv_file:
+        csv_writer = csv.writer(csv_file)
+
+        # Write the header only if the file did not exist and a header is provided
+        if not file_exists and header is not None:
+            csv_writer.writerow(header)
+
+        csv_writer.writerow([data])
+
+    print(f"Data saved in CSV file: {file_path}")
+
+# Start data collection and connect to MQTT broker
+def start_data_collection(level, sub_level, userID, filename):
+    print("Adding Mqtt callbacks")
+    client.on_connect = on_connect
+    client.on_message = partial(on_message, filename=filename) #Also send current filename
+    # client.on_message = on_message #Also send current filename
+    client.on_disconnect = on_disconnect
+    client.connect("test.mosquitto.org", 1883)
+    client.loop_start()
+
+# Stop data collection
+def stop_data_collection():
+    print("Stoping Mqtt data collection")
+    client.disconnect()
+    client.loop_stop()
+
+# Flask route to start MQTT data collection
+@app.route("/start_mqtt", methods=['GET', 'POST'])
+def start_mqtt_collection():
+    
+    #Get data from request
+    res = request.get_json()
+    level = res["level"]
+    sub_level = res["sub_level"]
+    userID = res["userID"]
+    
+    #Filename creation
+    session_filename = f"{level}_{sub_level}_{userID}_{int(time.time())}"
+    session['filename'] = session_filename
+    print("Started Mqtt with filename : ", session_filename)
+    
+    #Start mqtt connection
+    start_data_collection(level, sub_level, userID, session_filename)
+    return "", 201
+
+# Flask route to stop MQTT data collection
+@app.route("/stop_mqtt", methods=['GET', 'POST'])
+def stop_mqtt_collection():
+    session_filename = session.get('filename')
+    if session_filename:
+        stop_data_collection()
+    return "", 201
+
+
+#User inputs ID they see on watch
+#Watch will be publishing on the topic /acceleration/id
+#Start_mqtt we will send the ID from the watch so we will listen on the right topic /acceleration/id
 
 
 
@@ -160,28 +182,7 @@ def nogo():
 
 
 
-#================= Helper Functions =============================
-
-### 
-@app.route("/start_mqtt",methods=['GET','POST'])
-def start_mqtt_collection():
-    global filename
-    #Retrive Data from Post request
-    res = request.get_json()
-    level = res["level"] #Current level that posted data is from
-    sub_level = res["sub_level"]
-    userID = res["userID"] #Used to differentiate csv files from differet subjects
-    filename = str(level) + "_" + str(sub_level)+ "_" + str(userID)
-    print("start_mqtt_collection(): /",filename)
-    start_data_collection(level,sub_level,userID)
-    return "",201
-@app.route("/stop_mqtt",methods=['GET','POST'])
-def stop_mqtt_collection():
-    stop_data_collection()
-    return "",201
-
-
-
+# Helper Functions 
 def calculateEuclidanPercentChange(shortestData: dict, userData:dict) -> float:
     """
     Args:

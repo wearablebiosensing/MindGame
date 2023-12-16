@@ -1,3 +1,11 @@
+window.addEventListener("resize", resizeCanvas);
+
+function resizeCanvas() {
+  canvas.width = window.innerWidth * 2;
+  canvas.height = window.innerHeight * 2;
+  drawShapes();
+}
+
 //====================================
 //          Game Functions
 //====================================
@@ -15,6 +23,3 @@ function drawShapes() {
 //Start the engine
 //All thats needed is the event listeners
 drawShapes();
-
-//Starting watch data collection
-start_mqtt_data_collection();

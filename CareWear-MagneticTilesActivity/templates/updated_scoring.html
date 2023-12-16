@@ -22,10 +22,10 @@
   </head>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.1.2/socket.io.js"></script>
   <script>
-      const socket = io.connect('http://' + document.domain + ':' + location.port);
+      /*const socket = io.connect('http://' + document.domain + ':' + location.port);
       socket.on('mqtt_message', function(msg) {
           document.getElementById('mqtt-data').innerHTML = msg.data;
-      });
+      }); */
   </script>
 
   <body>
@@ -166,15 +166,18 @@
     // Update localStorage so that the next level is displayed on tiles_game page
     const nextLevelBtn = document.getElementById("next_level_btn");
     nextLevelBtn.addEventListener("click", () => {
-      console.log("PPP")
+
       let current_level = Number(localStorage.getItem("currentLevel"));
       let sub = Number(localStorage.getItem("currentSubLevel"));
 
+      //Done with all levels
       if(current_level == 3 && sub == 3){
         window.location.href = `/`;
         return;
       }
 
+      //We are done with all 3 puzzels
+      //In the current level, goto next level
       if(sub % 3 == 0){
         console.log("SUB")
         current_level += 1;
@@ -187,9 +190,9 @@
         return;
       }
 
+      //Otherwise, just go to next puzzel in level
       localStorage.setItem("currentLevel", current_level ); // Next Level + 1
       localStorage.setItem("currentSubLevel", sub + 1); // Next Level
-
       window.location.href = `/tiles_game`;
 
     });

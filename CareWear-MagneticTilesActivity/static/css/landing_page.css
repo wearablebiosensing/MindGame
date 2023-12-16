@@ -21,20 +21,14 @@ body {
 }
 
 .landing_hero_image {
-  width: min(80%, 500px);
+  width: min(70%, 200px);
   /* width: 700px; */
   height: auto;
 }
 
-.input-wrapper {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
 /* ~~~~~~~~~~~~~~~~~~~~~~ Input Styles ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 .input-container {
-  position: relative;
+  padding: 10px;
 }
 
 button[type="submit"],
@@ -48,44 +42,8 @@ input[type="text"] {
   margin-bottom: 10px;
   transition: border-color 0.3s ease-in-out;
 }
-
 input[type="text"]:focus {
   border-color: #0099ff;
-}
-
-select {
-  padding: 10px;
-  border: 2px solid #ccc;
-  border-radius: 5px;
-  font-size: 16px;
-  outline: none;
-  width: 300px;
-  transition: border-color 0.3s ease-in-out;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  appearance: none;
-  background-image: url("data:image/svg+xml,<svg fill='black' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/><path d='M0 0h24v24H0z' fill='none'/></svg>");
-  background-repeat: no-repeat;
-  background-position: right 10px center;
-}
-
-select:focus {
-  border-color: #0099ff;
-}
-
-button[type="submit"] {
-  background-color: #0099ff;
-  color: white;
-  cursor: pointer;
-}
-
-button[type="submit"]:hover {
-  background-color: #0077cc;
-}
-
-button[type="submit"]:focus {
-  border-color: #0099ff;
-  outline: none;
 }
 
 .gfg {
@@ -117,30 +75,6 @@ button[type="submit"]:focus {
   padding: 0 1rem;
 }
 
-.text-container-m5connection {
-  font-family: "IBM Plex Sans", sans-serif;
-  position: absolute;
-  color: #979797;
-  text-align: center;
-  font-size: 30px;
-  left: 18rem;
-  top: 34rem;
-  margin-left: 15%;
-  /* background-color: rgb(41, 41, 41, 0.8); */
-  padding: 0 1rem;
-}
-
-.text_container_m5connection {
-  font-family: "IBM Plex Sans", sans-serif;
-  color: #979797;
-  text-align: center;
-  font-size: 30px;
-  /* background-color: rgb(41, 41, 41, 0.8); */
-  padding: 0 1rem;
-  position: relative;
-  top: -100px;
-}
-
 .start-button {
   position: absolute;
   background-color: #478f96; /* Green */
@@ -163,9 +97,6 @@ button[type="submit"]:focus {
 }
 
 .start_button {
-  position: relative;
-  top: -50px;
-
   background-color: #478f96; /* Green */
   border-radius: 10px;
   border: none;
