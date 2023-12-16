@@ -60,8 +60,11 @@ ref = db.reference('/sensors_message')  # Path to your sensor data node in the d
 
 
 # Create an MQTT client
-client = mqtt.Client()
+# client = mqtt.Client()
 
+
+# Dictionary to hold multiple MQTT clients
+mqtt_clients = {}
 
 # Callback for when the client receives a CONNACK response from the server
 def on_connect(client, userdata, flags, rc, watchID):
@@ -75,7 +78,7 @@ def on_connect(client, userdata, flags, rc, watchID):
 # Callback for when a PUBLISH message is received from the server
 def on_message(client, userdata, message, filename, watchID):
     try:
-        print(f"Message received on topic {message.topic}")
+        # print(f"Message received on topic {message.topic}")
         if message.topic == f"AndroidWatch/acceleration/{watchID}":
             acc_data_msg = message.payload.decode()
             save_to_csv(acc_data_msg, filename)
@@ -109,23 +112,40 @@ def save_to_csv(data, filename, header=None):
 
         csv_writer.writerow([data])
 
-    print(f"Data saved in CSV file: {file_path}")
+    # print(f"Data saved in CSV file: {file_path}")
 
-# Start data collection and connect to MQTT broker
+# Modified function to start data collection for specific user
 def start_data_collection(level, sub_level, userID, filename, watchID):
-    print("Adding Mqtt callbacks")
-    client.on_connect = partial(on_connect, watchID = watchID)
-    client.on_message = partial(on_message, filename=filename, watchID = watchID) #Also send current filename
-    # client.on_message = on_message #Also send current filename
+    # Create a new MQTT client for the user
+    client = mqtt.Client()
+
+    # Set up callbacks
+    client.on_connect = partial(on_connect, watchID=watchID)
+    client.on_message = partial(on_message, filename=filename, watchID=watchID)
     client.on_disconnect = on_disconnect
+
+    # Connect the client
     client.connect("test.mosquitto.org", 1883)
     client.loop_start()
 
-# Stop data collection
-def stop_data_collection():
-    print("Stoping Mqtt data collection")
-    client.disconnect()
-    client.loop_stop()
+    # Store the client in the dictionary
+    #Need to also store filename, so when mqttstop is called we can then
+    #Save the same file to firebase, maybe use an obj {"client": client, "filename": filename}
+    
+    mqtt_clients[watchID] = client
+    print(f"Started MQTT for watch {watchID} with filename: {filename}")
+    print("All current clients: ", mqtt_clients)
+
+# Modified function to stop data collection for specific user
+def stop_data_collection(watchID):
+    print(mqtt_clients)
+    if watchID in mqtt_clients:
+        print(f"Stopping MQTT data collection for watchID {watchID}")
+        mqtt_clients[watchID].disconnect()
+        mqtt_clients[watchID].loop_stop()
+        del mqtt_clients[watchID]
+    else:
+        print(f"No MQTT client found for user {watchID}")
 
 # Flask route to start MQTT data collection
 @app.route("/start_mqtt", methods=['GET', 'POST'])
@@ -152,9 +172,12 @@ def start_mqtt_collection():
 # Flask route to stop MQTT data collection
 @app.route("/stop_mqtt", methods=['GET', 'POST'])
 def stop_mqtt_collection():
-    session_filename = session.get('filename')
-    if session_filename:
-        stop_data_collection()
+    
+    #Get data from request
+    res = request.get_json()
+    watchID = res["watchID"]
+
+    stop_data_collection(watchID)
     return "", 201
 
 
@@ -260,17 +283,17 @@ def calculateEuclidanPercentChange(shortestData: dict, userData:dict) -> float:
     for key in shortestData.keys():
         shortestDistance = shortestData[key]
         userDistance = userData[key]
-        print("Percent Change values ", shortestDistance, ", ", userDistance)
+        # print("Percent Change values ", shortestDistance, ", ", userDistance)
         
         percent_change = (abs(shortestDistance - userDistance) / ((shortestDistance + userDistance) / 2)) * 100
         # percent_change = (abs(shortestDistance - userDistance) / ((shortestDistance)) * 100
         
         percent_change_acc += percent_change
         total_shapes += 1 #Used in average
-        print(f"Percent Change for {key} = {percent_change}")
+        # print(f"Percent Change for {key} = {percent_change}")
         
     averaged_percent_change = percent_change_acc / total_shapes
-    print(f"Averaged Percent Change = {averaged_percent_change}")
+    # print(f"Averaged Percent Change = {averaged_percent_change}")
     return averaged_percent_change
 
 

@@ -33,6 +33,12 @@ function stop_mqtt_data_collection() {
   //Posting the data to the server
   fetch("/stop_mqtt", {
     method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      watchID: getLocalStorageOrNull("watchID"),
+    }),
   })
     .then((res) => {
       console.log("Stop mqtt data collection");
