@@ -24,6 +24,7 @@ function start_mqtt_data_collection() {
       level: getLocalStorageOrNull("currentLevel"),
       sub_level: getLocalStorageOrNull("currentSubLevel"),
       userID: getLocalStorageOrNull("userID"),
+      watchID: getLocalStorageOrNull("watchID"),
     }),
   });
 }

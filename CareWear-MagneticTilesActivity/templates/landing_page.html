@@ -27,7 +27,7 @@
         <!-- <div class="text_container_m5connection">Waiting for M5 to connect... </div> -->
 
         <div class="input-container">
-          <input type="text" placeholder="Watch ID" id="userID" />
+          <input type="text" placeholder="Watch ID" id="watchID" />
         </div>
 
         <div class="btn_container">
@@ -45,16 +45,25 @@
 
     <script>
       const submitBtn = document.getElementById("submitBtn");
+      const watchID_input = document.getElementById("watchID")
 
       submitBtn.addEventListener("click", () => {
+        if (!watchID_input.value.match(/\S/)) {
+          alert("Watch ID is empty");
+          return;
+
+        } else {
+        localStorage.setItem("watchID", watchID_input.value);
         localStorage.setItem("userID", "test");
         localStorage.setItem("currentLevel", 1);
         localStorage.setItem("currentSubLevel", 1);
 
   
         window.location.href = "/tiles_game"; //Send to game
+        }
 
       })
+      
 
 
       /*const ID_Input = document.getElementById("userID");

@@ -64,19 +64,24 @@ client = mqtt.Client()
 
 
 # Callback for when the client receives a CONNACK response from the server
-def on_connect(client, userdata, flags, rc):
+def on_connect(client, userdata, flags, rc, watchID):
     if rc == 0:
-        print("Connected to MQTT broker")
-        client.subscribe("AndroidWatch/acceleration/dea81fff")
+        topic = f"AndroidWatch/acceleration/{watchID}"
+        print("Connected to MQTT broker on ", topic)
+        client.subscribe(topic)
     else:
         print(f"Failed to connect, return code: {rc}")
 
 # Callback for when a PUBLISH message is received from the server
-def on_message(client, userdata, message, filename):
-    print(f"Message received on topic {message.topic}")
-    if message.topic == "AndroidWatch/acceleration/dea81fff":
-        acc_data_msg = message.payload.decode()
-        save_to_csv(acc_data_msg, filename)
+def on_message(client, userdata, message, filename, watchID):
+    try:
+        print(f"Message received on topic {message.topic}")
+        if message.topic == f"AndroidWatch/acceleration/{watchID}":
+            acc_data_msg = message.payload.decode()
+            save_to_csv(acc_data_msg, filename)
+    except Exception as e:
+        print(f"Error processing mqtt message: {e}")
+
 
 # Callback for when the client disconnects from the server
 def on_disconnect(client, userdata, rc):
@@ -107,10 +112,10 @@ def save_to_csv(data, filename, header=None):
     print(f"Data saved in CSV file: {file_path}")
 
 # Start data collection and connect to MQTT broker
-def start_data_collection(level, sub_level, userID, filename):
+def start_data_collection(level, sub_level, userID, filename, watchID):
     print("Adding Mqtt callbacks")
-    client.on_connect = on_connect
-    client.on_message = partial(on_message, filename=filename) #Also send current filename
+    client.on_connect = partial(on_connect, watchID = watchID)
+    client.on_message = partial(on_message, filename=filename, watchID = watchID) #Also send current filename
     # client.on_message = on_message #Also send current filename
     client.on_disconnect = on_disconnect
     client.connect("test.mosquitto.org", 1883)
@@ -131,14 +136,17 @@ def start_mqtt_collection():
     level = res["level"]
     sub_level = res["sub_level"]
     userID = res["userID"]
+    watchID = res["watchID"]
+    
     
     #Filename creation
-    session_filename = f"{level}_{sub_level}_{userID}_{int(time.time())}"
-    session['filename'] = session_filename
-    print("Started Mqtt with filename : ", session_filename)
+    filename = f"{level}_{sub_level}_{userID}_{int(time.time())}"
+    print("Started Mqtt with filename : ", filename)
+    print("Watch ID of : ", watchID)
+    
     
     #Start mqtt connection
-    start_data_collection(level, sub_level, userID, session_filename)
+    start_data_collection(level, sub_level, userID, filename, watchID)
     return "", 201
 
 # Flask route to stop MQTT data collection
