@@ -59,8 +59,6 @@ ref = db.reference('/sensors_message')  # Path to your sensor data node in the d
 #####################
 
 
-# Create an MQTT client
-# client = mqtt.Client()
 
 
 # Dictionary to hold multiple MQTT clients
@@ -111,6 +109,8 @@ def save_to_csv(data, filename, header=None):
             csv_writer.writerow(header)
 
         csv_writer.writerow([data])
+        
+    return file_path
 
     # print(f"Data saved in CSV file: {file_path}")
 
@@ -132,7 +132,7 @@ def start_data_collection(level, sub_level, userID, filename, watchID):
     #Need to also store filename, so when mqttstop is called we can then
     #Save the same file to firebase, maybe use an obj {"client": client, "filename": filename}
     
-    mqtt_clients[watchID] = client
+    mqtt_clients[watchID] = {"client": client, "filename": filename}
     print(f"Started MQTT for watch {watchID} with filename: {filename}")
     print("All current clients: ", mqtt_clients)
 
@@ -141,8 +141,21 @@ def stop_data_collection(watchID):
     print(mqtt_clients)
     if watchID in mqtt_clients:
         print(f"Stopping MQTT data collection for watchID {watchID}")
-        mqtt_clients[watchID].disconnect()
-        mqtt_clients[watchID].loop_stop()
+        mqtt_clients[watchID]["client"].disconnect()
+        mqtt_clients[watchID]["client"].loop_stop()
+        
+        #Save CSV to firebase
+        filename = mqtt_clients[watchID]["filename"]
+        filepath = save_to_csv("", filename) #Make sure correct filepath
+        
+        if(os.path.exists(filepath) == False):
+            print(f"File not found at {filepath}")
+            return
+        
+        print(filepath)
+        upload_csv_to_firebase(filepath, f"MagneticTiles/watch_data/{filename}")
+        
+        #Delete client
         del mqtt_clients[watchID]
     else:
         print(f"No MQTT client found for user {watchID}")
@@ -302,6 +315,33 @@ def calculateEuclidanPercentChange(shortestData: dict, userData:dict) -> float:
 #Constant
 SAVE_FILES_TO_LOCAL_SYSTEM = True
     
+    
+def upload_csv_to_firebase(file_path, firebase_path):
+    """
+    Uploads a CSV file to Firebase Storage.
+    
+    Args:
+        file_path (str): Path to the local CSV file.
+        firebase_path (str): Path in Firebase Storage where the file will be stored.
+    """
+    bucket = storage.bucket()
+    blob = bucket.blob(firebase_path)
+    
+    if(os.path.exists(file_path) == False):
+        print(f"File not found at {file_path}")
+        return
+    
+    with open(file_path, 'rb') as file:
+        blob.upload_from_file(file)
+        
+    if(SAVE_FILES_TO_LOCAL_SYSTEM == False):
+        #Delete CSV
+        if os.path.exists(file_path):
+            os.remove(file_path)
+        else:
+            print("The file does not exist")
+        
+        
     
 def createAndUpload(filePath: str, fileName: str, data: bytes):
     """Abstracts the way we create the data files and upload
