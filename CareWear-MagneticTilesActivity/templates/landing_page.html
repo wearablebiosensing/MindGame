@@ -34,22 +34,30 @@
 
         <!-- <div class="text_container_m5connection">Waiting for M5 to connect... </div> -->
 
-        <div class="input-container">
-          <input type="text" placeholder="Watch ID" id="watchID" />
-          <button id="watch_status_btn" style="padding: 10px;">Check Status</button>
 
-          <!-- Defualt Status -->
-          <div id="watch_status" style="color: red">Offline</div>
-          <svg id="watch_loading" class="second_spinner" viewBox="0 0 50 50">
-            <circle
-              class="path"
-              cx="25"
-              cy="25"
-              r="20"
-              fill="none"
-              stroke-width="5"
-            ></circle>
-          </svg>
+
+        <div class="input-container watch">
+          <div>
+            <input type="text" placeholder="Identifier" id="identifier" />
+            <input type="text" placeholder="Watch ID" id="watchID" />
+          </div>
+
+          <div style="display: flex; align-items: center; gap:10px;">
+            <button id="watch_status_btn" style="padding: 10px;">Check Status</button>
+            <!-- Defualt Status -->
+              <div id="watch_status" style="color: red">Offline</div>
+              <svg id="watch_loading" class="second_spinner" viewBox="0 0 50 50">
+                <circle
+                  class="path"
+                  cx="25"
+                  cy="25"
+                  r="20"
+                  fill="none"
+                  stroke-width="5"
+                ></circle>
+              </svg>
+          </div>
+
         </div>
 
         <div class="btn_container">
@@ -69,6 +77,7 @@
       //Code that allows for us to check the status of the watch
       let g_watch_status = null;
       const watchID_input = document.getElementById("watchID")
+      const userID_input = document.getElementById("identifier");
       const watch_status_btn = document.getElementById("watch_status_btn")
       const watch_status_text = document.getElementById("watch_status")
       const watch_status_loading = document.getElementById("watch_loading")
@@ -84,6 +93,9 @@
         watch_status_loading.style.display = "block";
         watch_status_text.style.display = "none"
 
+        //Initially false
+        g_watch_status = false;
+
         //Check to see the status of watch
         fetch("/check_mqtt_connection", {
           method: "POST",
@@ -96,7 +108,7 @@
         }).then((res) => {
           return res.json();
         }).then((data) => {
-          console.log("Watch Status: ", data);
+
           if(data["status"] == "online"){
             watch_status_text.innerText = "Online";
             watch_status_text.style.color = "green";
@@ -131,13 +143,18 @@
           return;
         }
 
+        if (!userID_input.value.match(/\S/)) {
+          alert("Identifier is empty");
+          return;
+        }
+
         if(!g_watch_status){
           alert("Watch status is offline");
           return;
         }
 
         localStorage.setItem("watchID", watchID_input.value);
-        localStorage.setItem("userID", "test");
+        localStorage.setItem("userID", userID_input.value);
         localStorage.setItem("currentLevel", 1);
         localStorage.setItem("currentSubLevel", 1);
 
