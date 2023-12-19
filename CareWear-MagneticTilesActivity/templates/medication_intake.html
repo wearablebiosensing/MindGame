@@ -46,16 +46,19 @@
       }
 
       .container h2 {
-        color: #333;
-        font-size: 24px;
+        color: #478f96;
+        font-size: calc(32px + 1vh);
         text-align: center;
+        padding: 20px;
         margin-bottom: 20px;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
       }
 
       .form-wrapper {
         display: flex;
         justify-content: center;
         gap: 20px;
+        padding: 20px;
       }
 
       .form-group {
@@ -68,6 +71,10 @@
       }
 
       .form-group label {
+        font-family: "Trebuchet MS", "Lucida Sans Unicode", "Lucida Grande",
+          "Lucida Sans", Arial, sans-serif;
+        font-size: 1.5em;
+        text-align: center;
       }
 
       .dropdown {
@@ -157,7 +164,9 @@
           </div>
         </div>
         <div class="form-group">
-          <label for="input-time">When did you last take it?</label>
+          <label for="input-time"
+            >When did you last take it? (Please input into box below)</label
+          >
           <!-- Change to a text input for time entry -->
           <input type="time" id="input-time" class="time-input" />
         </div>
