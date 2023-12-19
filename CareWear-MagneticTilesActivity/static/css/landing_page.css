@@ -4,13 +4,16 @@ body {
 
 .landing_container {
   max-width: 1000px;
+  padding: 20px;
   margin: 0 auto;
 }
 
 .landing_title {
-  text-align: center;
-  font-size: calc(4vh + 3vw);
   font-family: "IBM Plex Sans", sans-serif;
+  color: #478f96;
+  text-align: center;
+  font-size: calc(4vh + 4vw);
+  padding: 0 1rem;
 }
 
 .landing_hero_image_container {
@@ -22,16 +25,16 @@ body {
 
 .landing_hero_image {
   width: min(70%, 200px);
-  /* width: 700px; */
+  width: 700px;
   height: auto;
 }
 
-/* ~~~~~~~~~~~~~~~~~~~~~~ Input Styles ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 .input-container {
-  padding: 15px;
+  padding: 25px;
   display: flex;
   align-items: center;
   gap: 10px;
+  width: 100%;
 }
 
 .watch {
@@ -39,7 +42,7 @@ body {
   gap: 10px;
 }
 
-button[type="submit"],
+/* button[type="submit"],
 input[type="text"] {
   padding: 10px;
   border: 2px solid #ccc;
@@ -51,6 +54,45 @@ input[type="text"] {
 }
 input[type="text"]:focus {
   border-color: #0099ff;
+} */
+
+button[type="submit"],
+input[type="text"] {
+  padding: 1em; /* Use em for padding */
+  border: 2px solid #ccc;
+  border-radius: 5px;
+  font-size: 1em; /* Use em for font-size */
+  outline: none;
+  width: 100%; /* Full width */
+  max-width: 30em; /* Max-width in em (equivalent to 300px) */
+  transition: border-color 0.3s ease-in-out;
+  box-sizing: border-box; /* Include padding and border in the width */
+}
+
+input[type="text"]:focus,
+button[type="submit"]:focus {
+  border-color: #0099ff;
+}
+
+input[type="text"]:hover,
+button[type="submit"]:hover {
+  border-color: #0077cc; /* Slightly darker blue on hover */
+}
+
+/* Styles for active state */
+input[type="text"]:active,
+button[type="submit"]:active {
+  border-color: #0055aa; /* Even darker blue for active state */
+}
+
+/* Media query for smaller screens */
+@media (max-width: 768px) {
+  button[type="submit"],
+  input[type="text"] {
+    max-width: 100%; /* Full width on smaller screens */
+    /* padding: 0.5em; Slightly smaller padding */
+    font-size: 0.9em; /* Slightly smaller font size */
+  }
 }
 
 .gfg {
@@ -58,7 +100,6 @@ input[type="text"]:focus {
   position: relative;
 }
 
-/*This CSS code is defining the styles for a container that holds text*/
 .text-container {
   font-family: "IBM Plex Sans", sans-serif;
   position: absolute;
@@ -68,7 +109,7 @@ input[type="text"]:focus {
   left: 18rem;
   top: -3rem;
   margin-left: 15%;
-  /* background-color: rgb(41, 41, 41, 0.8); */
+  background-color: rgb(41, 41, 41, 0.8);
   padding: 0 1rem;
 }
 
@@ -78,33 +119,12 @@ input[type="text"]:focus {
   text-align: center;
   font-size: calc(4vh + 3vw);
 
-  /* background-color: rgb(41, 41, 41, 0.8); */
+  background-color: rgb(41, 41, 41, 0.8);
   padding: 0 1rem;
 }
 
-.start-button {
-  position: absolute;
-  background-color: #478f96; /* Green */
-  border-radius: 10px;
-  border: none;
-  color: white;
-  padding: 15px 32px;
-  width: 150px;
-  left: 18rem;
-  top: 38rem;
-  margin-left: 24%;
-
-  text-align: center;
-  text-decoration: none;
-  display: inline-block;
-  font-size: 25px;
-  cursor: pointer;
-  font-weight: bold;
-  font-family: "IBM Plex Sans", sans-serif;
-}
-
-.start_button {
-  background-color: #478f96; /* Green */
+/* .start_button {
+  background-color: #478f96;
   border-radius: 10px;
   border: none;
   color: white;
@@ -118,6 +138,33 @@ input[type="text"]:focus {
   cursor: pointer;
   font-weight: bold;
   font-family: "IBM Plex Sans", sans-serif;
+} */
+.start_button {
+  background-color: #478f96;
+  border-radius: 10px;
+  border: none;
+  color: white;
+  padding: 0.8em 4em; /* using em units */
+  max-width: 100%; /* allows button to be responsive */
+
+  width: auto; /* adjusts width based on content and padding */
+
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 1.5em; /* responsive font size */
+  cursor: pointer;
+  font-weight: bold;
+  font-family: "IBM Plex Sans", sans-serif;
+  box-sizing: border-box; /* includes padding and border in width calculation */
+}
+
+/* Media query for smaller screens */
+@media (max-width: 900px) {
+  .start_button {
+    font-size: 1.25em; /* smaller font size on small screens */
+    padding: 1em 1.8em; /* smaller padding */
+  }
 }
 
 .btn_container {
@@ -135,4 +182,32 @@ input[type="text"]:focus {
   flex-direction: column;
   justify-content: center;
   align-items: center;
+}
+/* Basic Resets */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+#watch_status_btn {
+  padding: 10px 15px;
+  background-color: #478f96;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+#watch_status {
+  font-family: serif;
+  font-weight: bold;
+  font-size: 1rem;
+  color: red; /* Default color */
+  margin-left: 10px;
+}
+
+button:hover {
+  background-color: #356f78;
 }

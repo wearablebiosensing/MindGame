@@ -25,8 +25,8 @@
   <body>
 
 
-      <div class="center">
-        <div class="text_container">Mind Game</div>
+      <div class="center landing_container">
+        <div class="landing_title">Mind Game</div>
         <img 
         style="width:min(100%, 650px); height: auto ; ",
         src="{{ url_for('static', filename='images/landing_page_logo.png') }}"
@@ -37,13 +37,13 @@
 
 
         <div class="input-container watch">
-          <div>
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 5px; width: 100%;">
             <input type="text" placeholder="Identifier" id="identifier" />
             <input type="text" placeholder="Watch ID" id="watchID" />
           </div>
 
           <div style="display: flex; align-items: center; gap:10px;">
-            <button id="watch_status_btn" style="padding: 10px;">Check Status</button>
+            <button id="watch_status_btn" style="padding: 10px;">Check Watch Status</button>
             <!-- Defualt Status -->
               <div id="watch_status" style="color: red">Offline</div>
               <svg id="watch_loading" class="second_spinner" viewBox="0 0 50 50">
