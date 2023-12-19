@@ -15,8 +15,8 @@ const ctx = canvas.getContext("2d");
  */
 const container = document.getElementById("container");
 
-canvas.width = container.clientWidth + 300;
-canvas.height = container.clientHeight + 300;
+canvas.width = container.clientWidth + 450;
+canvas.height = container.clientHeight + 450;
 
 // window.addEventListener("resize", resizeCanvas);
 
