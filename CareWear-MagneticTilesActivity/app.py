@@ -279,11 +279,36 @@ def nogo():
 
 @app.route('/intake', methods=['GET','POST'])
 def intake():
-
-    
   return render_template("medication_intake.html")
 
 
+
+@app.route('/intake_data', methods=['GET','POST'])
+def intake_data():
+    #Get data from request
+    res = request.get_json()
+    userID = res["userID"]
+    data = res["data"]
+    
+    print(data)
+    
+    # Correct directory name
+    directory = "intake/"
+    os.makedirs(directory, exist_ok=True)
+
+
+    # Correct file path
+    filename = f"intake_{userID}"
+    file_path = f"{directory}{filename}.csv"
+
+
+    with open(file_path, "w", newline='') as csv_file:
+        csv_writer = csv.writer(csv_file)
+        csv_writer.writerow(["userID","medication", "time"])
+        csv_writer.writerow([userID, data["medication"], data["time"]])
+
+    return "", 201
+  
 
 
 # Helper Functions 

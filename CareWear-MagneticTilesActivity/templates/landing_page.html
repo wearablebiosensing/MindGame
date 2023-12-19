@@ -74,9 +74,11 @@
 
 
     </div>
+    <script src="{{ url_for('static', filename='js/helper_functions.js') }}"></script>
+    
 
     <script>
-      //Code that allows for us to check the status of the watch
+      
       let g_watch_status = null;
       const watchID_input = document.getElementById("watchID")
       const userID_input = document.getElementById("identifier");
@@ -84,6 +86,17 @@
       const watch_status_text = document.getElementById("watch_status")
       const watch_status_loading = document.getElementById("watch_loading")
 
+      //Auto fills if already present
+      function prefillInputsWithLocalStorage(){
+        const userID =  getLocalStorageOrNull("userID");
+        const watchID =  getLocalStorageOrNull("watchID");
+        userID_input.value = userID;
+        watchID_input.value = watchID;
+      }
+      prefillInputsWithLocalStorage()
+      
+
+      //Code that allows for us to check the status of the watch
       watch_status_btn.addEventListener("click", () => {
         //No watch id provided
         if (!watchID_input.value.match(/\S/)) {

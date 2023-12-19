@@ -117,7 +117,7 @@
       }
       .time-input {
         padding: 20px;
-        width: calc(100% - 22px); /* Adjusted for padding and border */
+        width: calc(100%); /* Adjusted for padding and border */
         border: 1px solid #ccc;
       }
 
@@ -163,9 +163,14 @@
         </div>
       </div>
       <div style="display: flex; justify-content: center">
-        <button type="submit" id="submit" class="start_button">Submit</button>
+        <button type="submit" id="submit" class="start_button">
+          Start Game
+        </button>
       </div>
     </div>
+
+    <script src="{{ url_for('static', filename='js/helper_functions.js') }}"></script>
+
     <script>
       document.addEventListener("DOMContentLoaded", function () {
         const medicationOptions = [
@@ -255,13 +260,36 @@
           selectedMedication === "Other" ? otherMedication : selectedMedication;
         const data = { medication: medicationName, time: intakeTime };
 
-        fetch("YOUR_ENDPOINT_URL", {
+        const submit_btn = document.getElementById("submit");
+        submit_btn.disabled = true;
+        submit_btn.innerHTML = `
+        <svg id="loading" class="second_spinner" viewBox="0 0 50 50">
+          <circle
+            class="path"
+            cx="25"
+            cy="25"
+            r="20"
+            fill="none"
+            stroke-width="5"
+          ></circle>
+        </svg>
+        `;
+        const loading_spinner = document.getElementById("loading");
+        loading_spinner.getElementsByTagName("circle")[0].style.stroke =
+          "white";
+        loading_spinner.style.display = "block";
+
+        fetch("/intake_data", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data),
+          body: JSON.stringify({
+            data: data,
+            userID: getLocalStorageOrNull("userID"),
+          }),
         })
-          .then((response) => response.json())
-          .then((data) => console.log("Success:", data))
+          .then((data) => {
+            window.location.href = "/";
+          })
           .catch((error) => console.error("Error:", error));
       }
     </script>
