@@ -277,6 +277,12 @@ def tutorial():
 def nogo():
   return render_template("nogo.html")
 
+@app.route('/intake', methods=['GET','POST'])
+def intake():
+
+    
+  return render_template("medication_intake.html")
+
 
 
 
