@@ -65,8 +65,6 @@
           <a href="{{ url_for('tutorial') }}"><button class="start_button" >Tutorial</button></a>
           <a href="{{ url_for('nogo') }}"><button class="start_button" >Go/NoGo</button></a>
           <a href="{{ url_for('intake') }}"><button class="start_button" >In-Take</button></a>
-
-          
         </div>
 
       </div>
@@ -79,7 +77,7 @@
 
     <script>
       
-      let g_watch_status = null;
+      let g_watch_status = false;
       const watchID_input = document.getElementById("watchID")
       const userID_input = document.getElementById("identifier");
       const watch_status_btn = document.getElementById("watch_status_btn")

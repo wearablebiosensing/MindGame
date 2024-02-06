@@ -542,6 +542,13 @@ def processMouseMovementData():
     time_to_complete = res["time_to_complete"]
     user_euclid_distances = res["user_euclid_movement_distances"]
     shortest_euclid_distances = res["shortest_euclid_distances"]
+    window_width = res["window_width"]
+    window_height = res["window_height"]
+    
+    logger.info(f"Shortest Euclid: {shortest_euclid_distances}\n")
+    logger.info(f"User Euclid: {user_euclid_distances}\n")
+    
+    
     
 
 
@@ -571,7 +578,7 @@ def processMouseMovementData():
     SCREEN_HEIGHT_INDEX = 7
     info_file_string = f"""
         Screen Size: 
-        {data[0][SCREEN_WIDTH_INDEX]}x{data[0][SCREEN_HEIGHT_INDEX]}
+        {str(window_width)}x{str(window_height)}
 
         Level: 
         {str(level)}, {str(sub_level)}
@@ -624,10 +631,12 @@ def processMouseMovementData():
     #              MOUSE FILE
     #======================================
     mouse_data_path = "mouse_data"
+    os.makedirs(f"{mouse_data_path}/", exist_ok=True)
+    
     mouse_data_file_name = f"Mouse_{level}-{sub_level}_{userID}.csv"
     
     # Create the header row
-    header_row = ['x', 'y', 'timestamp', 'shape', 'x(px/s^2)', 'y(px/s^2)', 'screenWidth', 'screenHeight']
+    header_row = ['x', 'y', 'timestamp', 'shape', 'x(px/s^2)', 'y(px/s^2)']
     csv_data = [header_row] + data
 
     # Convert the accumulated data to a CSV string
