@@ -52,7 +52,7 @@ function mouse_down(event) {
 }
 
 function mouse_move(event) {
-  if (current_shape_index === null) return;
+  // if (current_shape_index === null) return;
 
   let clientX = 0;
   let clientY = 0;
@@ -93,19 +93,22 @@ function mouse_move(event) {
   // Check if enough time has passed since the last collection
   if (currentTime - lastCollectionTime >= throttlingInterval) {
     if (mouse_motion_array) {
+      // console.log("Push mouse data: ", Math.round(x), Math.round(y));
       mouse_motion_array.push([
         Math.round(x),
         Math.round(y),
         getTimestamp(),
-        shapes[current_shape_index].type,
+        current_shape_index ? shapes[current_shape_index].type : "null",
         Math.round(accelerationX_in_px_per_s_squared),
         Math.round(accelerationY_in_px_per_s_squared),
-        window.screen.width, // Add screen width to the data
-        window.screen.height,
       ]);
+      console.log("Mouse: ", mouse_motion_array);
       lastCollectionTime = currentTime;
     }
   }
+
+  // Ensures that we have to be dragging a shape to do logic below
+  if (current_shape_index === null) return;
 
   let closestDistanceToShape = null;
 

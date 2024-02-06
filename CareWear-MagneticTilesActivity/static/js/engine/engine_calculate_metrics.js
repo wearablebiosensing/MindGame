@@ -53,6 +53,7 @@ function calculateUserEuclidDistances() {
   let prevY = null;
 
   for (const row of mouse_motion_array) {
+    if (row[3] == "null") continue;
     if (row[0] === "END_OF_STROKE") {
       const shape = currentStrokeData[0][2];
 
@@ -222,6 +223,8 @@ function postMouseMotionData() {
       level: current_level,
       sub_level: current_sub_level,
       userID: getLocalStorageOrNull("userID"),
+      window_width: window.screen.width, // Add screen width to the data
+      window_height: window.screen.height,
     }),
   })
     .then((res) => {

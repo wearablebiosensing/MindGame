@@ -15,29 +15,11 @@ const ctx = canvas.getContext("2d");
  */
 const container = document.getElementById("container");
 
-canvas.width = container.clientWidth + 450;
-canvas.height = container.clientHeight + 450;
+// canvas.width = container.clientWidth + 450;
+// canvas.height = container.clientHeight + 450;
 
-// window.addEventListener("resize", resizeCanvas);
-
-// function resizeShapes() {
-//   const scaleX = canvas.width / originalCanvasWidth;
-//   const scaleY = canvas.height / originalCanvasHeight;
-
-//   shapes.forEach((shape) => {
-//     if (shape instanceof Square) {
-//       shape.resize(scaleX, scaleY);
-//     }
-//   });
-// }
-
-// function resizeCanvas() {
-
-//   canvas.width = window.innerWidth;
-//   canvas.height = window.innerHeight;
-//   resizeShapes(); // Function to resize shapes
-//   drawShapes();
-// }
+canvas.width = window.innerWidth + 420;
+canvas.height = window.innerHeight + 420;
 
 //Used for creating the levels of the game realtive to the center
 let LEVEL_X = canvas.width / 2;
