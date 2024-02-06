@@ -25,9 +25,21 @@ from functools import partial  # Import functools.partial
 import threading
 csv_lock = threading.Lock()
 
+import logging
+
+#Logging setup
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+
+# Create a handler that logs to console (stdout)
+handler = logging.StreamHandler()
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+handler.setFormatter(formatter)
+logger.addHandler(handler)
+
+
 #Flask Config
 app = Flask(__name__)
-# socketio = SocketIO(app)
 app.secret_key = "super secret key"
 
 
@@ -64,24 +76,43 @@ ref = db.reference('/sensors_message')  # Path to your sensor data node in the d
 # Dictionary to hold multiple MQTT clients
 mqtt_clients = {}
 
+
+
 # Callback for when the client receives a CONNACK response from the server
 def on_connect(client, userdata, flags, rc, watchID):
     if rc == 0:
         topic = f"AndroidWatch/acceleration/{watchID}"
+        topic2 = f"AndroidWatch/gyro/{watchID}"
+        topic3 = f"AndroidWatch/hr/{watchID}"
+        
+        
         print("Connected to MQTT broker on ", topic)
+        print("Connected to MQTT broker on ", topic2)
+        print("Connected to MQTT broker on ", topic3)
+        
+        
         client.subscribe(topic)
+        client.subscribe(topic2)
+        client.subscribe(topic3)
+        
+        
     else:
         print(f"Failed to connect, return code: {rc}")
-
-# Callback for when a PUBLISH message is received from the server
+        
 def on_message(client, userdata, message, filename, watchID):
     try:
-        # print(f"Message received on topic {message.topic}")
-        if message.topic == f"AndroidWatch/acceleration/{watchID}":
-            acc_data_msg = message.payload.decode()
-            save_to_csv(acc_data_msg, filename)
+        topic_base = message.topic.split('/')[1]  # Extracts 'acceleration' or 'gyro' from the topic
+        directory = f"watch_data/{topic_base}_data/"  # Creates directory path based on topic
+        full_filename = f"{filename}_{topic_base}"  # Appends topic to the filename
+        
+        print("OnMessage: ", topic_base)
+
+        data = message.payload.decode()
+        save_to_csv(data, directory, full_filename)
     except Exception as e:
         print(f"Error processing mqtt message: {e}")
+
+
 
 
 # Callback for when the client disconnects from the server
@@ -90,9 +121,9 @@ def on_disconnect(client, userdata, rc):
         print(f"Unexpected disconnection, return code: {rc}")
 
 # Function to save data to CSV
-def save_to_csv(data, filename, header=None):
+def save_to_csv(data, dir, filename, header=None):
     # Correct directory name
-    directory = "watch_data/"
+    directory = dir
     os.makedirs(directory, exist_ok=True)
 
     # Correct file path
@@ -146,14 +177,14 @@ def stop_data_collection(watchID):
         
         #Save CSV to firebase
         filename = mqtt_clients[watchID]["filename"]
-        filepath = save_to_csv("", filename) #Make sure correct filepath
+        # filepath = save_to_csv("", filename) #Make sure correct filepath
         
-        if(os.path.exists(filepath) == False):
-            print(f"File not found at {filepath}")
-            return
+        # if(os.path.exists(filepath) == False):
+        #     print(f"File not found at {filepath}")
+        #     return
         
-        print(filepath)
-        upload_csv_to_firebase(filepath, f"MagneticTiles/watch_data/{filename}")
+        # print(filepath)
+        # upload_csv_to_firebase(filepath, f"MagneticTiles/watch_data/{filename}")
         
         #Delete client
         del mqtt_clients[watchID]
@@ -185,6 +216,9 @@ def start_mqtt_collection():
 # Flask route to stop MQTT data collection
 @app.route("/stop_mqtt", methods=['GET', 'POST'])
 def stop_mqtt_collection():
+    """API endpoint to let the frontent disconnect the connection to the
+    mqtt client that is reciving data from the watch
+    """
     
     #Get data from request
     res = request.get_json()
@@ -197,6 +231,13 @@ def stop_mqtt_collection():
 
 @app.route("/check_mqtt_connection", methods=['GET', 'POST'])
 def check_mqtt_connection():
+    """API endpoint to let the frontend know if a specific watchID is connected and 
+    sending data to one of our mqtt topics
+
+    Returns:
+        dict: online or offline
+    """
+    
     #Get data from request
     res = request.get_json()
     watchID = res["watchID"]
@@ -210,41 +251,39 @@ def check_mqtt_connection():
     
 
 
-def check_topic_activity(watchID, timeout=5):
+def check_topic_activity(watch_id, timeout=5):
     """
     Check if a specific topic is receiving data.
 
     Args:
-    watchID (str): The ID of the watch.
-    timeout (int): Time in seconds to wait for a message.
+    watch_id (str): The ID of the watch.
+    timeout (int): Time in seconds to wait for a message (Default 5s)
 
     Returns:
     bool: True if the topic is active, False otherwise.
     """
-    temp_client = mqtt.Client()
+    client = mqtt.Client()
+    message_received = False
 
-    # Define a flag to indicate if a message is received
-    message_received = [False]
+    def on_message(client, userdata, message):
+        nonlocal message_received
+        logging.info(f"Message received on topic {message.topic}")
+        message_received = True
+        client.disconnect()  # Ensure disconnection after receiving a message
 
-    # Define the callback for when a message is received
-    def temp_on_message(client, userdata, message):
-        print(f"Temp message received on topic {message.topic}")
-        message_received[0] = True
-        temp_client.disconnect()  # Disconnect after receiving a message
+    client.on_message = on_message
+    client.connect("test.mosquitto.org", 1883, 60)
+    client.subscribe(f"AndroidWatch/gyro/{watch_id}") # Any topic that we send data on
 
-    # Set up the temporary client
-    temp_client.on_message = temp_on_message
-    temp_client.connect("test.mosquitto.org", 1883)
-    temp_client.subscribe(f"AndroidWatch/acceleration/{watchID}")
-    temp_client.loop_start()
-
-    # Wait for a message or until the timeout
+    client.loop_start()
     start_time = time.time()
-    while not message_received[0] and time.time() - start_time < timeout:
-        time.sleep(0.1)
+    while not message_received and time.time() - start_time < timeout:
+        time.sleep(0.1)  # Short sleep to yield control and wait efficiently
 
-    temp_client.loop_stop()
-    return message_received[0]
+    client.loop_stop()
+    client.disconnect()  # Ensure disconnection even if no message is received
+
+    return message_received
 
 
 
@@ -283,32 +322,45 @@ def intake():
 
 
 
-@app.route('/intake_data', methods=['GET','POST'])
+@app.route('/intake_data', methods=['GET', 'POST'])
 def intake_data():
-    #Get data from request
-    res = request.get_json()
-    userID = res["userID"]
-    data = res["data"]
-    
-    print(data)
-    
-    # Correct directory name
-    directory = "intake/"
-    os.makedirs(directory, exist_ok=True)
+    """
+    Endpoint to intake medication data for a user.
+    Extracts JSON data from the request, creates a directory if it doesn't exist, 
+    and writes the data into a CSV file named after the user ID.
 
+    Returns:
+        dict-> Status:Message
+    """
+    try:
+        # Attempt to get JSON data from the request
+        request_data = request.get_json()
+        user_id = request_data["userID"]
+        data = request_data["data"]
+        
+        # Define the directory and ensure its existence
+        directory = "intake/"
+        os.makedirs(directory, exist_ok=True)
 
-    # Correct file path
-    filename = f"intake_{userID}"
-    file_path = f"{directory}{filename}.csv"
+        # Construct the file path
+        file_path = os.path.join(directory, f"intake_{user_id}.csv")
 
-
-    with open(file_path, "w", newline='') as csv_file:
-        csv_writer = csv.writer(csv_file)
-        csv_writer.writerow(["userID","medication", "time"])
-        csv_writer.writerow([userID, data["medication"], data["time"]])
-
-    return "", 201
-  
+        # Write data to CSV
+        with open(file_path, "w", newline='') as csv_file:
+            csv_writer = csv.writer(csv_file)
+            csv_writer.writerow(["userID", "medication", "time"])
+            csv_writer.writerow([user_id, data["medication"], data["time"]])
+            
+        # Optionally, return a success message or JSON data
+        return jsonify({"message": "Data intake successful"}), 201
+    except KeyError as e:
+        # Log missing key errors and return an error response
+        logging.error(f"Missing key in the request data: {e}")
+        return jsonify({"error": "Bad request, missing key in the JSON data"}), 400
+    except Exception as e:
+        # Log unexpected errors and return a generic error response
+        logging.error(f"An error occurred: {e}")
+        return jsonify({"error": "Internal server error"}), 500
 
 
 # Helper Functions 
@@ -413,7 +465,6 @@ def createAndUpload(filePath: str, fileName: str, data: bytes):
 
 
 # Specify the expected time to complete Level
-
 EXPECTED_TTC = {
     #-- Level --
     1:{
@@ -491,8 +542,6 @@ def processMouseMovementData():
     time_to_complete = res["time_to_complete"]
     user_euclid_distances = res["user_euclid_movement_distances"]
     shortest_euclid_distances = res["shortest_euclid_distances"]
-    
-    # print("WHY", calculateEuclidanPercentChange(shortest_euclid_distances, user_euclid_distances))
     
 
 
@@ -588,12 +637,7 @@ def processMouseMovementData():
     #Upload Mouse Data
     createAndUpload(mouse_data_path, mouse_data_file_name, csv_data)
     
-    
-    # Create a named temporary file in memory
-    # with tempfile.NamedTemporaryFile(prefix=temp_file_prefix, mode="w+b", delete=False, suffix=".csv", dir=TEMP_FILE_DIRECTORY) as temp_file:
-    
-
-        
+      
         
     response = {'message': 'Data received and processed successfully'}
     return jsonify(response)
