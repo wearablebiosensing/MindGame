@@ -81,9 +81,13 @@ mqtt_clients = {}
 # Callback for when the client receives a CONNACK response from the server
 def on_connect(client, userdata, flags, rc, watchID):
     if rc == 0:
-        topic = f"AndroidWatch/acceleration/{watchID}"
-        topic2 = f"AndroidWatch/gyro/{watchID}"
-        topic3 = f"AndroidWatch/hr/{watchID}"
+        topic = f"{watchID}/accelerometer"
+        topic2 = f"{watchID}/gyroscope"
+        topic3 = f"{watchID}/heartrate"
+        
+        # android_sensor_heart_rate
+        # android_sensor_orientation
+        # android_sensor_gyroscope
         
         
         print("Connected to MQTT broker on ", topic)
@@ -156,7 +160,7 @@ def start_data_collection(level, sub_level, userID, filename, watchID):
     client.on_disconnect = on_disconnect
 
     # Connect the client
-    client.connect("test.mosquitto.org", 1883)
+    client.connect("broker.hivemq.com", 1883)
     client.loop_start()
 
     # Store the client in the dictionary
@@ -205,8 +209,7 @@ def start_mqtt_collection():
     
     #Filename creation
     filename = f"{level}_{sub_level}_{userID}_{int(time.time())}"
-    print("Started Mqtt with filename : ", filename)
-    print("Watch ID of : ", watchID)
+    logger.info(f"Starting MQTT data collection for WatchID of {watchID} for user {userID} for {level}-{sub_level}")
     
     
     #Start mqtt connection
@@ -223,7 +226,8 @@ def stop_mqtt_collection():
     #Get data from request
     res = request.get_json()
     watchID = res["watchID"]
-
+    
+    logger.info(f"Stopping MQTT data collection for WatchID of {watchID}")
     stop_data_collection(watchID)
     return "", 201
 
@@ -241,8 +245,10 @@ def check_mqtt_connection():
     #Get data from request
     res = request.get_json()
     watchID = res["watchID"]
+    logger.info(f"Checking MQTT watch connection for WatchID of {watchID}")
     
-    if check_topic_activity(watchID):
+    
+    if check_watch_activity(watchID):
         response = {'status': "online"}
         return jsonify(response)
     else:
@@ -251,7 +257,7 @@ def check_mqtt_connection():
     
 
 
-def check_topic_activity(watch_id, timeout=5):
+def check_watch_activity(watch_id, timeout=5):
     """
     Check if a specific topic is receiving data.
 
@@ -272,8 +278,8 @@ def check_topic_activity(watch_id, timeout=5):
         client.disconnect()  # Ensure disconnection after receiving a message
 
     client.on_message = on_message
-    client.connect("test.mosquitto.org", 1883, 60)
-    client.subscribe(f"AndroidWatch/gyro/{watch_id}") # Any topic that we send data on
+    client.connect("broker.hivemq.com", 1883, 60)
+    client.subscribe(f"{watch_id}/gyroscope") # Any topic that we send data on
 
     client.loop_start()
     start_time = time.time()
@@ -298,10 +304,15 @@ def check_topic_activity(watch_id, timeout=5):
 def home():
   return render_template("landing_page.html")
 
+@app.route('/mindgame_precheck', methods=['GET','POST'])
+def mindgame_precheck():
+  return render_template("mindgame_precheck.html")
+
 
 @app.route('/tiles_game', methods=['GET','POST'])
 def tiles_game():
   return render_template("tiles.html")
+
 
 @app.route('/updated_scoring', methods=['GET','POST'])
 def updated_scoring():
@@ -314,11 +325,23 @@ def tutorial():
 
 @app.route('/nogo', methods=['GET','POST'])
 def nogo():
+    
   return render_template("nogo.html")
 
 @app.route('/intake', methods=['GET','POST'])
-def intake():
+def intake(type: str):
   return render_template("medication_intake.html")
+
+@app.route('/start_application/<string:type>', methods=['GET','POST'])
+def start_application(type: str):
+    
+    #Just as a sanity check, make sure watch is sending mqtt data
+    # watchID = request.args.get('watchID', "")
+    # if check_watch_activity(watchID, 2) == False:
+    #     return render_template("landing_page.html")
+        
+    return render_template("medication_intake.html", type = type)
+
 
 
 
@@ -351,21 +374,25 @@ def intake_data():
             csv_writer.writerow(["userID", "medication", "time"])
             csv_writer.writerow([user_id, data["medication"], data["time"]])
             
+        logger.info(f"Sucesfully saved Medication Intake data for user {user_id}");
+            
         # Optionally, return a success message or JSON data
         return jsonify({"message": "Data intake successful"}), 201
     except KeyError as e:
         # Log missing key errors and return an error response
-        logging.error(f"Missing key in the request data: {e}")
+        logger.error(f"Missing key in the request data: {e}")
         return jsonify({"error": "Bad request, missing key in the JSON data"}), 400
     except Exception as e:
         # Log unexpected errors and return a generic error response
-        logging.error(f"An error occurred: {e}")
+        logger.error(f"An error occurred: {e}")
         return jsonify({"error": "Internal server error"}), 500
 
 
 # Helper Functions 
 def calculateEuclidanPercentChange(shortestData: dict, userData:dict) -> float:
     """
+        Calculates the average percent change between the shortest path the shapes could take
+        compared the the users path
     Args:
         shortestData (dict): Key is the shape, value is the euclidan distance
         userData (dict): Key is the shape, value is the euclidan distance
@@ -385,7 +412,7 @@ def calculateEuclidanPercentChange(shortestData: dict, userData:dict) -> float:
         # percent_change = (abs(shortestDistance - userDistance) / ((shortestDistance)) * 100
         
         percent_change_acc += percent_change
-        total_shapes += 1 #Used in average
+        total_shapes += 1
         # print(f"Percent Change for {key} = {percent_change}")
         
     averaged_percent_change = percent_change_acc / total_shapes
@@ -397,6 +424,8 @@ def calculateEuclidanPercentChange(shortestData: dict, userData:dict) -> float:
 
 #Constant
 SAVE_FILES_TO_LOCAL_SYSTEM = True
+SAVE_FILES_TO_CLOUD = False
+
     
     
 def upload_csv_to_firebase(file_path, firebase_path):
@@ -411,7 +440,7 @@ def upload_csv_to_firebase(file_path, firebase_path):
     blob = bucket.blob(firebase_path)
     
     if(os.path.exists(file_path) == False):
-        print(f"File not found at {file_path}")
+        logger.error(f"The file {file_path} does not exist")
         return
     
     with open(file_path, 'rb') as file:
@@ -422,7 +451,7 @@ def upload_csv_to_firebase(file_path, firebase_path):
         if os.path.exists(file_path):
             os.remove(file_path)
         else:
-            print("The file does not exist")
+            logger.error(f"The file {file_path} does not exist when trying to remove")
         
         
     
@@ -441,10 +470,11 @@ def createAndUpload(filePath: str, fileName: str, data: bytes):
                 
                 file.write(data)
                 
-                file.seek(0)  # Rewind the file pointer to the beginning
-                bucket = storage.bucket()
-                blob = bucket.blob(f"MagneticTiles/{filePath}/{fileName}") 
-                blob.upload_from_file(file_obj=file, rewind=True)
+                if(SAVE_FILES_TO_CLOUD):
+                    file.seek(0)  # Rewind the file pointer to the beginning
+                    bucket = storage.bucket()
+                    blob = bucket.blob(f"MagneticTiles/{filePath}/{fileName}") 
+                    blob.upload_from_file(file_obj=file, rewind=True)
         else:
             
             with tempfile.NamedTemporaryFile(delete=False) as file:
@@ -457,7 +487,7 @@ def createAndUpload(filePath: str, fileName: str, data: bytes):
         
             
     except Exception as e:
-        print(f"An error occurred (createAndUpload):({fileName}) -> {str(e)}")
+        logger.error(f"An error occurred (createAndUpload):({fileName}) -> {str(e)}")
 
 
 
@@ -545,6 +575,7 @@ def processMouseMovementData():
     window_width = res["window_width"]
     window_height = res["window_height"]
     
+    logger.info(f"Processing Mouse data for user {userID} on level {level}-{sub_level}")
     logger.info(f"Shortest Euclid: {shortest_euclid_distances}\n")
     logger.info(f"User Euclid: {user_euclid_distances}\n")
     
@@ -557,8 +588,8 @@ def processMouseMovementData():
     session["TimeToCompleteLevel"] = time_to_complete
     session["ExpectedTimeToCompleteLevel"] = EXPECTED_TTC[level][sub_level]
     
-    print("HOPE", session.get("AverageEuclidanPercentChange"))
-    print("HOPE", session.get("TimeToCompleteLevel"))
+    # print("HOPE", session.get("AverageEuclidanPercentChange"))
+    # print("HOPE", session.get("TimeToCompleteLevel"))
     
     
 
@@ -574,8 +605,8 @@ def processMouseMovementData():
     
 
     # Define the string with indentation
-    SCREEN_WIDTH_INDEX = 6
-    SCREEN_HEIGHT_INDEX = 7
+    # SCREEN_WIDTH_INDEX = 6
+    # SCREEN_HEIGHT_INDEX = 7
     info_file_string = f"""
         Screen Size: 
         {str(window_width)}x{str(window_height)}
@@ -654,43 +685,53 @@ def processMouseMovementData():
 
 @app.route('/process-nogo-data', methods=['POST'])
 def processnogo():
+    """
+    Endpoint to process and save data from the No-Go game.
     
-    #Retrive Data from Post request
-    res = request.get_json()
-    data = res["data"]
-    userID = res["userID"] #Used to differentiate csv files from differet subjects
-    
-    print(data)
-    
-    # Create a StringIO object to write the CSV data into a string
-    output = io.StringIO()
+    This endpoint expects a JSON payload with 'data' containing a list of dictionaries 
+    with No-Go game results, and 'userID' indicating the unique identifier for the user.
 
-    # Create a CSV writer
-    writer = csv.DictWriter(output, fieldnames=data[0].keys())
+    The data is saved in a CSV file within a 'nogo' directory, named using the user's ID.
 
-    # Write header and rows
-    writer.writeheader()
-    for row in data:
-        writer.writerow(row)
+    Returns:
+        JSON response with a message indicating the success or failure of the operation.
+    """
+    try:
+        # Retrieve Data from the Post request
+        res = request.get_json()
+        data = res.get("data")
+        userID = res.get("userID")
+        
+        if not data or not userID:
+            logger.error("Missing 'data' or 'userID' in the request payload")
+            return jsonify({"error": "Missing 'data' or 'userID' in the request payload"}), 400
 
-    # Get the CSV string from the StringIO object
-    csv_string = output.getvalue()
+        # Initialize CSV output
+        output = io.StringIO()
+        writer = csv.DictWriter(output, fieldnames=data[0].keys())
 
-    
-    #======================================    
-    #              NOGO FILES
-    #======================================
-    os.makedirs("nogo/", exist_ok=True)
-    nogo_path = "nogo"
-    nogo_file_name = f"nogo_{userID}.csv"
-    
+        # Write the data to the CSV string
+        writer.writeheader()
+        for row in data:
+            writer.writerow(row)
+        csv_string = output.getvalue()
 
-    #Shortest Distances JSON
-    nogo_data = csv_string.encode("utf-8")
-    createAndUpload(nogo_path, nogo_file_name, nogo_data)
-    
-    response = {'message': 'Data received and processed successfully'}
-    return jsonify(response)
+        # Define the file path and ensure the directory exists
+        nogo_path = "nogo/"
+        os.makedirs(nogo_path, exist_ok=True)
+        nogo_file_name = f"nogo_{userID}.csv"
+
+        # Encode the CSV string to bytes and upload
+        nogo_data = csv_string.encode("utf-8")
+        createAndUpload(nogo_path, nogo_file_name, nogo_data)
+        
+        logger.info(f"Successfully processed and saved No-Go data for userID {userID}")
+        return jsonify({"message": "Data received and processed successfully"}), 201
+
+    except Exception as e:
+        logger.error(f"An error occurred while processing No-Go data: {e}")
+        return jsonify({"error": "Internal server error"}), 500
+
     
     
 

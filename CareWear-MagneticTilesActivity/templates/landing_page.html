@@ -28,7 +28,7 @@
       <div class="center landing_container">
         <div class="landing_title">Mind Game</div>
         <img 
-        style="width:min(100%, 650px); height: auto ; ",
+        style="width:min(100%, 500px); height: auto ; ",
         src="{{ url_for('static', filename='images/landing_page_logo.png') }}"
         alt="Group">
 
@@ -39,12 +39,12 @@
         <div class="input-container watch">
           <div style="display: flex; flex-direction: column; align-items: center; gap: 5px; width: 100%;">
             <input type="text" placeholder="Identifier" id="identifier" />
-            <input type="text" placeholder="Watch ID" id="watchID" />
+            <!-- <input type="text" placeholder="Watch ID" id="watchID" /> -->
           </div>
 
-          <div style="display: flex; align-items: center; gap:10px;">
+          <!-- <div style="display: flex; align-items: center; gap:10px;">
             <button id="watch_status_btn" style="padding: 10px;">Check Watch Status</button>
-            <!-- Defualt Status -->
+
               <div id="watch_status" style="color: red">Offline</div>
               <svg id="watch_loading" class="second_spinner" viewBox="0 0 50 50">
                 <circle
@@ -56,15 +56,20 @@
                   stroke-width="5"
                 ></circle>
               </svg>
-          </div>
+          </div> -->
 
         </div>
 
         <div class="btn_container">
-          <button id="submitBtn"  class="start_button" required> Start </button>
-          <a href="{{ url_for('tutorial') }}"><button class="start_button" >Tutorial</button></a>
+
+
+          <button id="in_lab_btn" class="start_button" >In Lab</button>
+          <button id="at_home_btn" class="start_button" >At Home</button>
+
+          <!-- <button id="submitBtn"  class="start_button" required> Start </button> -->
+          <!-- <a href="{{ url_for('tutorial') }}"><button class="start_button" >Tutorial</button></a>
           <a href="{{ url_for('nogo') }}"><button class="start_button" >Go/NoGo</button></a>
-          <a href="{{ url_for('intake') }}"><button class="start_button" >In-Take</button></a>
+          <a href="{{ url_for('intake') }}"><button class="start_button" >In-Take</button></a> -->
         </div>
 
       </div>
@@ -72,85 +77,24 @@
 
 
     </div>
-    <script src="{{ url_for('static', filename='js/helper_functions.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/home.js') }}"></script>
     
 
     <script>
       
-      let g_watch_status = false;
-      const watchID_input = document.getElementById("watchID")
-      const userID_input = document.getElementById("identifier");
-      const watch_status_btn = document.getElementById("watch_status_btn")
-      const watch_status_text = document.getElementById("watch_status")
-      const watch_status_loading = document.getElementById("watch_loading")
-
-      //Auto fills if already present
-      function prefillInputsWithLocalStorage(){
-        const userID =  getLocalStorageOrNull("userID");
-        const watchID =  getLocalStorageOrNull("watchID");
-        userID_input.value = userID;
-        watchID_input.value = watchID;
-      }
-      prefillInputsWithLocalStorage()
-      
-
-      //Code that allows for us to check the status of the watch
-      watch_status_btn.addEventListener("click", () => {
-        //No watch id provided
-        if (!watchID_input.value.match(/\S/)) {
-          alert("Watch ID is empty");
-          return;
-        }
-
-        //Show loading and remove status
-        watch_status_loading.style.display = "block";
-        watch_status_text.style.display = "none"
-
-        //Initially false
-        g_watch_status = false;
-
-        //Check to see the status of watch
-        fetch("/check_mqtt_connection", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            watchID: watchID_input.value,
-          }),
-        }).then((res) => {
-          return res.json();
-        }).then((data) => {
-
-          if(data["status"] == "online"){
-            watch_status_text.innerText = "Online";
-            watch_status_text.style.color = "green";
-            g_watch_status = true;
-
-          } 
-          if(data["status"] == "offline"){
-            watch_status_text.innerText = "Offline";
-            watch_status_text.style.color = "red";
-            g_watch_status = false;
-
-
-          }
-        }).catch((err) => {
-          console.log("Watch Status Error: ", err);
-          watch_status_text.innerText = "Offline";
-          watch_status_text.style.color = "red";
-          g_watch_status = false;
-
-
-        }).finally(() => {
-          watch_status_loading.style.display = "none";
-          watch_status_text.style.display = "block"
-        });
-      })
-
-
-      const submitBtn = document.getElementById("submitBtn");
+      /*const submitBtn = document.getElementById("submitBtn");
       submitBtn.addEventListener("click", () => {
+
+        // Please remove
+        localStorage.setItem("watchID", watchID_input.value);
+        localStorage.setItem("userID", userID_input.value);
+        localStorage.setItem("currentLevel", 1);
+        localStorage.setItem("currentSubLevel", 1);
+
+  
+        window.location.href = "/tiles_game"; //Send to game
+
+
         if (!watchID_input.value.match(/\S/)) {
           alert("Watch ID is empty");
           return;
@@ -161,21 +105,16 @@
           return;
         }
 
-        if(!g_watch_status){
-          alert("Watch status is offline");
-          return;
-        }
-
-        localStorage.setItem("watchID", watchID_input.value);
-        localStorage.setItem("userID", userID_input.value);
-        localStorage.setItem("currentLevel", 1);
-        localStorage.setItem("currentSubLevel", 1);
+        //localStorage.setItem("watchID", watchID_input.value);
+        //localStorage.setItem("userID", userID_input.value);
+        //localStorage.setItem("currentLevel", 1);
+        //localStorage.setItem("currentSubLevel", 1);
 
   
-        window.location.href = "/tiles_game"; //Send to game
+        //window.location.href = "/tiles_game"; //Send to game
         
 
-      })
+      })*/
       
     </script>
   </body>

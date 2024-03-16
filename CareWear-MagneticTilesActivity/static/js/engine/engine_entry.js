@@ -12,10 +12,9 @@ function resizeCanvas() {
 function drawShapes() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   drawSectionLines();
+  shapes.forEach((shape) => shape.draw()); // Draw each shape
 
-  for (let shape of shapes) {
-    shape.draw();
-  }
+  requestAnimationFrame(drawShapes); // Loop this function
 
   // calculateShortestEuclidianDistanceForCurrentLevel();
 }

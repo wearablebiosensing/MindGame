@@ -3,7 +3,8 @@ const g_start_btn = document.getElementById("nogo_start");
 const g_nogo_container = document.getElementById("nogo_container");
 const g_nogo_shape = document.getElementById("nogo_shape");
 const g_nogo_spinner = document.getElementById("nogo_spinner");
-const MAX_SHAPES_SHOWN = 10; //Standard 240
+const MAX_SHAPES_SHOWN = 22; //Standard 220, 20 for practice, 100 Go, 100 NoGo
+const PRACTICE_SHAPES = 20;
 const MAX_TIME = 1000; //ms
 const TIME_BETWEEN_SHAPES = 2400; //ms
 let g_times_shape_shown = 0;
@@ -67,11 +68,14 @@ function nogo_post_data() {
       userID: getLocalStorageOrNull("userID"),
     }),
   }).finally(() => {
-    window.location.href = "/";
+    window.location.href = "/mindgame_precheck";
   });
 }
 
 function nogo_add_data(shape, wasClicked, correct) {
+  if (g_times_shape_shown <= PRACTICE_SHAPES) {
+    return; // Practice for the first 20, dont collect data
+  }
   const ttcMilliseconds = g_end_ts.getTime() - g_start_ts.getTime();
   g_nogo_data.push({
     type: shape,
@@ -181,10 +185,7 @@ function getTimestamp(currentDate) {
   const hours = currentDate.getHours().toString().padStart(2, "0");
   const minutes = currentDate.getMinutes().toString().padStart(2, "0");
   const seconds = currentDate.getSeconds().toString().padStart(2, "0");
-  const milliseconds = currentDate
-    .getMilliseconds()
-    .toString()
-    .padStart(3, "0");
+  const milliseconds = currentDate.getMilliseconds().toString().padStart(3, "0");
 
   // Format the timestamp
   const formattedTimestamp = `${hours}:${minutes}:${seconds}:${milliseconds}`;

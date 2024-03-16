@@ -60,7 +60,7 @@ const progressBarPercent = document.getElementById("progress-bar-percent");
 //Mouse Data
 let mouse_motion_array = [];
 let lastCollectionTime = 0;
-const throttlingInterval = 150; // 150 milliseconds
+const throttlingInterval = 200; // 200 milliseconds
 
 //  -> Mouse Acceleration
 //      -> Define variables to store previous mouse position and timestamp

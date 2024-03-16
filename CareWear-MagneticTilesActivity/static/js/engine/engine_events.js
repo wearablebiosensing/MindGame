@@ -102,7 +102,7 @@ function mouse_move(event) {
         Math.round(accelerationX_in_px_per_s_squared),
         Math.round(accelerationY_in_px_per_s_squared),
       ]);
-      console.log("Mouse: ", mouse_motion_array);
+      //console.log("Mouse: ", mouse_motion_array);
       lastCollectionTime = currentTime;
     }
   }
@@ -113,9 +113,7 @@ function mouse_move(event) {
   let closestDistanceToShape = null;
 
   const shape = shapes[current_shape_index];
-  for (let targetShape of shapes.filter(
-    (s) => s.isLevelShape || s.isBuildingBlock
-  )) {
+  for (let targetShape of shapes.filter((s) => s.isLevelShape || s.isBuildingBlock)) {
     //Calculate distance from dragging shape to level shape
     const distance = shape.getDistanceToShape(targetShape);
     if (closestDistanceToShape == null) {
@@ -131,22 +129,22 @@ function mouse_move(event) {
     updateProgressBar();
   }
 
-  // LEVEL IS COMPLETE
-  if (getProgressBarPercentage() == 100) {
-    if (isDataSentAlready == false) {
-      if (mouse_motion_array.length != 0) {
-        console.log("POSING");
-        postLevelMouseData(); //Create csv
-        stop_mqtt_data_collection();
-      }
-    }
+  // // LEVEL IS COMPLETE
+  // if (getProgressBarPercentage() == 100) {
+  //   if (isDataSentAlready == false) {
+  //     if (mouse_motion_array.length != 0) {
+  //       console.log("POSING");
+  //       postLevelMouseData(); //Create csv
+  //       stop_mqtt_data_collection();
+  //     }
+  //   }
 
-    isDataSentAlready = true;
-  }
+  //   isDataSentAlready = true;
+  // }
 
   shapes[current_shape_index].mouseMove(x, y);
 
-  drawShapes();
+  //drawShapes();
 }
 
 function mouse_up(event) {
@@ -177,16 +175,20 @@ function mouse_up(event) {
   current_shape_index = null;
 
   // Add the identifier for the end of stroke
-  mouse_motion_array.push([
-    "END_OF_STROKE",
-    0,
-    0,
-    getTimestamp(),
-    "END_OF_STROKE",
-    0,
-    0,
-    0,
-  ]);
+  mouse_motion_array.push(["END_OF_STROKE", 0, 0, getTimestamp(), "END_OF_STROKE", 0]);
+
+  // LEVEL IS COMPLETE
+  if (getProgressBarPercentage() == 100) {
+    if (isDataSentAlready == false) {
+      if (mouse_motion_array.length != 0) {
+        console.log("POSING");
+        postLevelMouseData(); //Create csv
+        stop_mqtt_data_collection();
+      }
+    }
+
+    isDataSentAlready = true;
+  }
 }
 
 //Called to rotate in degrees
@@ -214,6 +216,27 @@ document.addEventListener("keydown", function (event) {
     console.log("Rotated shape");
   }
 });
+
+function throttle(func, limit) {
+  let lastFunc;
+  let lastRan;
+  return function () {
+    const context = this;
+    const args = arguments;
+    if (!lastRan) {
+      func.apply(context, args);
+      lastRan = Date.now();
+    } else {
+      clearTimeout(lastFunc);
+      lastFunc = setTimeout(function () {
+        if (Date.now() - lastRan >= limit) {
+          func.apply(context, args);
+          lastRan = Date.now();
+        }
+      }, limit - (Date.now() - lastRan));
+    }
+  };
+}
 
 //Add the actual event listeners to the canvas
 canvas.addEventListener("mousedown", mouse_down);

@@ -5,10 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Medication Intake Form</title>
 
-    <link
-      rel="stylesheet"
-      href="{{ url_for('static', filename='css/global.css') }}"
-    />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/global.css') }}" />
     <style>
       body,
       html {
@@ -71,8 +68,7 @@
       }
 
       .form-group label {
-        font-family: "Trebuchet MS", "Lucida Sans Unicode", "Lucida Grande",
-          "Lucida Sans", Arial, sans-serif;
+        font-family: "Trebuchet MS", "Lucida Sans Unicode", "Lucida Grande", "Lucida Sans", Arial, sans-serif;
         font-size: 1.5em;
         text-align: center;
       }
@@ -147,34 +143,26 @@
       <h2>Medication Intake Form</h2>
       <div class="form-wrapper">
         <div class="form-group">
-          <label for="medication-name"
-            >Which medication did you take? (Please select from the list
-            below)</label
-          >
+          <label for="medication-name">Which medication did you take? (Please select from the list below)</label>
           <div id="medication-name" class="dropdown">
             <div class="dropdown-selected">Select Medication</div>
             <div class="dropdown-list hidden"></div>
             <!-- Additional text input for the "Other" option -->
-            <input
-              type="text"
-              id="other-medication"
-              class="other-input hidden"
-              placeholder="Enter your medication"
-            />
+            <input type="text" id="other-medication" class="other-input hidden" placeholder="Enter your medication" />
           </div>
         </div>
         <div class="form-group">
-          <label for="input-time"
-            >When did you last take it? (Please input into box below)</label
-          >
+          <label for="input-time">When did you last take it? (Please input into box below)</label>
           <!-- Change to a text input for time entry -->
           <input type="time" id="input-time" class="time-input" />
         </div>
       </div>
       <div style="display: flex; justify-content: center">
-        <button type="submit" id="submit" class="start_button">
-          Start Game
-        </button>
+        {% if type == "inlab" %}
+        <button type="submit" id="next_btn" class="start_button">Go / Nogo</button>
+        {% endif %} {% if type == "athome" %}
+        <button type="submit" id="next_btn" class="start_button">MindGame</button>
+        {% endif %}
       </div>
     </div>
 
@@ -182,94 +170,68 @@
 
     <script>
       document.addEventListener("DOMContentLoaded", function () {
-        const medicationOptions = [
-          "Ritalin",
-          "Concerta",
-          "Focalin",
-          "Daytrana",
-          "Adderall",
-          "Dexedrine",
-          "Vyvanse",
-          "Other",
-        ];
+        const medicationOptions = ["Ritalin", "Concerta", "Focalin", "Daytrana", "Adderall", "Dexedrine", "Vyvanse", "Other"];
 
         initializeDropdown("medication-name", medicationOptions);
         setupFormSubmission();
       });
 
+      // Dont ask me whats going on here tbh it was a blur
       function initializeDropdown(dropdownId, options) {
         const dropdown = document.getElementById(dropdownId);
         const dropdownList = dropdown.querySelector(".dropdown-list");
         const selectedOption = dropdown.querySelector(".dropdown-selected");
-        const otherMedicationInput =
-          document.getElementById("other-medication");
+        const otherMedicationInput = document.getElementById("other-medication");
 
         options.forEach((option) => {
           const div = document.createElement("div");
           div.textContent = option;
-          div.addEventListener("click", () =>
-            handleDropdownSelection(
-              option,
-              selectedOption,
-              dropdownList,
-              otherMedicationInput
-            )
-          );
+          div.addEventListener("click", () => handleDropdownSelection(option, selectedOption, dropdownList, otherMedicationInput));
           dropdownList.appendChild(div);
         });
 
-        selectedOption.addEventListener("click", () =>
-          dropdownList.classList.toggle("hidden")
-        );
+        selectedOption.addEventListener("click", () => dropdownList.classList.toggle("hidden"));
       }
 
-      function handleDropdownSelection(
-        option,
-        selectedOption,
-        dropdownList,
-        otherInput
-      ) {
+      function handleDropdownSelection(option, selectedOption, dropdownList, otherInput) {
         selectedOption.textContent = option;
         dropdownList.classList.add("hidden");
         otherInput.style.display = option === "Other" ? "block" : "none";
       }
 
       function setupFormSubmission() {
-        document
-          .getElementById("submit")
-          .addEventListener("click", function (event) {
-            event.preventDefault();
+        document.getElementById("next_btn").addEventListener("click", function (event) {
+          event.preventDefault();
 
-            const selectedMedication = document
-              .getElementById("medication-name")
-              .querySelector(".dropdown-selected").textContent;
-            const otherMedication =
-              document.getElementById("other-medication").value;
-            const intakeTime = document.getElementById("input-time").value;
+          const selectedMedication = document.getElementById("medication-name").querySelector(".dropdown-selected").textContent;
+          const otherMedication = document.getElementById("other-medication").value;
+          const intakeTime = document.getElementById("input-time").value;
 
-            if (isValidForm(selectedMedication, otherMedication, intakeTime)) {
-              submitForm(selectedMedication, otherMedication, intakeTime);
-            } else {
-              alert("Please fill in both the medication name and intake time.");
+          if (isValidForm(selectedMedication, otherMedication, intakeTime)) {
+            submitForm(selectedMedication, otherMedication, intakeTime);
+
+            // Handle if this is an athome or in Lab
+            let application_type = "{{ type|safe }}";
+            if (application_type == "inlab") {
+              window.location = "/nogo";
+            } else if (application_type == "athome") {
+              window.location = "/mindgame_precheck";
             }
-          });
+          } else {
+            alert("Please fill in both the medication name and intake time.");
+          }
+        });
       }
 
       function isValidForm(selectedMedication, otherMedication, intakeTime) {
-        return (
-          ((selectedMedication !== "Select Medication" &&
-            selectedMedication !== "Other") ||
-            (selectedMedication === "Other" && otherMedication.trim())) &&
-          intakeTime.trim()
-        );
+        return ((selectedMedication !== "Select Medication" && selectedMedication !== "Other") || (selectedMedication === "Other" && otherMedication.trim())) && intakeTime.trim();
       }
 
       function submitForm(selectedMedication, otherMedication, intakeTime) {
-        const medicationName =
-          selectedMedication === "Other" ? otherMedication : selectedMedication;
+        const medicationName = selectedMedication === "Other" ? otherMedication : selectedMedication;
         const data = { medication: medicationName, time: intakeTime };
 
-        const submit_btn = document.getElementById("submit");
+        const submit_btn = document.getElementById("next_btn");
         submit_btn.disabled = true;
         submit_btn.innerHTML = `
         <svg id="loading" class="second_spinner" viewBox="0 0 50 50">
@@ -284,8 +246,7 @@
         </svg>
         `;
         const loading_spinner = document.getElementById("loading");
-        loading_spinner.getElementsByTagName("circle")[0].style.stroke =
-          "white";
+        loading_spinner.getElementsByTagName("circle")[0].style.stroke = "white";
         loading_spinner.style.display = "block";
 
         fetch("/intake_data", {
@@ -296,9 +257,7 @@
             userID: getLocalStorageOrNull("userID"),
           }),
         })
-          .then((data) => {
-            window.location.href = "/";
-          })
+          .then((data) => {})
           .catch((error) => console.error("Error:", error));
       }
     </script>

@@ -14,34 +14,62 @@ function euclideanDistance(x1, y1, x2, y2) {
  * and each level block. It then stores this in an object and returns it
  *  (key) - Shape Name    (value) - total distance for shape
  */
-function calculateShortestEuclidianDistanceForLevel() {
-  shortestEuclidDistances = {};
+// function calculateShortestEuclidianDistanceForLevel() {
+//   shortestEuclidDistances = {};
 
-  for (let levelShape of shapes.filter((s) => s.isLevelShape)) {
-    //Getting Building Block
-    let buildingBlockOfSameLevelShape = null;
-    shapes.forEach((shape) => {
-      if (shape.isBuildingBlock && shape.type == levelShape.type) {
-        buildingBlockOfSameLevelShape = shape;
+//   for (let levelShape of shapes.filter((s) => s.isLevelShape)) {
+//     //Getting Building Block
+//     let buildingBlockOfSameLevelShape = null;
+//     shapes.forEach((shape) => {
+//       if (shape.isBuildingBlock && shape.type == levelShape.type) {
+//         buildingBlockOfSameLevelShape = shape;
+//       }
+//     });
+
+//     distance = euclideanDistance(
+//       buildingBlockOfSameLevelShape.x,
+//       buildingBlockOfSameLevelShape.y,
+//       levelShape.x,
+//       levelShape.y
+//     );
+
+//     if (levelShape.type in shortestEuclidDistances) {
+//       //Add to Shortest Distance
+//       shortestEuclidDistances[levelShape.type] += distance;
+//     } else {
+//       shortestEuclidDistances[levelShape.type] = distance;
+//     }
+//   }
+
+//   // console.log("Shortest Euclid Distance For Level - ", shortestEuclidDistances);
+//   return shortestEuclidDistances;
+// }
+
+function calculateShortestEuclidianDistanceForLevel() {
+  const shortestEuclidDistances = {};
+  const buildingBlocks = {};
+
+  // Classify shapes first to reduce repetitive searching
+  shapes.forEach((shape) => {
+    if (shape.isBuildingBlock) {
+      if (!buildingBlocks[shape.type]) {
+        buildingBlocks[shape.type] = [];
+      }
+      buildingBlocks[shape.type].push(shape);
+    }
+  });
+
+  shapes
+    .filter((s) => s.isLevelShape)
+    .forEach((levelShape) => {
+      const buildingBlock = buildingBlocks[levelShape.type]?.[0]; // Assuming one building block per type for simplicity
+      if (buildingBlock) {
+        const distance = euclideanDistance(buildingBlock.x, buildingBlock.y, levelShape.x, levelShape.y);
+
+        shortestEuclidDistances[levelShape.type] = (shortestEuclidDistances[levelShape.type] || 0) + distance;
       }
     });
 
-    distance = euclideanDistance(
-      buildingBlockOfSameLevelShape.x,
-      buildingBlockOfSameLevelShape.y,
-      levelShape.x,
-      levelShape.y
-    );
-
-    if (levelShape.type in shortestEuclidDistances) {
-      //Add to Shortest Distance
-      shortestEuclidDistances[levelShape.type] += distance;
-    } else {
-      shortestEuclidDistances[levelShape.type] = distance;
-    }
-  }
-
-  // console.log("Shortest Euclid Distance For Level - ", shortestEuclidDistances);
   return shortestEuclidDistances;
 }
 
@@ -55,6 +83,7 @@ function calculateUserEuclidDistances() {
   for (const row of mouse_motion_array) {
     if (row[3] == "null") continue;
     if (row[0] === "END_OF_STROKE") {
+      console.log("Calculating euclid distance: ", currentStrokeData, mouse_motion_array);
       const shape = currentStrokeData[0][2];
 
       // Calculate the distance traveled for the current stroke
@@ -130,10 +159,7 @@ function getTimestamp() {
   const hours = currentDate.getHours().toString().padStart(2, "0");
   const minutes = currentDate.getMinutes().toString().padStart(2, "0");
   const seconds = currentDate.getSeconds().toString().padStart(2, "0");
-  const milliseconds = currentDate
-    .getMilliseconds()
-    .toString()
-    .padStart(3, "0");
+  const milliseconds = currentDate.getMilliseconds().toString().padStart(3, "0");
 
   // Format the timestamp
   const formattedTimestamp = `${hours}:${minutes}:${seconds}:${milliseconds}`;
@@ -172,17 +198,13 @@ function postLevelMouseData() {
 
   //Dont post data when in playground mode!
   if (isPlaygroundMode) {
-    document.querySelector(".playground_level_done").style.visibility =
-      "visible";
+    document.querySelector(".playground_level_done").style.visibility = "visible";
 
-    document
-      .getElementById("playground_retry")
-      .addEventListener("click", () => {
-        // changeCurrentLevel(1, 1);
-        document.querySelector(".playground_level_done").style.visibility =
-          "hidden";
-        window.location.href = "/tiles_game?playground=true";
-      });
+    document.getElementById("playground_retry").addEventListener("click", () => {
+      // changeCurrentLevel(1, 1);
+      document.querySelector(".playground_level_done").style.visibility = "hidden";
+      window.location.href = "/tiles_game?playground=true";
+    });
 
     document.getElementById("playground_end").addEventListener("click", () => {
       window.location.href = "/";

@@ -56,10 +56,7 @@ class Shape {
       const difference = Math.abs(rotationDifference - angle);
       const wrappedDifference = Math.abs(360 - difference);
 
-      if (
-        difference <= rotationThreshold ||
-        wrappedDifference <= rotationThreshold
-      ) {
+      if (difference <= rotationThreshold || wrappedDifference <= rotationThreshold) {
         return true;
       }
     }
@@ -148,9 +145,7 @@ class Shape {
   getDistanceToShape(targetShape) {
     //This is what a few shapes use so I set this as default
     //Others can overide
-    const distance = Math.sqrt(
-      Math.pow(this.x - targetShape.x, 2) + Math.pow(this.y - targetShape.y, 2)
-    );
+    const distance = Math.sqrt(Math.pow(this.x - targetShape.x, 2) + Math.pow(this.y - targetShape.y, 2));
 
     return distance;
   }
@@ -163,18 +158,13 @@ class Shape {
    */
   snapUpdate(targetShape) {
     if (targetShape.isBuildingBlock) {
-      console.log("Snap is BuildingBlock");
+      //console.log("Snap is BuildingBlock");
       this.rotation = targetShape.rotation;
       this.mouseUp();
       return;
     }
 
-    console.log(
-      "SnapUpdate - ",
-      targetShape.type,
-      targetShape.isLevelShape,
-      this.isLevelShapeFilled
-    );
+    //console.log("SnapUpdate - ", targetShape.type, targetShape.isLevelShape, this.isLevelShapeFilled);
     this.isSnapped = true;
     targetShape.isLevelShapeFilled = true;
     this.rotation = targetShape.rotation;
@@ -206,7 +196,7 @@ class Shape {
    */
   mouseMove(x, y) {
     if (this.isDragging) {
-      console.log("MOVING");
+      //console.log("MOVING");
       const dx = x - this.startX;
       const dy = y - this.startY;
 
@@ -220,16 +210,7 @@ class Shape {
 }
 
 class Square extends Shape {
-  constructor(
-    x,
-    y,
-    width,
-    height,
-    color,
-    rotation = 0,
-    isLevelShape = false,
-    isBuildingBlock = false
-  ) {
+  constructor(x, y, width, height, color, rotation = 0, isLevelShape = false, isBuildingBlock = false) {
     super(x, y, color, rotation, isLevelShape, isBuildingBlock);
     this.width = width;
     this.height = height;
@@ -269,13 +250,9 @@ class Square extends Shape {
     if (targetShape instanceof Square) {
       // Snap Square shape to target Square shape if they are close enough
 
-      if (!this.checkRotationThreshold(targetShape, [0, 90, 180, 270, 360]))
-        return;
+      if (!this.checkRotationThreshold(targetShape, [0, 90, 180, 270, 360])) return;
 
-      const distance = Math.sqrt(
-        Math.pow(this.x - targetShape.x, 2) +
-          Math.pow(this.y - targetShape.y, 2)
-      );
+      const distance = Math.sqrt(Math.pow(this.x - targetShape.x, 2) + Math.pow(this.y - targetShape.y, 2));
 
       if (this.canMoveShapeBackToOrigin(targetShape, 50)) {
         return;
@@ -295,22 +272,12 @@ class Square extends Shape {
     let shape_top = this.y;
     let shape_bottom = this.y + this.height;
 
-    return (
-      x > shape_left && x < shape_right && y > shape_top && y < shape_bottom
-    );
+    return x > shape_left && x < shape_right && y > shape_top && y < shape_bottom;
   }
 }
 
 class Circle extends Shape {
-  constructor(
-    x,
-    y,
-    radius,
-    color,
-    rotation = 0,
-    isLevelShape = false,
-    isBuildingBlock = false
-  ) {
+  constructor(x, y, radius, color, rotation = 0, isLevelShape = false, isBuildingBlock = false) {
     super(
       x + radius, //So that Circle is drawn from top left instead of center
       y + radius,
@@ -344,10 +311,7 @@ class Circle extends Shape {
     if (targetShape instanceof Circle) {
       // Snap Circle shape to target Circle shape if they are close enough
 
-      const distance = Math.sqrt(
-        Math.pow(this.x - targetShape.x, 2) +
-          Math.pow(this.y - targetShape.y, 2)
-      );
+      const distance = Math.sqrt(Math.pow(this.x - targetShape.x, 2) + Math.pow(this.y - targetShape.y, 2));
 
       //Dont Snap To Buildiong Block if dragStartX is too close to building block
       if (this.canMoveShapeBackToOrigin(targetShape)) {
@@ -363,32 +327,13 @@ class Circle extends Shape {
   }
 
   isPointInside(x, y) {
-    return (
-      Math.pow(this.x - x, 2) + Math.pow(this.y - y, 2) <=
-      Math.pow(this.radius, 2)
-    );
+    return Math.pow(this.x - x, 2) + Math.pow(this.y - y, 2) <= Math.pow(this.radius, 2);
   }
 }
 
 class Trapezoid extends Shape {
-  constructor(
-    x,
-    y,
-    base,
-    height,
-    color,
-    rotation = 0,
-    isLevelShape = false,
-    isBuildingBlock = false
-  ) {
-    super(
-      x + base / 2,
-      y + height / 2,
-      color,
-      rotation,
-      isLevelShape,
-      isBuildingBlock
-    );
+  constructor(x, y, base, height, color, rotation = 0, isLevelShape = false, isBuildingBlock = false) {
+    super(x + base / 2, y + height / 2, color, rotation, isLevelShape, isBuildingBlock);
     this.base = base;
     this.height = height;
     this.type = "Trapezoid";
@@ -418,11 +363,7 @@ class Trapezoid extends Shape {
 
   createShapeFromBlock() {
     if (!this.isBuildingBlock) return;
-    return GreenTrapezoid(
-      this.x - this.base / 2,
-      this.y - this.height / 2,
-      this.rotation
-    );
+    return GreenTrapezoid(this.x - this.base / 2, this.y - this.height / 2, this.rotation);
   }
 
   snapToTargetShape(targetShape) {
@@ -432,10 +373,7 @@ class Trapezoid extends Shape {
       // if (this.rotation % 360 !== targetShape.rotation % 360) return;
       if (!this.checkRotationThreshold(targetShape)) return;
 
-      const distance = Math.sqrt(
-        Math.pow(this.x - targetShape.x, 2) +
-          Math.pow(this.y - targetShape.y, 2)
-      );
+      const distance = Math.sqrt(Math.pow(this.x - targetShape.x, 2) + Math.pow(this.y - targetShape.y, 2));
 
       //Dont Snap To Buildiong Block if dragStartX is too close to building block
       if (this.canMoveShapeBackToOrigin(targetShape)) {
@@ -481,26 +419,12 @@ class Trapezoid extends Shape {
     const bottomBoundary = halfHeight;
 
     // Check if the point is within the boundaries
-    return (
-      rotatedY >= topBoundary &&
-      rotatedY <= bottomBoundary &&
-      rotatedX >= -topWidth / 2 &&
-      rotatedX <= topWidth / 2
-    );
+    return rotatedY >= topBoundary && rotatedY <= bottomBoundary && rotatedX >= -topWidth / 2 && rotatedX <= topWidth / 2;
   }
 }
 
 class RightTriangle extends Shape {
-  constructor(
-    x,
-    y,
-    base,
-    height,
-    color,
-    rotation = 0,
-    isLevelShape = false,
-    isBuildingBlock = false
-  ) {
+  constructor(x, y, base, height, color, rotation = 0, isLevelShape = false, isBuildingBlock = false) {
     super(x, y, color, rotation, isLevelShape, isBuildingBlock);
     this.base = base;
     this.height = height;
@@ -548,14 +472,9 @@ class RightTriangle extends Shape {
       // Calculate the distance between the centers of the triangles
       const centerX = this.x + (this.x1 + this.x2) / 2;
       const centerY = this.y + (this.y1 + this.y3) / 2;
-      const targetCenterX =
-        targetShape.x + (targetShape.x1 + targetShape.x2) / 2;
-      const targetCenterY =
-        targetShape.y + (targetShape.y1 + targetShape.y3) / 2;
-      const distance = Math.sqrt(
-        Math.pow(centerX - targetCenterX, 2) +
-          Math.pow(centerY - targetCenterY, 2)
-      );
+      const targetCenterX = targetShape.x + (targetShape.x1 + targetShape.x2) / 2;
+      const targetCenterY = targetShape.y + (targetShape.y1 + targetShape.y3) / 2;
+      const distance = Math.sqrt(Math.pow(centerX - targetCenterX, 2) + Math.pow(centerY - targetCenterY, 2));
 
       //Dont Snap To Buildiong Block if dragStartX is too close to building block
       if (this.canMoveShapeBackToOrigin(targetShape)) {
@@ -620,17 +539,7 @@ class RightTriangle extends Shape {
 }
 
 class Diamond extends Shape {
-  constructor(
-    x,
-    y,
-    width,
-    height,
-    color,
-    rotation = 0,
-    isLevelShape = false,
-    isBuildingBlock = false,
-    type = null
-  ) {
+  constructor(x, y, width, height, color, rotation = 0, isLevelShape = false, isBuildingBlock = false, type = null) {
     super(x, y, color, rotation, isLevelShape, isBuildingBlock);
     this.width = width;
     this.height = height;
@@ -654,9 +563,7 @@ class Diamond extends Shape {
 
   createShapeFromBlock() {
     if (!this.isBuildingBlock) return;
-    return this.type == "Yellow Diamond"
-      ? YellowDiamond(this.x, this.y, this.rotation)
-      : PurpleDiamond(this.x, this.y, this.rotation);
+    return this.type == "Yellow Diamond" ? YellowDiamond(this.x, this.y, this.rotation) : PurpleDiamond(this.x, this.y, this.rotation);
     _;
   }
 
@@ -670,10 +577,7 @@ class Diamond extends Shape {
       // const equivalentRotations = [0, 90, 180, 270];
       if (!this.checkRotationThreshold(targetShape, [0, 180])) return;
 
-      const distance = Math.sqrt(
-        Math.pow(this.x - targetShape.x, 2) +
-          Math.pow(this.y - targetShape.y, 2)
-      );
+      const distance = Math.sqrt(Math.pow(this.x - targetShape.x, 2) + Math.pow(this.y - targetShape.y, 2));
 
       //Dont Snap To Buildiong Block if dragStartX is too close to building block
       if (this.canMoveShapeBackToOrigin(targetShape, 60)) {
@@ -693,32 +597,16 @@ class Diamond extends Shape {
     const centerY = this.y + this.height / 2;
 
     // Adjust the point coordinates based on rotation and center of the diamond
-    const rotatedX =
-      Math.cos((this.rotation * Math.PI) / 180) * (x - centerX) -
-      Math.sin((this.rotation * Math.PI) / 180) * (y - centerY);
-    const rotatedY =
-      Math.sin((this.rotation * Math.PI) / 180) * (x - centerX) +
-      Math.cos((this.rotation * Math.PI) / 180) * (y - centerY);
+    const rotatedX = Math.cos((this.rotation * Math.PI) / 180) * (x - centerX) - Math.sin((this.rotation * Math.PI) / 180) * (y - centerY);
+    const rotatedY = Math.sin((this.rotation * Math.PI) / 180) * (x - centerX) + Math.cos((this.rotation * Math.PI) / 180) * (y - centerY);
 
     // Check if the adjusted point is inside the diamond
-    return (
-      Math.abs(rotatedX) / (this.width / 2) +
-        Math.abs(rotatedY) / (this.height / 2) <=
-      1
-    );
+    return Math.abs(rotatedX) / (this.width / 2) + Math.abs(rotatedY) / (this.height / 2) <= 1;
   }
 }
 
 class EquilateralTriangle extends Shape {
-  constructor(
-    x,
-    y,
-    sideLength,
-    color,
-    rotation = 0,
-    isLevelShape = false,
-    isBuildingBlock = false
-  ) {
+  constructor(x, y, sideLength, color, rotation = 0, isLevelShape = false, isBuildingBlock = false) {
     super(x, y, color, rotation, isLevelShape, isBuildingBlock);
     this.sideLength = sideLength;
     this.height = (Math.sqrt(3) / 2) * sideLength;
@@ -766,12 +654,8 @@ class EquilateralTriangle extends Shape {
       const centerX = this.x;
       const centerY = this.y - (Math.sqrt(3) / 6) * this.sideLength;
       const targetCenterX = targetShape.x;
-      const targetCenterY =
-        targetShape.y - (Math.sqrt(3) / 6) * targetShape.sideLength;
-      const distance = Math.sqrt(
-        Math.pow(centerX - targetCenterX, 2) +
-          Math.pow(centerY - targetCenterY, 2)
-      );
+      const targetCenterY = targetShape.y - (Math.sqrt(3) / 6) * targetShape.sideLength;
+      const distance = Math.sqrt(Math.pow(centerX - targetCenterX, 2) + Math.pow(centerY - targetCenterY, 2));
 
       //Dont Snap To Buildiong Block if dragStartX is too close to building block
       if (this.canMoveShapeBackToOrigin(targetShape)) {
@@ -841,15 +725,7 @@ class EquilateralTriangle extends Shape {
 }
 
 class Hexagon extends Shape {
-  constructor(
-    x,
-    y,
-    sideLength,
-    color,
-    rotation = 0,
-    isLevelShape = false,
-    isBuildingBlock = false
-  ) {
+  constructor(x, y, sideLength, color, rotation = 0, isLevelShape = false, isBuildingBlock = false) {
     super(x, y, color, rotation, isLevelShape, isBuildingBlock);
     this.sideLength = sideLength;
     this.radius = (sideLength * Math.sqrt(3)) / 2;
@@ -889,29 +765,18 @@ class Hexagon extends Shape {
     if (targetShape instanceof Hexagon) {
       // Snap Hexagon shape to target Hexagon shape if they are close enough
 
-      if (
-        !this.checkRotationThreshold(
-          targetShape,
-          [0, 60, 120, 180, 240, 300, 360]
-        )
-      )
-        return;
+      if (!this.checkRotationThreshold(targetShape, [0, 60, 120, 180, 240, 300, 360])) return;
 
-      const distance = Math.sqrt(
-        Math.pow(this.x - targetShape.x, 2) +
-          Math.pow(this.y - targetShape.y, 2)
-      );
+      const distance = Math.sqrt(Math.pow(this.x - targetShape.x, 2) + Math.pow(this.y - targetShape.y, 2));
 
       //Dont Snap To Buildiong Block if dragStartX is too close to building block
       if (this.canMoveShapeBackToOrigin(targetShape)) {
-        console.log("RETT");
         return;
       }
 
-      console.log("HEXDIS - ", distance <= this.snapDistanceThreshold);
+      //console.log("HEXDIS - ", distance <= this.snapDistanceThreshold);
 
       if (distance <= this.snapDistanceThreshold) {
-        console.log("GOOD");
         this.x = targetShape.x;
         this.y = targetShape.y;
         this.snapUpdate(targetShape);
@@ -921,20 +786,13 @@ class Hexagon extends Shape {
 
   isPointInside(x, y) {
     // Check if the point is inside the bounding rectangle of the hexagon
-    if (
-      x > this.x - this.radius &&
-      x < this.x + this.radius &&
-      y > this.y - this.radius &&
-      y < this.y + this.radius
-    ) {
+    if (x > this.x - this.radius && x < this.x + this.radius && y > this.y - this.radius && y < this.y + this.radius) {
       const localX = x - this.x;
       const localY = y - this.y;
 
       // Convert to axial coordinates
       const q = ((2 / 3) * localX) / this.radius;
-      const r =
-        ((-1 / 3) * localX) / this.radius +
-        ((Math.sqrt(3) / 3) * localY) / this.radius;
+      const r = ((-1 / 3) * localX) / this.radius + ((Math.sqrt(3) / 3) * localY) / this.radius;
 
       // Check if the point is inside the hexagon using axial coordinates
       if (Math.abs(q) <= 1 && Math.abs(r) <= 1 && Math.abs(q + r) <= 1) {
@@ -947,15 +805,7 @@ class Hexagon extends Shape {
 }
 
 class QuarterCircle extends Shape {
-  constructor(
-    x,
-    y,
-    radius,
-    color,
-    rotation = 0,
-    isLevelShape = false,
-    isBuildingBlock = false
-  ) {
+  constructor(x, y, radius, color, rotation = 0, isLevelShape = false, isBuildingBlock = false) {
     super(x, y, color, rotation, isLevelShape, isBuildingBlock);
     this.radius = radius;
     this.type = "Quarter Circle";
@@ -988,18 +838,9 @@ class QuarterCircle extends Shape {
     if (targetShape instanceof QuarterCircle) {
       // if (this.rotation % 360 != targetShape.rotation % 360) return; // Have to be the same rotation
 
-      const distance = Math.sqrt(
-        Math.pow(this.x - targetShape.x, 2) +
-          Math.pow(this.y - targetShape.y, 2)
-      );
+      const distance = Math.sqrt(Math.pow(this.x - targetShape.x, 2) + Math.pow(this.y - targetShape.y, 2));
 
-      console.log(
-        "QUAERT PINK DISTANCE - ",
-        distance,
-        this.snapDistanceThreshold
-      );
-
-      console.log("PINK - ", distance <= this.snapDistanceThreshold);
+      //console.log("PINK - ", distance <= this.snapDistanceThreshold);
 
       if (this.canMoveShapeBackToOrigin(targetShape)) {
         return;
@@ -1011,7 +852,7 @@ class QuarterCircle extends Shape {
       }
 
       if (distance - 60 <= this.snapDistanceThreshold) {
-        console.log("SNAP PINK - ", shapes);
+        //console.log("SNAP PINK - ", shapes);
         this.x = targetShape.x;
         this.y = targetShape.y;
         this.snapUpdate(targetShape);
@@ -1022,24 +863,14 @@ class QuarterCircle extends Shape {
   isPointInside(x, y) {
     const centerX = this.x;
     const centerY = this.y;
-    const adjustedX =
-      (x - centerX) * Math.cos((Math.PI / 180) * -this.rotation) -
-      (y - centerY) * Math.sin((Math.PI / 180) * -this.rotation);
-    const adjustedY =
-      (x - centerX) * Math.sin((Math.PI / 180) * -this.rotation) +
-      (y - centerY) * Math.cos((Math.PI / 180) * -this.rotation);
+    const adjustedX = (x - centerX) * Math.cos((Math.PI / 180) * -this.rotation) - (y - centerY) * Math.sin((Math.PI / 180) * -this.rotation);
+    const adjustedY = (x - centerX) * Math.sin((Math.PI / 180) * -this.rotation) + (y - centerY) * Math.cos((Math.PI / 180) * -this.rotation);
 
     // Calculate the distance between the adjusted point and the center of the rotated quarter circle
     const distance = Math.sqrt(Math.pow(adjustedX, 2) + Math.pow(adjustedY, 2));
 
     // Check if the distance is within the radius of the quarter circle
     // and if the point is within the visible area of the quarter circle
-    return (
-      distance <= this.radius &&
-      adjustedX >= 0 &&
-      adjustedY >= 0 &&
-      adjustedX <= this.radius &&
-      adjustedY <= this.radius
-    );
+    return distance <= this.radius && adjustedX >= 0 && adjustedY >= 0 && adjustedX <= this.radius && adjustedY <= this.radius;
   }
 }
