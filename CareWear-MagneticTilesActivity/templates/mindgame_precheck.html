@@ -11,7 +11,7 @@
   <body>
     <div class="container">
       <div class="pregame_header">MindGame Pre-Check</div>
-      <div class="pregame_directions">This is to ensure that your watch is functioning properly</div>
+      <div class="pregame_directions">This is to ensure that your watch is functioning properly<br />Open the app and start sending data<br />Then input your watch ID and check its status</div>
       <div style="display: flex; flex-direction: column; align-items: center; gap: 5px; width: 100%">
         <!-- <div class="pregame_id">UserID: <span>P1</span></div> -->
         <input type="text" placeholder="Watch ID" id="watchID_input" />
@@ -25,7 +25,9 @@
         </svg>
       </div>
 
-      <div class="h_center"><button id="pregame_start" class="start_button pregame_disabled">Start MindGame</button></div>
+      <div class="h_center"><button id="mindgame_start_btn" class="start_button pregame_disabled">Start MindGame</button></div>
+
+      <div class="pregame_id" id="pregame_id">User ID: &nbsp;</div>
     </div>
 
     <script src="{{ url_for('static', filename='js/precheck.js') }}"></script>

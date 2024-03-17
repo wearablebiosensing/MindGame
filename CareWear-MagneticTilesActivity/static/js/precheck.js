@@ -8,6 +8,8 @@ const g_watchID_input = document.getElementById("watchID_input");
 const g_watch_status_text = document.getElementById("watch_status_text");
 const g_watch_check_watch_status_btn = document.getElementById("watch_status_check_btn");
 const g_watch_status_loading = document.getElementById("watch_status_loading");
+const g_mindgame_start_btn = document.getElementById("mindgame_start_btn");
+const g_show_user_id = document.getElementById("pregame_id");
 
 // Indicates if watch is connected
 let g_watch_status = false;
@@ -75,16 +77,17 @@ async function fetchWatchStatus(watchID) {
  * @param {string} status The status of the watch ('online' or 'offline').
  */
 function displayWatchStatus(status) {
-  const isOnline = status === "online";
+  const isOnline = status == "online";
+  console.log(isOnline);
   g_watch_status_text.innerText = isOnline ? "Online" : "Offline";
   g_watch_status_text.style.color = isOnline ? "green" : "red";
 
   if (isOnline) {
     g_watch_status = true;
-    //Change disabled status
+    g_mindgame_start_btn.classList.remove("pregame_disabled");
   } else {
     g_watch_status = false;
-    //Change disabled status
+    g_mindgame_start_btn.classList.add("pregame_disabled");
   }
 }
 
@@ -95,6 +98,7 @@ function displayWatchStatus(status) {
 
 
 */
+
 function getLocalStorageOrNull(key) {
   try {
     const value = localStorage.getItem(key);
@@ -111,11 +115,33 @@ function prefillInputsWithLocalStorage() {
 }
 prefillInputsWithLocalStorage();
 
+// Event listner for the check status button
 g_watch_check_watch_status_btn.addEventListener("click", async () => {
+  const watchID = g_watchID_input.value;
+  if (!watchID.match(/\S/)) {
+    alert("Watch ID is empty");
+    return;
+  }
   await handleWatchStatusCheck();
 });
-// const watchID = g_watchID_input.value;
-// if (!watchID.match(/\S/)) {
-//   alert("Watch ID is empty");
-//   return;
-// }
+
+// Event listner for the start mindgame button
+g_mindgame_start_btn.addEventListener("click", () => {
+  const watchID = g_watchID_input.value;
+  if (!watchID.match(/\S/)) {
+    alert("Watch ID is empty");
+    return;
+  }
+
+  if (g_mindgame_start_btn.classList.contains("pregame_disabled")) return;
+
+  if (getLocalStorageOrNull("userID") == null) {
+    alert("Cannot start MindGame as there is no userID saved to differentiate the data");
+    return;
+  }
+
+  window.location = "/tiles_game";
+});
+
+// Show userID
+g_show_user_id.innerHTML += getLocalStorageOrNull("userID") == null ? "No UserID found" : getLocalStorageOrNull("userID");

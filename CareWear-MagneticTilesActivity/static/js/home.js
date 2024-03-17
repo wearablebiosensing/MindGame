@@ -59,6 +59,11 @@ g_inlab_btn.addEventListener("click", async () => {
     return;
   }
 
+  // localStorage.setItem("watchID", watchID_input.value);
+  localStorage.setItem("userID", g_userID_input.value);
+  localStorage.setItem("currentLevel", 1);
+  localStorage.setItem("currentSubLevel", 1);
+
   window.location = `/start_application/inlab`;
 });
 
@@ -67,6 +72,10 @@ g_athome_btn.addEventListener("click", async () => {
     alert("Identifier is empty");
     return;
   }
+
+  localStorage.setItem("userID", g_userID_input.value);
+  localStorage.setItem("currentLevel", 1);
+  localStorage.setItem("currentSubLevel", 1);
 
   window.location = `/start_application/athome`;
 });

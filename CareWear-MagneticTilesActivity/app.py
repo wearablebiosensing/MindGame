@@ -253,6 +253,8 @@ def check_mqtt_connection():
         return jsonify(response)
     else:
         response = {'status': "offline"}
+        # response = {'status': "online"}
+        
         return jsonify(response)
     
 
