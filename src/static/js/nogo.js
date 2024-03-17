@@ -13,6 +13,10 @@ let g_end_ts = null;
 let g_nogo_data = [];
 let g_timeout_id = null;
 
+// This will guarentee that there is exactly hald circles and half squares shown
+let shapeSequence = generateShapeSequence(MAX_SHAPES_SHOWN);
+let currentShapeIndex = 0; // Keep track of the current index in the sequence
+
 //Prevention for space bar in rapid sucession
 // let g_action_debounce_id = null; // New debounce timer
 // const ACTION_DEBOUNCE_TIME = 500; // Debounce time in ms
@@ -42,6 +46,22 @@ function nogo_end() {
   console.log(g_nogo_data);
   g_nogo_shape.removeAttribute("class");
   nogo_post_data();
+}
+
+function generateShapeSequence(totalShapes) {
+  let sequence = [];
+  for (let i = 0; i < totalShapes / 2; i++) {
+    sequence.push("square", "circle");
+  }
+  return shuffleArray(sequence);
+}
+
+function shuffleArray(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
 }
 
 function getLocalStorageOrNull(key) {
@@ -172,9 +192,11 @@ function nogo_show_shape() {
  * @returns {void}
  */
 function nogo_set_rand_shape() {
-  let oneOrZero = Math.random() >= 0.5 ? 1 : 0;
-  if (oneOrZero == 1) g_nogo_shape.classList.add("nogo_square");
-  if (oneOrZero == 0) g_nogo_shape.classList.add("nogo_circle");
+  let currentShape = shapeSequence[currentShapeIndex++];
+  g_nogo_shape.classList.add(`nogo_${currentShape}`);
+  // let oneOrZero = Math.random() >= 0.5 ? 1 : 0;
+  // if (oneOrZero == 1) g_nogo_shape.classList.add("nogo_square");
+  // if (oneOrZero == 0) g_nogo_shape.classList.add("nogo_circle");
 }
 
 function getTimestamp(currentDate) {
