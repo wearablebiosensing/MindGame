@@ -13,6 +13,7 @@ const g_show_user_id = document.getElementById("pregame_id");
 
 // Indicates if watch is connected
 let g_watch_status = false;
+let g_is_watch_status_loading = false;
 
 /*
   =======================================================================
@@ -34,17 +35,19 @@ async function handleWatchStatusCheck() {
   }
 
   toggleLoadingIndicator(true);
+  g_is_watch_status_loading = true;
 
   try {
     // Get and handle watch status
     const watchStatus = await fetchWatchStatus(watchID);
-    watchStatus == "online" ? (g_watch_status = true) : (g_watch_status = false);
+    // watchStatus == "online" ? (g_watch_status = true) : (g_watch_status = false);
     displayWatchStatus(watchStatus);
   } catch (error) {
     console.error("Watch Status Error: ", error);
     displayWatchStatus("offline"); // Default to 'offline' in case of error
   } finally {
     toggleLoadingIndicator(false);
+    g_is_watch_status_loading = false;
   }
 }
 
@@ -117,6 +120,9 @@ prefillInputsWithLocalStorage();
 
 // Event listner for the check status button
 g_watch_check_watch_status_btn.addEventListener("click", async () => {
+  // Prevent multiple requests at once
+  if (g_is_watch_status_loading == true) return;
+
   const watchID = g_watchID_input.value;
   if (!watchID.match(/\S/)) {
     alert("Watch ID is empty");

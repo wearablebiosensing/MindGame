@@ -364,7 +364,7 @@ def intake_data():
         data = request_data["data"]
         
         # Define the directory and ensure its existence
-        directory = "intake/"
+        directory = f"{SAVED_DATA_DIRECTORY}intake/"
         os.makedirs(directory, exist_ok=True)
 
         # Construct the file path
@@ -424,7 +424,11 @@ def calculateEuclidanPercentChange(shortestData: dict, userData:dict) -> float:
 
 
 
-
+def ensure_directory_exists(directory):
+    try:
+        os.makedirs(directory, exist_ok=True)
+    except Exception as e:
+        logger.error(f"An error occurred while creating directory {directory}: {e}")
 
     
     
@@ -464,9 +468,15 @@ def createAndUpload(filePath: str, fileName: str, data: bytes):
         fileName (_type_): name of the file
         data (_type_): utf8 encoded bytes??
     """
+    
+    directory = os.path.join(SAVED_DATA_DIRECTORY, filePath)
+    ensure_directory_exists(directory)
+    full_path = os.path.join(directory, fileName)
+    
     try:
+        
         if(SAVE_FILES_TO_LOCAL_SYSTEM):
-            with open(f"{SAVED_DATA_DIRECTORY}{filePath}/{fileName}", mode="w+b") as file:
+            with open(full_path, mode="w+b") as file:
                 
                 file.write(data)
                 
@@ -602,7 +612,7 @@ def processMouseMovementData():
         
     info_file_path = "level_info"
     info_file_name = f"Info_{level}-{sub_level}_{userID}.txt"
-    os.makedirs("level_info/", exist_ok=True)
+    # os.makedirs("level_info/", exist_ok=True)
     
 
     # Define the string with indentation
@@ -638,7 +648,7 @@ def processMouseMovementData():
     #======================================    
     #              EUCLID FILES
     #======================================
-    os.makedirs("euclid/", exist_ok=True)
+    # os.makedirs("euclid/", exist_ok=True)
     euclid_path = "euclid"
     shortest_euclid_file_name = f"Shortest_{level}-{sub_level}_{userID}.json"
     user_euclid_file_name = f"User_{level}-{sub_level}_{userID}.json"
@@ -663,7 +673,7 @@ def processMouseMovementData():
     #              MOUSE FILE
     #======================================
     mouse_data_path = "mouse_data"
-    os.makedirs(f"{mouse_data_path}/", exist_ok=True)
+    # os.makedirs(f"{mouse_data_path}/", exist_ok=True)
     
     mouse_data_file_name = f"Mouse_{level}-{sub_level}_{userID}.csv"
     
@@ -719,7 +729,7 @@ def processnogo():
 
         # Define the file path and ensure the directory exists
         nogo_path = "nogo/"
-        os.makedirs(nogo_path, exist_ok=True)
+        # os.makedirs(nogo_path, exist_ok=True)
         nogo_file_name = f"nogo_{userID}.csv"
 
         # Encode the CSV string to bytes and upload
