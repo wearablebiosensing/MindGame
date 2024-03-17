@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/tiles.css') }}"
+    />
+
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/global.css') }}"
+    />
+
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/updated_scoring.css') }}"
+    />
+  </head>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.1.2/socket.io.js"></script>
+  <script>
+      /*const socket = io.connect('http://' + document.domain + ':' + location.port);
+      socket.on('mqtt_message', function(msg) {
+          document.getElementById('mqtt-data').innerHTML = msg.data;
+      }); */
+  </script>
+
+  <body>
+    <header>
+      <p class="level_indicator">Level <span id="level"> : Scoring</span></p>
+    </header>
+
+    <div class="updated_scoring_page_container">
+      <!-- Mouse Data Score -->
+      <div class="updated_scoring_mouse_data_wrapper">
+        <h2 class="updated_scoring_mouse_data_title">Mouse Data Score</h2>
+        <div class="updated_scoring_mouse_data_container">
+          <!-- Emoji containers -->
+
+          <div class="updated_scoring_mouse_data_item">
+
+          {% if session.get("AverageEuclidanPercentChange") and (session.get("AverageEuclidanPercentChange") > 30) %}
+            <div class="emoji_wrapper active">
+            {% else %}
+            <div class="emoji_wrapper">
+            {% endif %}
+              <img
+                src="{{ url_for('static', filename='images/verySadYellowEmoji.svg') }}"
+              />
+            </div>
+            <p class="updated_scoring_mouse_data_item_desc">Very Poor</p>
+
+          </div>
+
+
+          
+          <div class="updated_scoring_mouse_data_item">
+
+            {% if session.get("AverageEuclidanPercentChange") and (session.get("AverageEuclidanPercentChange") > 20) and (session.get("AverageEuclidanPercentChange") <= 30) %}
+            <div class="emoji_wrapper active">
+            {% else %}
+            <div class="emoji_wrapper">
+            {% endif %}
+
+              <img
+                src="{{ url_for('static', filename='images/sadYellowEmoji.svg') }}"
+              />
+            </div>
+            <!-- <p class="updated_scoring_mouse_data_item_desc">&nbsp;</p> -->
+            <p class="updated_scoring_mouse_data_item_desc">Poor</p>
+
+
+          </div>
+
+
+
+          <div class="updated_scoring_mouse_data_item">
+
+            {% if session.get("AverageEuclidanPercentChange") and (session.get("AverageEuclidanPercentChange") > 10) and (session.get("AverageEuclidanPercentChange") <= 20) %}
+            <div class="emoji_wrapper active">
+            {% else %}
+            <div class="emoji_wrapper">
+            {% endif %}
+
+
+              <img
+                src="{{ url_for('static', filename='images/happyGreenEmoji.svg') }}"
+              />
+            </div>
+            <p class="updated_scoring_mouse_data_item_desc">Good</p>
+
+          </div>
+
+
+
+
+
+          <div class="updated_scoring_mouse_data_item">
+            <!-- <p class="updated_scoring_mouse_data_item_desc">>10%</p> -->
+
+          {% if session.get("AverageEuclidanPercentChange") and session.get("AverageEuclidanPercentChange") > 0 and session.get("AverageEuclidanPercentChange") <= 10  %}
+          <div class="emoji_wrapper active">
+          {% else %}
+            <div class="emoji_wrapper">
+          {% endif %}
+              <img
+                src="{{ url_for('static', filename='images/veryHappyGreenEmoji.svg') }}"
+              />
+            </div>
+            <p class="updated_scoring_mouse_data_item_desc">Very Good</p>
+          </div>
+
+
+
+        </div>
+
+
+
+
+      </div>
+
+      <br />
+      <br />
+      <br />
+
+      <!-- Time to Complete -->
+      <div class="updated_scoring_ttc_wrapper">
+        <h2 class="updated_scoring_ttc_title">Time to Complete Task</h2>
+        <div class="updated_scoring_ttc_container">
+          <div class="ttc_expected">
+            Expected Time: <span id="ttc_expected">{{ session.get("ExpectedTimeToCompleteLevel")["minutes"] }}:{{ session.get("ExpectedTimeToCompleteLevel")["seconds"] }}</span>
+          </div>
+
+      <br />
+      <br />
+
+          <div class="ttc_actual">You Took: <span id="ttc_actual">{{ session.get("TimeToCompleteLevel")["ttc_minutes"] }}:{{ session.get("TimeToCompleteLevel")["ttc_seconds"] }}</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bring User to next level -->
+    <div style="display: flex; justify-content: center;">
+      <button id="next_level_btn">
+        >
+      </button>
+    </div>
+
+ <div>Received MQTT Data:</div>
+        <div id="mqtt-data"></div>
+  </body>
+
+  <script src="{{ url_for('static', filename='js/helper_functions.js') }}"></script>
+
+  <script>
+    // Global Constants
+    //const userID = getLocalStorageOrNull("userID");
+    //const level = getLocalStorageOrNull("currentLevel");
+    //const sub_level = getLocalStorageOrNull("currentSubLevel");
+
+
+
+    // Update localStorage so that the next level is displayed on tiles_game page
+    const nextLevelBtn = document.getElementById("next_level_btn");
+    nextLevelBtn.addEventListener("click", () => {
+
+      let current_level = Number(localStorage.getItem("currentLevel"));
+      let sub = Number(localStorage.getItem("currentSubLevel"));
+
+      //Done with all levels
+      if(current_level == 3 && sub == 3){
+        window.location.href = `/`;
+        return;
+      }
+
+      //We are done with all 3 puzzels
+      //In the current level, goto next level
+      if(sub % 3 == 0){
+        console.log("SUB")
+        current_level += 1;
+        sub = 1;
+
+        localStorage.setItem("currentLevel", current_level ); 
+        localStorage.setItem("currentSubLevel", sub ); 
+
+        window.location.href = `/tiles_game`;
+        return;
+      }
+
+      //Otherwise, just go to next puzzel in level
+      localStorage.setItem("currentLevel", current_level ); // Next Level + 1
+      localStorage.setItem("currentSubLevel", sub + 1); // Next Level
+      window.location.href = `/tiles_game`;
+
+    });
+  </script>
+</html>
+
+

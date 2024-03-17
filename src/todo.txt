@@ -1,0 +1,50 @@
+
+check if mqtt collection before starting each level
+Send back to landing page if lost internet connection?
+
+
+
+
+Buttons for the in-lab and at-home study to automate the process.
+App deployed to the correct domain.
+At-home they do the game 8-10 times a week.
+Randomize which level 1 1/3, Level 2 1/3, Level 3 1/3.
+Logging which puzzle they did?
+Data from go no go?
+Go no go : Fix the number of trials.
+Go/ No go: fix the duration of of shapes appearing and disappearing.
+Practice test implementation GO / No-Go. First 20 trials
+Participant payment?
+Start button still clicks when watch is offline.
+Sample rate on the watch data?
+Sample rate on the mouse data?
+Accelerometer , Gyroscope, HR.
+Test the HR data on the watch
+Install watch apps on all the 5 watches.
+Print out instructions to participants guide. Google doc.
+
+
+In-Lab: Medication -> NoGo -> MindGame
+At-Home: Medication -> MindGame
+
+
+
+
+RISE ABOVE
+============================
+Home Page - Effects of Stigma
+Welcome page - Rise
+Show mid video in exercise - SM
+Filled out tbale- PS
+
+Welcome (Rise Video RISE showing)
+Home - (Effects of stigma section)
+NO LGS OR SURVEY
+SM - Exercise Progress(Better before and after on progress page)
+RS - Exercise(Positive feedback) Progress
+TAL - SAME
+PS - Josh Problem Solving table (Filled out)
+PS worksheet at end
+Certificate
+
+Faster
