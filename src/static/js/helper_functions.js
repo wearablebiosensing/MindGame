@@ -8,13 +8,14 @@ function getLocalStorageOrNull(key) {
   }
 }
 
+function getRandomNumberInclusive(min, max) {
+  min = Math.ceil(min); // Ensure min is rounded up to the nearest whole number
+  max = Math.floor(max); // Ensure max is rounded down to the nearest whole number
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
 function start_mqtt_data_collection() {
-  console.log(
-    "Mouse info ",
-    current_level,
-    current_sub_level,
-    getLocalStorageOrNull("userID")
-  );
+  console.log("Mouse info ", current_level, current_sub_level, getLocalStorageOrNull("userID"));
   fetch("/start_mqtt", {
     method: "POST",
     headers: {

@@ -84,27 +84,29 @@ function calculateUserEuclidDistances() {
     if (row[3] == "null") continue;
     if (row[0] === "END_OF_STROKE") {
       console.log("Calculating euclid distance: ", currentStrokeData, mouse_motion_array);
-      const shape = currentStrokeData[0][2];
+      if (currentStrokeData.length > 0) {
+        const shape = currentStrokeData[0][2];
 
-      // Calculate the distance traveled for the current stroke
-      let strokeDistance = 0;
-      for (let i = 1; i < currentStrokeData.length; i++) {
-        const [x1, y1] = currentStrokeData[i - 1];
-        const [x2, y2] = currentStrokeData[i];
-        strokeDistance += euclideanDistance(x1, y1, x2, y2);
+        // Calculate the distance traveled for the current stroke
+        let strokeDistance = 0;
+        for (let i = 1; i < currentStrokeData.length; i++) {
+          const [x1, y1] = currentStrokeData[i - 1];
+          const [x2, y2] = currentStrokeData[i];
+          strokeDistance += euclideanDistance(x1, y1, x2, y2);
+        }
+
+        // Add the strokeDistance to totalDistance
+        totalDistance += strokeDistance;
+
+        // Store the total distance for the shape
+        if (shape in shapeDistances) {
+          shapeDistances[shape] += strokeDistance;
+        } else {
+          shapeDistances[shape] = strokeDistance;
+        }
+
+        currentStrokeData = [];
       }
-
-      // Add the strokeDistance to totalDistance
-      totalDistance += strokeDistance;
-
-      // Store the total distance for the shape
-      if (shape in shapeDistances) {
-        shapeDistances[shape] += strokeDistance;
-      } else {
-        shapeDistances[shape] = strokeDistance;
-      }
-
-      currentStrokeData = [];
     } else {
       const [x, y, shape] = [parseInt(row[0]), parseInt(row[1]), row[3]];
       currentStrokeData.push([x, y, shape]);

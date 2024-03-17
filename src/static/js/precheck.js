@@ -146,6 +146,8 @@ g_mindgame_start_btn.addEventListener("click", () => {
     return;
   }
 
+  localStorage.setItem("currentLevel", 1); // Start at level 1
+  localStorage.setItem("currentSubLevel", getRandomNumberInclusive(1, 3));
   window.location = "/tiles_game";
 });
 

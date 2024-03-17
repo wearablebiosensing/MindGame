@@ -20,7 +20,7 @@
       href="{{ url_for('static', filename='css/updated_scoring.css') }}"
     />
   </head>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.1.2/socket.io.js"></script>
+  <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.1.2/socket.io.js"></script> -->
   <script>
       /*const socket = io.connect('http://' + document.domain + ':' + location.port);
       socket.on('mqtt_message', function(msg) {
@@ -145,12 +145,12 @@
     <!-- Bring User to next level -->
     <div style="display: flex; justify-content: center;">
       <button id="next_level_btn">
-        >
+        Next
       </button>
     </div>
 
- <div>Received MQTT Data:</div>
-        <div id="mqtt-data"></div>
+ <!-- <div>Received MQTT Data:</div> -->
+        <!-- <div id="mqtt-data"></div> -->
   </body>
 
   <script src="{{ url_for('static', filename='js/helper_functions.js') }}"></script>
@@ -171,14 +171,18 @@
       let sub = Number(localStorage.getItem("currentSubLevel"));
 
       //Done with all levels
-      if(current_level == 3 && sub == 3){
+      if(current_level == 3){
         window.location.href = `/`;
         return;
       }
 
+      localStorage.setItem("currentLevel", current_level + 1); // Go to next level
+      localStorage.setItem("currentSubLevel", getRandomNumberInclusive(1, 3)); // Pick random puzzle
+      window.location = "/tiles_game";
+
       //We are done with all 3 puzzels
       //In the current level, goto next level
-      if(sub % 3 == 0){
+      /*if(sub % 3 == 0){
         console.log("SUB")
         current_level += 1;
         sub = 1;
@@ -188,12 +192,12 @@
 
         window.location.href = `/tiles_game`;
         return;
-      }
+      }*/
 
       //Otherwise, just go to next puzzel in level
-      localStorage.setItem("currentLevel", current_level ); // Next Level + 1
-      localStorage.setItem("currentSubLevel", sub + 1); // Next Level
-      window.location.href = `/tiles_game`;
+      //localStorage.setItem("currentLevel", current_level ); // Next Level + 1
+      //localStorage.setItem("currentSubLevel", sub + 1); // Next Level
+      //window.location.href = `/tiles_game`;
 
     });
   </script>
