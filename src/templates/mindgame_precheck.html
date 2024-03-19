@@ -31,6 +31,64 @@
     </div>
 
     <script src="{{ url_for('static', filename='js/helper_functions.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/precheck.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/watch_check.js') }}"></script>
+
+    <script>
+      const g_mindgame_start_btn = document.getElementById("mindgame_start_btn");
+      const g_show_user_id = document.getElementById("pregame_id");
+      let g_watch_status = false;
+
+      function prefillInputsWithLocalStorage() {
+        const watchID = getLocalStorageOrNull("watchID");
+        g_watchID_input.value = watchID;
+      }
+      prefillInputsWithLocalStorage();
+
+      // Event listner for the check status button
+      g_watch_check_watch_status_btn.addEventListener("click", async () => {
+        g_mindgame_start_btn.classList.add("pregame_disabled");
+
+        const watchID = g_watchID_input.value;
+        if (!watchID.match(/\S/)) {
+          alert("Watch ID is empty");
+          return;
+        }
+
+        localStorage.setItem("watchID", watchID);
+        await handleWatchStatusCheck((status) => {
+          if (status == "online") {
+            g_watch_status = true;
+            g_mindgame_start_btn.classList.remove("pregame_disabled");
+          } else {
+            g_watch_status = false;
+            g_mindgame_start_btn.classList.add("pregame_disabled");
+          }
+        });
+      });
+
+      // Event listner for the start mindgame button
+      g_mindgame_start_btn.addEventListener("click", () => {
+        const watchID = g_watchID_input.value;
+        if (!watchID.match(/\S/)) {
+          alert("Watch ID is empty");
+          return;
+        }
+
+        if (g_mindgame_start_btn.classList.contains("pregame_disabled")) return;
+
+        if (getLocalStorageOrNull("userID") == null) {
+          alert("Cannot start MindGame as there is no userID saved to differentiate the data");
+          return;
+        }
+
+        localStorage.setItem("watchID", watchID);
+        localStorage.setItem("currentLevel", 1); // Start at level 1
+        localStorage.setItem("currentSubLevel", getRandomNumberInclusive(1, 3));
+        window.location = "/tiles_game";
+      });
+
+      // Show userID
+      g_show_user_id.innerHTML += getLocalStorageOrNull("userID") == null ? "No UserID found" : getLocalStorageOrNull("userID");
+    </script>
   </body>
 </html>

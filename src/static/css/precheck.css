@@ -60,7 +60,7 @@
   color: white;
   padding: 0.8em 2em; /* Adjusted for better proportion */
   min-width: 160px; /* Minimum width for better legibility */
-  max-width: auto; /* Adjust based on your layout's needs */
+  /* max-width: auto; Adjust based on your layout's needs */
   text-align: center;
   text-decoration: none;
   display: inline-block;

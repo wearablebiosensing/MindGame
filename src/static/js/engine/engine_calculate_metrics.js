@@ -82,7 +82,7 @@ function calculateUserEuclidDistances() {
 
   for (const row of mouse_motion_array) {
     if (row[3] == "null") continue;
-    if (row[0] === "END_OF_STROKE") {
+    if (row[3] === "END_OF_STROKE") {
       console.log("Calculating euclid distance: ", currentStrokeData, mouse_motion_array);
       if (currentStrokeData.length > 0) {
         const shape = currentStrokeData[0][2];

@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
 
-    <link
+    <!-- <link
       rel="stylesheet"
       href="{{ url_for('static', filename='css/tiles.css') }}"
-    />
+    /> -->
 
     <link
       rel="stylesheet"
@@ -19,14 +19,11 @@
       rel="stylesheet"
       href="{{ url_for('static', filename='css/updated_scoring.css') }}"
     />
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/precheck.css') }}" />
+
   </head>
-  <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.1.2/socket.io.js"></script> -->
-  <script>
-      /*const socket = io.connect('http://' + document.domain + ':' + location.port);
-      socket.on('mqtt_message', function(msg) {
-          document.getElementById('mqtt-data').innerHTML = msg.data;
-      }); */
-  </script>
+
 
   <body>
     <header>
@@ -142,30 +139,66 @@
       </div>
     </div>
 
-    <!-- Bring User to next level -->
-    <div style="display: flex; justify-content: center;">
-      <button id="next_level_btn">
-        Next
+
+    <!-- <div style="display: flex; flex-direction: column; align-items: center; gap: 5px; width: 100%">
+      <input type="text" placeholder="Watch ID" id="watchID_input" />
+    </div> -->
+
+
+        <!-- Bring User to next level -->
+        <!-- <div style="display: flex; justify-content: center;">
+          <button id="next_level_btn" class="start_button pregame_disabled">
+            Next Puzzle
+          </button>
+        </div> -->
+
+    <div class="pregame_status_container" style="flex-direction: row;">
+      <button id="next_level_btn" class="start_button pregame_disabled">
+        Next Puzzle
       </button>
+      <hr style="width: 2px; height: 30px; display: inline-block; margin: 0px 10px; background-color: black;">
+      <button id="watch_status_check_btn" class="start_button">Check Watch Status</button>
+      <div class="pregame_watch_status" id="watch_status_text">Offline</div>
+      <svg id="watch_status_loading" class="second_spinner" viewBox="0 0 50 50">
+        <circle class="path" cx="25" cy="25" r="20" fill="none" stroke-width="5"></circle>
+      </svg>
+
     </div>
 
- <!-- <div>Received MQTT Data:</div> -->
-        <!-- <div id="mqtt-data"></div> -->
+
+
+
   </body>
 
   <script src="{{ url_for('static', filename='js/helper_functions.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/watch_check.js') }}"></script>
+
 
   <script>
-    // Global Constants
-    //const userID = getLocalStorageOrNull("userID");
-    //const level = getLocalStorageOrNull("currentLevel");
-    //const sub_level = getLocalStorageOrNull("currentSubLevel");
+    const nextLevelBtn = document.getElementById("next_level_btn");
+    let g_watch_status = false;
+
+    // Event listner for the check status button
+    g_watch_check_watch_status_btn.addEventListener("click", async () => {
+      nextLevelBtn.classList.add("pregame_disabled");
 
 
+      //localStorage.setItem("watchID", watchID);
+      await handleWatchStatusCheck((status) => {
+        if (status == "online") {
+          g_watch_status = true;
+          nextLevelBtn.classList.remove("pregame_disabled");
+        } else {
+          g_watch_status = false;
+          nextLevelBtn.classList.add("pregame_disabled");
+        }
+      }, getLocalStorageOrNull("watchID"));
+    });
 
     // Update localStorage so that the next level is displayed on tiles_game page
-    const nextLevelBtn = document.getElementById("next_level_btn");
     nextLevelBtn.addEventListener("click", () => {
+
+      if(nextLevelBtn.classList.contains("pregame_disabled")) return;
 
       let current_level = Number(localStorage.getItem("currentLevel"));
       let sub = Number(localStorage.getItem("currentSubLevel"));
@@ -180,26 +213,14 @@
       localStorage.setItem("currentSubLevel", getRandomNumberInclusive(1, 3)); // Pick random puzzle
       window.location = "/tiles_game";
 
-      //We are done with all 3 puzzels
-      //In the current level, goto next level
-      /*if(sub % 3 == 0){
-        console.log("SUB")
-        current_level += 1;
-        sub = 1;
-
-        localStorage.setItem("currentLevel", current_level ); 
-        localStorage.setItem("currentSubLevel", sub ); 
-
-        window.location.href = `/tiles_game`;
-        return;
-      }*/
-
-      //Otherwise, just go to next puzzel in level
-      //localStorage.setItem("currentLevel", current_level ); // Next Level + 1
-      //localStorage.setItem("currentSubLevel", sub + 1); // Next Level
-      //window.location.href = `/tiles_game`;
-
     });
+
+    let current_level = Number(localStorage.getItem("currentLevel"));
+    if(current_level == 3){
+      nextLevelBtn.classList.remove("pregame_disabled");
+      nextLevelBtn.innerHTML = "Finish"
+      //document.getElementsByClassName("pregame_status_container")[0].style.display = "none";
+    }
   </script>
 </html>
 

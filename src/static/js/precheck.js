@@ -25,7 +25,7 @@ let g_is_watch_status_loading = false;
  * Handles the process of checking and displaying the watch's status.
  * It makes a server request to check if a watch, identified by its ID, is online or offline.
  */
-async function handleWatchStatusCheck() {
+async function handleWatchStatusCheck(callback) {
   const watchID = g_watchID_input.value;
 
   //No watchID provided
@@ -102,54 +102,57 @@ function displayWatchStatus(status) {
 
 */
 
-function getLocalStorageOrNull(key) {
-  try {
-    const value = localStorage.getItem(key);
-    return value !== null ? value : null;
-  } catch (error) {
-    console.error("Error retrieving from local storage:", error);
-    return null;
-  }
-}
+// function getLocalStorageOrNull(key) {
+//   try {
+//     const value = localStorage.getItem(key);
+//     return value !== null ? value : null;
+//   } catch (error) {
+//     console.error("Error retrieving from local storage:", error);
+//     return null;
+//   }
+// }
 
-function prefillInputsWithLocalStorage() {
-  const watchID = getLocalStorageOrNull("watchID");
-  g_watchID_input.value = watchID;
-}
-prefillInputsWithLocalStorage();
+// function prefillInputsWithLocalStorage() {
+//   const watchID = getLocalStorageOrNull("watchID");
+//   g_watchID_input.value = watchID;
+// }
+// prefillInputsWithLocalStorage();
 
-// Event listner for the check status button
-g_watch_check_watch_status_btn.addEventListener("click", async () => {
-  // Prevent multiple requests at once
-  if (g_is_watch_status_loading == true) return;
+// // Event listner for the check status button
+// g_watch_check_watch_status_btn.addEventListener("click", async () => {
+//   // Prevent multiple requests at once
+//   if (g_is_watch_status_loading == true) return;
 
-  const watchID = g_watchID_input.value;
-  if (!watchID.match(/\S/)) {
-    alert("Watch ID is empty");
-    return;
-  }
-  await handleWatchStatusCheck();
-});
+//   const watchID = g_watchID_input.value;
+//   if (!watchID.match(/\S/)) {
+//     alert("Watch ID is empty");
+//     return;
+//   }
 
-// Event listner for the start mindgame button
-g_mindgame_start_btn.addEventListener("click", () => {
-  const watchID = g_watchID_input.value;
-  if (!watchID.match(/\S/)) {
-    alert("Watch ID is empty");
-    return;
-  }
+//   localStorage.setItem("watchID", watchID);
+//   await handleWatchStatusCheck();
+// });
 
-  if (g_mindgame_start_btn.classList.contains("pregame_disabled")) return;
+// // Event listner for the start mindgame button
+// g_mindgame_start_btn.addEventListener("click", () => {
+//   const watchID = g_watchID_input.value;
+//   if (!watchID.match(/\S/)) {
+//     alert("Watch ID is empty");
+//     return;
+//   }
 
-  if (getLocalStorageOrNull("userID") == null) {
-    alert("Cannot start MindGame as there is no userID saved to differentiate the data");
-    return;
-  }
+//   if (g_mindgame_start_btn.classList.contains("pregame_disabled")) return;
 
-  localStorage.setItem("currentLevel", 1); // Start at level 1
-  localStorage.setItem("currentSubLevel", getRandomNumberInclusive(1, 3));
-  window.location = "/tiles_game";
-});
+//   if (getLocalStorageOrNull("userID") == null) {
+//     alert("Cannot start MindGame as there is no userID saved to differentiate the data");
+//     return;
+//   }
 
-// Show userID
-g_show_user_id.innerHTML += getLocalStorageOrNull("userID") == null ? "No UserID found" : getLocalStorageOrNull("userID");
+//   localStorage.setItem("watchID", watchID);
+//   localStorage.setItem("currentLevel", 1); // Start at level 1
+//   localStorage.setItem("currentSubLevel", getRandomNumberInclusive(1, 3));
+//   window.location = "/tiles_game";
+// });
+
+// // Show userID
+// g_show_user_id.innerHTML += getLocalStorageOrNull("userID") == null ? "No UserID found" : getLocalStorageOrNull("userID");

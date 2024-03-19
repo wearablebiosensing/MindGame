@@ -127,11 +127,12 @@ def on_disconnect(client, userdata, rc):
 # Function to save data to CSV
 def save_to_csv(data, dir, filename, header=None):
     # Correct directory name
-    directory = dir
+    directory = os.path.join(SAVED_DATA_DIRECTORY, dir)
+    
     os.makedirs(directory, exist_ok=True)
 
     # Correct file path
-    file_path = f"{SAVED_DATA_DIRECTORY}{directory}{filename}.csv"
+    file_path = f"{directory}{filename}.csv"
 
     # Check if file exists before opening it
     file_exists = os.path.exists(file_path)
@@ -206,9 +207,11 @@ def start_mqtt_collection():
     userID = res["userID"]
     watchID = res["watchID"]
     
+    # Generate a unique identifier for the session
+    session['unique_session_identifier'] = int(time.time())
     
     #Filename creation
-    filename = f"{level}_{sub_level}_{userID}_{int(time.time())}"
+    filename = f"watch_{userID}_L{level}_S{sub_level}_{session['unique_session_identifier']}"
     logger.info(f"Starting MQTT data collection for WatchID of {watchID} for user {userID} for {level}-{sub_level}")
     
     
@@ -459,7 +462,7 @@ def upload_csv_to_firebase(file_path, firebase_path):
         
         
     
-def createAndUpload(filePath: str, fileName: str, data: bytes):
+def createAndUpload(fileDir: str, fileName: str, data: bytes):
     """Abstracts the way we create the data files and upload
     them to Firebase
 
@@ -469,7 +472,7 @@ def createAndUpload(filePath: str, fileName: str, data: bytes):
         data (_type_): utf8 encoded bytes??
     """
     
-    directory = os.path.join(SAVED_DATA_DIRECTORY, filePath)
+    directory = os.path.join(SAVED_DATA_DIRECTORY, fileDir)
     ensure_directory_exists(directory)
     full_path = os.path.join(directory, fileName)
     
@@ -483,7 +486,7 @@ def createAndUpload(filePath: str, fileName: str, data: bytes):
                 if(SAVE_FILES_TO_CLOUD):
                     file.seek(0)  # Rewind the file pointer to the beginning
                     bucket = storage.bucket()
-                    blob = bucket.blob(f"MagneticTiles/{filePath}/{fileName}") 
+                    blob = bucket.blob(f"MagneticTiles/{fileDir}/{fileName}") 
                     blob.upload_from_file(file_obj=file, rewind=True)
         else:
             
@@ -493,7 +496,7 @@ def createAndUpload(filePath: str, fileName: str, data: bytes):
                     
                     file.seek(0)  # Rewind the file pointer to the beginning
                     bucket = storage.bucket()
-                    blob = bucket.blob(f"MagneticTiles/{filePath}/{fileName}") 
+                    blob = bucket.blob(f"MagneticTiles/{fileDir}/{fileName}") 
                     blob.upload_from_file(file_obj=file, rewind=True)
         
             
@@ -603,6 +606,11 @@ def processMouseMovementData():
     # print("HOPE", session.get("TimeToCompleteLevel"))
     
     
+    
+    unique_file_identifier =  session.get('unique_session_identifier')
+    
+    if not unique_file_identifier:
+        logger.error("Cannot get session identifier")
 
     
     
@@ -610,34 +618,49 @@ def processMouseMovementData():
     #              INFO FILE
     #======================================
         
-    info_file_path = "level_info"
-    info_file_name = f"Info_{level}-{sub_level}_{userID}.txt"
-    # os.makedirs("level_info/", exist_ok=True)
+    info_file_dir = "level_info"
+    info_file_name = f"info_{userID}_L{level}_S{sub_level}_{unique_file_identifier}.json"
     
+    # Construct the data dictionary
+    info_data = {
+        "ScreenSize": {
+            "width": window_width,
+            "height": window_height
+        },
+        "Level": {
+            "main": level,
+            "sub": sub_level
+        },
+        "UserID": userID,
+        "TimeToCompleteLevel": f"{time_to_complete['ttc_minutes']}:{time_to_complete['ttc_seconds']}"
+    }
+    # Serialize the dictionary to a JSON string
+    info_json = json.dumps(info_data, indent=4)
+    
+    # Convert JSON string to bytes, since your createAndUpload function seems to expect bytes
+    info_file_data = info_json.encode("utf-8")
 
     # Define the string with indentation
-    # SCREEN_WIDTH_INDEX = 6
-    # SCREEN_HEIGHT_INDEX = 7
-    info_file_string = f"""
-        Screen Size: 
-        {str(window_width)}x{str(window_height)}
+    # info_file_string = f"""
+    #     Screen Size: 
+    #     {str(window_width)}x{str(window_height)}
 
-        Level: 
-        {str(level)}, {str(sub_level)}
+    #     Level: 
+    #     {str(level)}, {str(sub_level)}
 
-        UserID: 
-        {str(userID)}
+    #     UserID: 
+    #     {str(userID)}
 
-        Time to Complete Level: 
-        {time_to_complete['ttc_minutes']}:{time_to_complete['ttc_seconds']}
-    """
+    #     Time to Complete Level: 
+    #     {time_to_complete['ttc_minutes']}:{time_to_complete['ttc_seconds']}
+    # """
 
-    # Remove leading spaces from each line in the string
-    info_file_string = '\n'.join(line.lstrip() for line in info_file_string.splitlines())
-    info_file_data = info_file_string.encode("utf-8")
+    # # Remove leading spaces from each line in the string
+    # info_file_string = '\n'.join(line.lstrip() for line in info_file_string.splitlines())
+    # info_file_data = info_file_string.encode("utf-8")
     
     #Info File
-    createAndUpload(info_file_path, info_file_name, info_file_data)
+    createAndUpload(info_file_dir, info_file_name, info_file_data)
     
     
 
@@ -648,20 +671,19 @@ def processMouseMovementData():
     #======================================    
     #              EUCLID FILES
     #======================================
-    # os.makedirs("euclid/", exist_ok=True)
-    euclid_path = "euclid"
-    shortest_euclid_file_name = f"Shortest_{level}-{sub_level}_{userID}.json"
-    user_euclid_file_name = f"User_{level}-{sub_level}_{userID}.json"
+    euclid_dir = "euclid"
+    shortest_euclid_file_name = f"shortest_{userID}_L{level}_S{sub_level}_{unique_file_identifier}.json"
+    user_euclid_file_name = f"user_{userID}_L{level}_S{sub_level}_{unique_file_identifier}.json"
     
 
     #Shortest Distances JSON
     shortest_euclid_data = json.dumps(shortest_euclid_distances).encode("utf-8")
-    createAndUpload(euclid_path, shortest_euclid_file_name, shortest_euclid_data)
+    createAndUpload(euclid_dir, shortest_euclid_file_name, shortest_euclid_data)
        
         
     #User Distances JSON
     user_euclid_data = json.dumps(user_euclid_distances).encode("utf-8")
-    createAndUpload(euclid_path, user_euclid_file_name, user_euclid_data)
+    createAndUpload(euclid_dir, user_euclid_file_name, user_euclid_data)
     
     
     
@@ -672,10 +694,8 @@ def processMouseMovementData():
     #======================================    
     #              MOUSE FILE
     #======================================
-    mouse_data_path = "mouse_data"
-    # os.makedirs(f"{mouse_data_path}/", exist_ok=True)
-    
-    mouse_data_file_name = f"Mouse_{level}-{sub_level}_{userID}.csv"
+    mouse_data_dir = "mouse_data"
+    mouse_data_file_name = f"mouse_{userID}_L{level}_S{sub_level}_{unique_file_identifier}.csv"
     
     # Create the header row
     header_row = ['x', 'y', 'timestamp', 'shape', 'x(px/s^2)', 'y(px/s^2)']
@@ -686,7 +706,7 @@ def processMouseMovementData():
     csv_data = csv_data.encode('utf-8')
     
     #Upload Mouse Data
-    createAndUpload(mouse_data_path, mouse_data_file_name, csv_data)
+    createAndUpload(mouse_data_dir, mouse_data_file_name, csv_data)
     
       
         
@@ -728,13 +748,13 @@ def processnogo():
         csv_string = output.getvalue()
 
         # Define the file path and ensure the directory exists
-        nogo_path = "nogo/"
+        nogo_dir = "nogo/"
         # os.makedirs(nogo_path, exist_ok=True)
         nogo_file_name = f"nogo_{userID}.csv"
 
         # Encode the CSV string to bytes and upload
         nogo_data = csv_string.encode("utf-8")
-        createAndUpload(nogo_path, nogo_file_name, nogo_data)
+        createAndUpload(nogo_dir, nogo_file_name, nogo_data)
         
         logger.info(f"Successfully processed and saved No-Go data for userID {userID}")
         return jsonify({"message": "Data received and processed successfully"}), 201

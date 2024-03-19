@@ -174,8 +174,27 @@ function mouse_up(event) {
   shape.mouseUp();
   current_shape_index = null;
 
+  let clientX = 0;
+  let clientY = 0;
+
+  // Handle touch events as well
+  if (event.type === "touchmove") {
+    // Get touch coordinates
+    const touch = event.touches[0];
+    clientX = Math.round(touch.clientX);
+    clientY = Math.round(touch.clientY);
+  } else {
+    clientX = event.clientX;
+    clientY = event.clientY;
+  }
+
+  //Collect mouse data every interval set by global var
+  const currentTime = Date.now();
+
+  const { x, y } = calculateMousePos(clientX, clientY);
+
   // Add the identifier for the end of stroke
-  mouse_motion_array.push(["END_OF_STROKE", 0, 0, getTimestamp(), "END_OF_STROKE", 0]);
+  mouse_motion_array.push([Math.round(x), Math.round(y), getTimestamp(), "END_OF_STROKE", "END_OF_STROKE", "END_OF_STROKE"]);
 
   // LEVEL IS COMPLETE
   if (getProgressBarPercentage() == 100) {
