@@ -12,12 +12,6 @@ import firebase_admin
 from firebase_admin import credentials, storage, db
 import pandas as pd
 import numpy as np
-# import scipy.signal as signal
-import matplotlib
-matplotlib.use('Agg')
-from matplotlib import pyplot as plt
-from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
-from flask_socketio import SocketIO
 import paho.mqtt.client as mqtt
 import csv
 import time
@@ -144,7 +138,14 @@ def save_to_csv(data, dir, filename, header=None):
         if not file_exists and header is not None:
             csv_writer.writerow(header)
 
-        csv_writer.writerow([data])
+        # csv_writer.writerow([data])
+        #csv_writer.writerow(data.split(','))
+        # Trim, clean, and split the data before writing
+        cleaned_data = data.strip()  # Remove leading/trailing whitespace
+        fields = cleaned_data.split(',')  # Split into fields
+        # Optionally, further sanitize each field here if necessary
+
+        csv_writer.writerow(fields)
         
     return file_path
 
