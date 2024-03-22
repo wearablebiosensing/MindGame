@@ -38,7 +38,8 @@ app.secret_key = "super secret key"
 
 
 #Firebase Config
-cred = credentials.Certificate('./carewear-77d8e-b0c3a74e907c.json') 
+cred_path = os.path.join(".", "carewear-77d8e-b0c3a74e907c.json")
+cred = credentials.Certificate(cred_path) 
 firebaseConfig = {
   "apiKey": "AIzaSyDyjHLuokjuGEPr3HOSsX8FP16qxyS62W8",
   "authDomain": "carewear-77d8e.firebaseapp.com",
@@ -60,7 +61,7 @@ ref = db.reference('/sensors_message')  # Path to your sensor data node in the d
 #Constant
 SAVE_FILES_TO_LOCAL_SYSTEM = True
 SAVE_FILES_TO_CLOUD = False
-SAVED_DATA_DIRECTORY = "data/"
+SAVED_DATA_DIRECTORY = os.path.join("data", "")
 
 
 
@@ -126,7 +127,7 @@ def save_to_csv(data, dir, filename, header=None):
     os.makedirs(directory, exist_ok=True)
 
     # Correct file path
-    file_path = f"{directory}{filename}.csv"
+    file_path = os.path.join(directory, f"{filename}.csv")
 
     # Check if file exists before opening it
     file_exists = os.path.exists(file_path)
@@ -368,11 +369,12 @@ def intake_data():
         data = request_data["data"]
         
         # Define the directory and ensure its existence
-        directory = f"{SAVED_DATA_DIRECTORY}intake/"
+        directory = os.path.join(SAVED_DATA_DIRECTORY, "intake")  # Use os.path.join for cross-platform compatibility
         os.makedirs(directory, exist_ok=True)
 
         # Construct the file path
-        file_path = os.path.join(directory, f"intake_{user_id}.csv")
+        file_name = f"intake_{user_id}.csv"
+        file_path = os.path.join(directory, file_name)
 
         # Write data to CSV
         with open(file_path, "w", newline='') as csv_file:
