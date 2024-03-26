@@ -173,9 +173,30 @@
   <script src="{{ url_for('static', filename='js/helper_functions.js') }}"></script>
   <script src="{{ url_for('static', filename='js/watch_check.js') }}"></script>
 
+  <script>
+
+
+    const nextLevelBtn = document.getElementById("next_level_btn");
+    let level = Number(localStorage.getItem("currentLevel"));
+    if(level == 3){
+      nextLevelBtn.classList.remove("pregame_disabled");
+      nextLevelBtn.innerHTML = "Finish"
+    }
+
+
+    localStorage.setItem("mindgame_progress", "tiles");
+    if(level == 3){
+      // Done with all levels and reset progress
+      localStorage.setItem("mindgame_progress", "home");
+    } else {
+      localStorage.setItem("currentLevel", level + 1); // Go to next level
+      localStorage.setItem("currentSubLevel", getRandomNumberInclusive(1, 3)); // Pick random puzzle
+    }
+
+  </script>
+
 
   <script>
-    const nextLevelBtn = document.getElementById("next_level_btn");
     let g_watch_status = false;
 
     // Event listner for the check status button
@@ -209,18 +230,14 @@
         return;
       }
 
-      localStorage.setItem("currentLevel", current_level + 1); // Go to next level
-      localStorage.setItem("currentSubLevel", getRandomNumberInclusive(1, 3)); // Pick random puzzle
+      //localStorage.setItem("currentLevel", current_level + 1); // Go to next level
+      //localStorage.setItem("currentSubLevel", getRandomNumberInclusive(1, 3)); // Pick random puzzle
       window.location = "/tiles_game";
 
     });
 
-    let current_level = Number(localStorage.getItem("currentLevel"));
-    if(current_level == 3){
-      nextLevelBtn.classList.remove("pregame_disabled");
-      nextLevelBtn.innerHTML = "Finish"
-      //document.getElementsByClassName("pregame_status_container")[0].style.display = "none";
-    }
+
+
   </script>
 </html>
 
