@@ -34,6 +34,21 @@
     <script src="{{ url_for('static', filename='js/watch_check.js') }}"></script>
 
     <script>
+      let restore_tiles_progress = false;
+      let mindgame_status = getLocalStorageOrNull("mindgame_progress");
+      if (mindgame_status == null || mindgame_status != "tiles") {
+        // Only set the precheck as progress since if inside tiles
+        // we send user to this page anways
+        localStorage.setItem("mindgame_progress", "precheck");
+      }
+
+      // Set flag so we dont start from begining
+      if (mindgame_status == "tiles") {
+        restore_tiles_progress = true;
+      }
+    </script>
+
+    <script>
       const g_mindgame_start_btn = document.getElementById("mindgame_start_btn");
       const g_show_user_id = document.getElementById("pregame_id");
       let g_watch_status = false;
@@ -81,10 +96,14 @@
           return;
         }
 
-        localStorage.setItem("watchID", watchID);
-        localStorage.setItem("currentLevel", 1); // Start at level 1
-        localStorage.setItem("currentSubLevel", getRandomNumberInclusive(1, 3));
+        // Start from begining
+        if (restore_tiles_progress == false) {
+          localStorage.setItem("watchID", watchID);
+          localStorage.setItem("currentLevel", 1); // Start at level 1
+          localStorage.setItem("currentSubLevel", getRandomNumberInclusive(1, 3));
+        }
         window.location = "/tiles_game";
+        //document.location.replace("/tiles_game");
       });
 
       // Show userID

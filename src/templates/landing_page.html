@@ -28,8 +28,8 @@
       <div class="center landing_container">
         <div class="landing_title">Mind Game</div>
         <img 
-        style="width:min(100%, 500px); height: auto ; ",
-        src="{{ url_for('static', filename='images/landing_page_logo.png') }}"
+        style="width:min(100%, 550px); height: auto ; ",
+        src="{{ url_for('static', filename='images/landing_page_v2.png') }}"
         alt="Group">
 
         <!-- <div class="text_container_m5connection">Waiting for M5 to connect... </div> -->
@@ -42,35 +42,25 @@
             <!-- <input type="text" placeholder="Watch ID" id="watchID" /> -->
           </div>
 
-          <!-- <div style="display: flex; align-items: center; gap:10px;">
-            <button id="watch_status_btn" style="padding: 10px;">Check Watch Status</button>
+        </div>
 
-              <div id="watch_status" style="color: red">Offline</div>
-              <svg id="watch_loading" class="second_spinner" viewBox="0 0 50 50">
-                <circle
-                  class="path"
-                  cx="25"
-                  cy="25"
-                  r="20"
-                  fill="none"
-                  stroke-width="5"
-                ></circle>
-              </svg>
-          </div> -->
+        <div class="btn_container" style="margin-bottom: 10px;">
+
+
+          <button id="restore_btn" class="start_button" >Restore Progress</button>
 
         </div>
 
-        <div class="btn_container">
+        <div class="btn_container" id="navigation_buttons">
 
 
           <button id="in_lab_btn" class="start_button" >In Lab</button>
           <button id="at_home_btn" class="start_button" >At Home</button>
+          <a href="{{ url_for('tutorial') }}"><button class="start_button" >Tutorial</button></a>
 
           <!-- <button id="submitBtn"  class="start_button" required> Start </button> -->
-          <!-- <a href="{{ url_for('tutorial') }}"><button class="start_button" >Tutorial</button></a>
-          <a href="{{ url_for('nogo') }}"><button class="start_button" >Go/NoGo</button></a>
-          <a href="{{ url_for('intake') }}"><button class="start_button" >In-Take</button></a> -->
         </div>
+
 
       </div>
       
@@ -78,6 +68,57 @@
 
     </div>
     <script src="{{ url_for('static', filename='js/home.js') }}"></script>
+    <script>
+      let mindgameStatus = getLocalStorageOrNull("mindgame_progress");
+      if(mindgameStatus == null){
+        localStorage.setItem("mindgame_progress", "home");
+      } 
+
+
+      const restoreBtn = document.getElementById("restore_btn");
+      restoreBtn.style.display = mindgameStatus !== "home" ? "block" : "none";
+
+      const navigation_buttons = document.getElementById("navigation_buttons");
+      navigation_buttons.style.display = mindgameStatus !== "home" ? "none" : "block";
+
+
+
+
+
+      function updateRestoreButtonText() {
+        if (mindgameStatus === "tiles" || mindgameStatus === "precheck") {
+          const currentLevel = Number(localStorage.getItem("currentLevel"));
+          const sub = Number(localStorage.getItem("currentSubLevel"));
+          restoreBtn.innerHTML += ` Level ${currentLevel}-${sub}`;
+        } else if (mindgameStatus === "nogo") {
+          restoreBtn.innerHTML += ": NoGo";
+        } else if (mindgameStatus === "intake") {
+          restoreBtn.innerHTML += ": In Take Form";
+        }
+      }
+
+      function redirectToPage() {
+        switch (mindgameStatus) {
+          case "tiles":
+          case "precheck":
+            window.location = "/mindgame_precheck";
+            break;
+          case "nogo":
+            window.location = "/nogo";
+            break;
+          case "intake":
+            window.location = "/start_application/athome";
+            break;
+        }
+      }
+
+      if (mindgameStatus !== "home") {
+        updateRestoreButtonText();
+        restoreBtn.addEventListener("click", redirectToPage);
+      }
+      
+      
+    </script>
     
 
     <script>

@@ -1,15 +1,6 @@
 /*
     This file contatins needed functions for the landing/home page of the MindGame Application
     Event liseners and use of these functions can be found in the "landing_page.html"
-
-
-    Table Of Contents:
-
-        - Section 0) Global Variables
-        - Section 1) Check the status of the Samsung MQTT Watch Application 
-        - Section 2) Handle Input validation for Watch and UserID inputs
-        - Section 3) Other Useful Helper Functions
-        - Section 4) Event Listeners / Starting the Application
 */
 
 /*
