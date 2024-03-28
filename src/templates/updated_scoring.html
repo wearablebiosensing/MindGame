@@ -124,17 +124,17 @@
       <br />
 
       <!-- Time to Complete -->
-      <div class="updated_scoring_ttc_wrapper">
+      <div class="updated_scoring_ttc_wrapper" style="align-items: center;">
         <h2 class="updated_scoring_ttc_title">Time to Complete Task</h2>
         <div class="updated_scoring_ttc_container">
-          <div class="ttc_expected">
+          <!-- <div class="ttc_expected">
             Expected Time: <span id="ttc_expected">{{ session.get("ExpectedTimeToCompleteLevel")["minutes"] }}:{{ session.get("ExpectedTimeToCompleteLevel")["seconds"] }}</span>
-          </div>
+          </div> -->
 
-      <br />
-      <br />
+      <!-- <br />
+      <br /> -->
 
-          <div class="ttc_actual">You Took: <span id="ttc_actual">{{ session.get("TimeToCompleteLevel")["ttc_minutes"] }}:{{ session.get("TimeToCompleteLevel")["ttc_seconds"] }}</span></div>
+          <div class="ttc_actual" style="text-align: center;">You Took: <span id="ttc_actual">{{ session.get("TimeToCompleteLevel")["ttc_minutes"] }}:{{ session.get("TimeToCompleteLevel")["ttc_seconds"] }}</span></div>
         </div>
       </div>
     </div>
