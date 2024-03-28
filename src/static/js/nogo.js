@@ -3,8 +3,9 @@ const g_start_btn = document.getElementById("nogo_start");
 const g_nogo_container = document.getElementById("nogo_container");
 const g_nogo_shape = document.getElementById("nogo_shape");
 const g_nogo_spinner = document.getElementById("nogo_spinner");
-const MAX_SHAPES_SHOWN = 22; //Standard 220, 20 for practice, 100 Go, 100 NoGo
-const PRACTICE_SHAPES = 20;
+const g_nogo_progress_txt = document.getElementById("nogo_progress");
+const MAX_SHAPES_SHOWN = 220; //Standard 220, 20 for practice, 100 Go, 100 NoGo
+const PRACTICE_SHAPES = 10;
 const MAX_TIME = 1000; //ms
 const TIME_BETWEEN_SHAPES = 2400; //ms
 let g_times_shape_shown = 0;
@@ -93,6 +94,10 @@ function nogo_post_data() {
 }
 
 function nogo_add_data(shape, wasClicked, correct) {
+  // if (g_times_shape_shown == PRACTICE_SHAPES) {
+  //   alert("Practice is Over");
+  // }
+
   if (g_times_shape_shown <= PRACTICE_SHAPES) {
     return; // Practice for the first 20, dont collect data
   }
@@ -167,6 +172,12 @@ function nogo_show_shape() {
     return;
   }
   g_times_shape_shown += 1;
+
+  if (g_times_shape_shown < PRACTICE_SHAPES) {
+    g_nogo_progress_txt.innerHTML = `Practice ${g_times_shape_shown}/${PRACTICE_SHAPES}`;
+  } else {
+    g_nogo_progress_txt.innerHTML = `${g_times_shape_shown}/${MAX_SHAPES_SHOWN}`;
+  }
 
   g_nogo_shape.removeAttribute("class");
 
