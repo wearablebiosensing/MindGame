@@ -98,16 +98,34 @@ def on_connect(client, userdata, flags, rc, watchID):
     else:
         print(f"Failed to connect, return code: {rc}")
         
+        
+def get_csv_headers_from_topic(topic: str) -> list[str]:
+    """Ouputs the correct csv header for a specific topic of data
+
+    Args:
+        topic (str)
+
+    Returns:
+        list[str]: list of headers to be written to the csv
+    """
+    
+    if(topic == "accelerometer"):
+        return ["x", "y", "z", "internal_ts", "watch_timestamp", "relative_timestamp"]
+    
+    if(topic == "gyroscope"):
+        return ["x", "y", "z", "internal_ts", "watch_timestamp", "relative_timestamp"]
+    
+    if(topic == "heartrate"):
+        return ["bpm", "internal_ts", "watch_timestamp", "relative_timestamp"]
+        
 def on_message(client, userdata, message, filename, watchID):
     try:
         topic_base = message.topic.split('/')[1]  # Extracts 'acceleration' or 'gyro' from the topic
         directory = f"watch_data/{topic_base}_data/"  # Creates directory path based on topic
         full_filename = f"{filename}_{topic_base}"  # Appends topic to the filename
-        
-        print("OnMessage: ", topic_base)
 
         data = message.payload.decode()
-        save_to_csv(data, directory, full_filename)
+        save_to_csv(data, directory, full_filename, watchID, get_csv_headers_from_topic(topic_base))
     except Exception as e:
         print(f"Error processing mqtt message: {e}")
 
@@ -120,7 +138,7 @@ def on_disconnect(client, userdata, rc):
         print(f"Unexpected disconnection, return code: {rc}")
 
 # Function to save data to CSV
-def save_to_csv(data, dir, filename, header=None):
+def save_to_csv(data, dir, filename, watchID, header=None):
     # Correct directory name
     directory = os.path.join(SAVED_DATA_DIRECTORY, dir)
     
@@ -131,6 +149,17 @@ def save_to_csv(data, dir, filename, header=None):
 
     # Check if file exists before opening it
     file_exists = os.path.exists(file_path)
+    
+    
+    relative_timestamp = 0
+    # == Relative Timestamp == Initialize start_time if it's the first message
+    if mqtt_clients[watchID]["start_time"] is None:
+        mqtt_clients[watchID]["start_time"] = time.time()
+    else:
+        # Calculate relative timestamp
+        relative_timestamp = time.time() - mqtt_clients[watchID]["start_time"]
+        
+    print(relative_timestamp)
 
     with open(file_path, "a", newline='') as csv_file:
         csv_writer = csv.writer(csv_file)
@@ -139,14 +168,18 @@ def save_to_csv(data, dir, filename, header=None):
         if not file_exists and header is not None:
             csv_writer.writerow(header)
 
-        # csv_writer.writerow([data])
-        #csv_writer.writerow(data.split(','))
-        # Trim, clean, and split the data before writing
-        cleaned_data = data.strip()  # Remove leading/trailing whitespace
-        fields = cleaned_data.split(',')  # Split into fields
-        # Optionally, further sanitize each field here if necessary
+        # Splite the gitant string blob into each row, still also just a big string
+        rows = data.split('\n')
+        
+        
+        # 2D array each row is a row for csv
+        # Each column is a entry in each row
+        csv_data = [row.split(',') for row in rows]
+        
+        for row in csv_data:
+            row.append(str(relative_timestamp))
 
-        csv_writer.writerow(fields)
+        csv_writer.writerows(csv_data)
         
     return file_path
 
@@ -169,8 +202,7 @@ def start_data_collection(level, sub_level, userID, filename, watchID):
     # Store the client in the dictionary
     #Need to also store filename, so when mqttstop is called we can then
     #Save the same file to firebase, maybe use an obj {"client": client, "filename": filename}
-    
-    mqtt_clients[watchID] = {"client": client, "filename": filename}
+    mqtt_clients[watchID] = {"client": client, "filename": filename, "start_time": None}
     print(f"Started MQTT for watch {watchID} with filename: {filename}")
     print("All current clients: ", mqtt_clients)
 
