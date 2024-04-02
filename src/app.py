@@ -79,11 +79,7 @@ def on_connect(client, userdata, flags, rc, watchID):
         topic = f"{watchID}/accelerometer"
         topic2 = f"{watchID}/gyroscope"
         topic3 = f"{watchID}/heartrate"
-        
-        # android_sensor_heart_rate
-        # android_sensor_orientation
-        # android_sensor_gyroscope
-        
+        topic4 = f"{watchID}/linear_acceleration"
         
         print("Connected to MQTT broker on ", topic)
         print("Connected to MQTT broker on ", topic2)
@@ -93,6 +89,8 @@ def on_connect(client, userdata, flags, rc, watchID):
         client.subscribe(topic)
         client.subscribe(topic2)
         client.subscribe(topic3)
+        client.subscribe(topic4)
+        
         
         
     else:
@@ -110,13 +108,16 @@ def get_csv_headers_from_topic(topic: str) -> list[str]:
     """
     
     if(topic == "accelerometer"):
-        return ["x", "y", "z", "internal_ts", "watch_timestamp", "relative_timestamp"]
+        return ["x(m/s^2)", "y(m/s^2)", "z(m/s^2)", "internal_ts", "watch_timestamp", "relative_timestamp"]
     
     if(topic == "gyroscope"):
-        return ["x", "y", "z", "internal_ts", "watch_timestamp", "relative_timestamp"]
+        return ["x(rad)", "y(rad)", "z(rad)", "internal_ts", "watch_timestamp", "relative_timestamp"]
     
     if(topic == "heartrate"):
         return ["bpm", "internal_ts", "watch_timestamp", "relative_timestamp"]
+    
+    if(topic == "linear_acceleration"):
+        return ["x(m/s^2)", "y(m/s^2)", "z(m/s^2)", "internal_ts", "watch_timestamp", "relative_timestamp"]
         
 def on_message(client, userdata, message, filename, watchID):
     try:

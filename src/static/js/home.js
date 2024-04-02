@@ -44,31 +44,45 @@ function prefillInputsWithLocalStorage() {
   =======================================================================
 */
 
+const HEALTHLY_PREFIX = "H";
+
 g_inlab_btn.addEventListener("click", async () => {
-  if (!g_userID_input.value.match(/\S/)) {
+  const userID = g_userID_input.value;
+
+  if (!userID.match(/\S/)) {
     alert("Identifier is empty");
     return;
   }
 
   // localStorage.setItem("watchID", watchID_input.value);
-  localStorage.setItem("userID", g_userID_input.value);
+  localStorage.setItem("userID", userID);
   localStorage.setItem("currentLevel", 1);
   localStorage.setItem("currentSubLevel", 1);
 
-  window.location = `/start_application/inlab`;
+  if (userID.startsWith(HEALTHLY_PREFIX)) {
+    window.location = `/nogo`;
+  } else {
+    window.location = `/start_application/inlab`;
+  }
 });
 
 g_athome_btn.addEventListener("click", async () => {
-  if (!g_userID_input.value.match(/\S/)) {
+  const userID = g_userID_input.value;
+
+  if (!userID.match(/\S/)) {
     alert("Identifier is empty");
     return;
   }
 
-  localStorage.setItem("userID", g_userID_input.value);
+  localStorage.setItem("userID", userID);
   localStorage.setItem("currentLevel", 1);
   localStorage.setItem("currentSubLevel", 1);
 
-  window.location = `/start_application/athome`;
+  if (userID.startsWith(HEALTHLY_PREFIX)) {
+    window.location = `/mindgame_precheck`;
+  } else {
+    window.location = `/start_application/athome`;
+  }
 });
 
 prefillInputsWithLocalStorage();
