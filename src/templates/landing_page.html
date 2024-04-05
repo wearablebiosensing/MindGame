@@ -67,6 +67,8 @@
 
 
     </div>
+  <script src="{{ url_for('static', filename='js/helper_functions.js') }}"></script>
+
     <script src="{{ url_for('static', filename='js/home.js') }}"></script>
     <script>
       let mindgameStatus = getLocalStorageOrNull("mindgame_progress");
@@ -87,8 +89,8 @@
 
       function updateRestoreButtonText() {
         if (mindgameStatus === "tiles" || mindgameStatus === "precheck") {
-          const currentLevel = Number(localStorage.getItem("currentLevel"));
-          const sub = Number(localStorage.getItem("currentSubLevel"));
+          const currentLevel = Number(localStorage.getItem("mindgame_next_level"));
+          const sub = Number(localStorage.getItem("mindgame_next_sublevel"));
           restoreBtn.innerHTML += ` Level ${currentLevel}-${sub}`;
         } else if (mindgameStatus === "nogo") {
           restoreBtn.innerHTML += ": NoGo";

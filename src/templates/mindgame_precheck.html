@@ -99,8 +99,12 @@
         // Start from begining
         if (restore_tiles_progress == false) {
           localStorage.setItem("watchID", watchID);
-          localStorage.setItem("currentLevel", 1); // Start at level 1
-          localStorage.setItem("currentSubLevel", getRandomNumberInclusive(1, 3));
+
+          //localStorage.setItem("currentLevel", 1); // Start at level 1
+          //localStorage.setItem("currentSubLevel", getRandomNumberInclusive(1, 3));
+        } else {
+          localStorage.setItem("currentSubLevel", getLocalStorageOrNull("mindgame_next_sublevel") == null ? 1 : getLocalStorageOrNull("mindgame_next_sublevel")); // Pick random puzzle
+          localStorage.setItem("currentLevel", getLocalStorageOrNull("mindgame_next_level") == null ? 1 : getLocalStorageOrNull("mindgame_next_level")); // Pick random puzzle
         }
         window.location = "/tiles_game";
         //document.location.replace("/tiles_game");

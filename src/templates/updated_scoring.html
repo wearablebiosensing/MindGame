@@ -177,27 +177,28 @@
 
 
     const nextLevelBtn = document.getElementById("next_level_btn");
-    let level = Number(localStorage.getItem("currentLevel"));
-    if(level == 3){
-      nextLevelBtn.classList.remove("pregame_disabled");
-      nextLevelBtn.innerHTML = "Finish"
-    }
+    let current_level = Number(getLocalStorageOrNull("currentLevel")) || 1;
+    let current_sub = Number(getLocalStorageOrNull("currentSubLevel")) || 1;
 
+    console.log(current_level, current_sub)
 
     localStorage.setItem("mindgame_progress", "tiles");
-    if(level == 3){
-      // Done with all levels and reset progress
-      localStorage.setItem("mindgame_progress", "home");
-    } else {
-      localStorage.setItem("currentLevel", level + 1); // Go to next level
-      localStorage.setItem("currentSubLevel", getRandomNumberInclusive(1, 3)); // Pick random puzzle
-    }
+    localStorage.setItem("mindgame_next_level", current_level + 1); // Go to next level
+    localStorage.setItem("mindgame_next_sublevel", getRandomNumberInclusive(1, 3)); // Pick random puzzle
 
   </script>
 
 
   <script>
     let g_watch_status = false;
+    let next_level = Number(getLocalStorageOrNull("mindgame_next_level")) || 1;
+    let next_sub = Number(getLocalStorageOrNull("mindgame_next_sublevel")) || 1;
+
+    if(current_level == 3){
+      nextLevelBtn.classList.remove("pregame_disabled");
+      nextLevelBtn.innerHTML = "Finish"
+      localStorage.setItem("mindgame_progress", "home");
+    }
 
     // Event listner for the check status button
     g_watch_check_watch_status_btn.addEventListener("click", async () => {
@@ -221,8 +222,10 @@
 
       if(nextLevelBtn.classList.contains("pregame_disabled")) return;
 
-      let current_level = Number(localStorage.getItem("currentLevel"));
-      let sub = Number(localStorage.getItem("currentSubLevel"));
+
+
+      localStorage.setItem("currentLevel", next_level); // Go to next level
+      localStorage.setItem("currentSubLevel", next_sub); 
 
       //Done with all levels
       if(current_level == 3){

@@ -64,10 +64,12 @@ g_inlab_btn.addEventListener("click", async () => {
     return;
   }
 
-  // localStorage.setItem("watchID", watchID_input.value);
+  let sublevel = getRandomNumberInclusive(1, 3);
   localStorage.setItem("userID", userID);
   localStorage.setItem("currentLevel", 1);
-  localStorage.setItem("currentSubLevel", 1);
+  localStorage.setItem("currentSubLevel", sublevel);
+  localStorage.setItem("mindgame_next_level", 1);
+  localStorage.setItem("mindgame_next_sublevel", sublevel);
 
   if (userID.startsWith(HEALTHLY_PREFIX)) {
     window.location = `/nogo`;
@@ -90,9 +92,12 @@ g_athome_btn.addEventListener("click", async () => {
     return;
   }
 
+  let sublevel = getRandomNumberInclusive(1, 3);
   localStorage.setItem("userID", userID);
   localStorage.setItem("currentLevel", 1);
-  localStorage.setItem("currentSubLevel", 1);
+  localStorage.setItem("currentSubLevel", sublevel);
+  localStorage.setItem("mindgame_next_level", 1);
+  localStorage.setItem("mindgame_next_sublevel", sublevel);
 
   if (userID.startsWith(HEALTHLY_PREFIX)) {
     window.location = `/mindgame_precheck`;
