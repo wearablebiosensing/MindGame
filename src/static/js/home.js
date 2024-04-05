@@ -44,13 +44,23 @@ function prefillInputsWithLocalStorage() {
   =======================================================================
 */
 
-const HEALTHLY_PREFIX = "H";
+const HEALTHLY_PREFIX = "N";
+const OTHER_PREFIX = "P";
+
+// Regular expression for user ID validation
+const userIDPattern = /^[NP]\d+$/;
 
 g_inlab_btn.addEventListener("click", async () => {
   const userID = g_userID_input.value;
 
   if (!userID.match(/\S/)) {
     alert("Identifier is empty");
+    return;
+  }
+
+  // Check if userID matches the required pattern
+  if (!userIDPattern.test(userID)) {
+    alert("Identifier must be either N or P followed by numbers.");
     return;
   }
 
@@ -71,6 +81,12 @@ g_athome_btn.addEventListener("click", async () => {
 
   if (!userID.match(/\S/)) {
     alert("Identifier is empty");
+    return;
+  }
+
+  // Check if userID matches the required pattern
+  if (!userIDPattern.test(userID)) {
+    alert("Identifier must be either N or P followed by numbers.");
     return;
   }
 

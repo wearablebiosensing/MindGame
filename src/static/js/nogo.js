@@ -4,10 +4,11 @@ const g_nogo_container = document.getElementById("nogo_container");
 const g_nogo_shape = document.getElementById("nogo_shape");
 const g_nogo_spinner = document.getElementById("nogo_spinner");
 const g_nogo_progress_txt = document.getElementById("nogo_progress");
+const g_nogo_practice_status_txt = document.getElementById("practice_status");
 const MAX_SHAPES_SHOWN = 220; //Standard 220, 20 for practice, 100 Go, 100 NoGo
 const PRACTICE_SHAPES = 20;
 const MAX_TIME = 1000; //ms
-const TIME_BETWEEN_SHAPES = 2400; //ms
+const TIME_BETWEEN_SHAPES = 2800; //ms
 let g_times_shape_shown = 0;
 let g_start_ts = null;
 let g_end_ts = null;
@@ -126,6 +127,25 @@ function nogo_get_current_shape() {
   }
 }
 
+function showPracticeStatus(status) {
+  if (g_times_shape_shown < PRACTICE_SHAPES) {
+    g_nogo_practice_status_txt.style.opacity = "1";
+
+    if (status) {
+      g_nogo_practice_status_txt.innerHTML = "Correct";
+      g_nogo_practice_status_txt.style.color = "green";
+    } else {
+      g_nogo_practice_status_txt.innerHTML = "Wrong";
+      g_nogo_practice_status_txt.style.color = "red";
+    }
+
+    //Remove from screen after timeout
+    setTimeout(() => {
+      g_nogo_practice_status_txt.style.opacity = "0";
+    }, TIME_BETWEEN_SHAPES);
+  }
+}
+
 //Called when the user clicks durring the exercise
 function nogo_handle_action() {
   if (!canPreformAction) return;
@@ -137,9 +157,13 @@ function nogo_handle_action() {
   const shape = nogo_get_current_shape();
   if (shape == "square") {
     nogo_add_data(shape, true, 1); //Action on square
+
+    showPracticeStatus(true);
   }
   if (shape == "circle") {
     nogo_add_data(shape, true, 0); //Action on Circle
+
+    showPracticeStatus(false);
   }
 
   // Remove click listener to prevent double registration
@@ -157,9 +181,11 @@ function nogo_handle_timeout() {
   const shape = nogo_get_current_shape();
   if (shape == "square") {
     nogo_add_data(shape, false, 0); //No action on Square
+    showPracticeStatus(false);
   }
   if (shape == "circle") {
     nogo_add_data(shape, false, 1); // No action on Circle
+    showPracticeStatus(true);
   }
 
   nogo_show_shape();
