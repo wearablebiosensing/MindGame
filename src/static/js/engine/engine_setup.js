@@ -26,17 +26,17 @@ window.addEventListener("beforeunload", function (e) {
   stop_mqtt_data_collection();
 });
 
-const userID_display = document.getElementById("userID");
-const currentLevel_display = document.getElementById("level");
+const userID_display = document.getElementById("mindgame_userID");
+const currentLevel_display = document.getElementById("mindgame_level_txt");
 
 /*This function comes from drag_drop.js
   Make sure it is included before this is called*/
 //This function will change the specific level user is on
-const currentLevel = Number(getLocalStorageOrNull("currentLevel"));
-const currentSubLevel = Number(getLocalStorageOrNull("currentSubLevel"));
+const currentLevel = Number(getLocalStorage(LOCALSTORAGE_CURR_LEVEL, 1));
+const currentSubLevel = Number(getLocalStorage(LOCALSTORAGE_CURR_SUBLEVEL, 1));
 
 changeCurrentLevel(currentLevel, currentSubLevel); //NOTHING WILL WORK WITHOUT THIS
 
 //Update text on page
-// userID_display.innerText = getLocalStorageOrNull("userID") ?? "";
-currentLevel_display.innerText = currentLevel ?? "";
+// userID_display.innerText = getLocalStorage(LOCALSTORAGE_USERID, "No ID");
+currentLevel_display.innerText = `Level ${currentLevel}-${currentSubLevel}`;

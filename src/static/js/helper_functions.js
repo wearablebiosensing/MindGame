@@ -1,3 +1,27 @@
+// Makse sure localstorage names are consistant
+const LOCALSTORAGE_USERID = "mindgame_userID";
+const LOCALSTORAGE_PROGRESS = "mindgame_progress";
+const LOCALSTORAGE_CURR_LEVEL = "mindgame_level";
+const LOCALSTORAGE_CURR_SUBLEVEL = "mindgame_sublevel";
+const LOCALSTORAGE_NEXT_LEVEL = "mindgame_next_level";
+const LOCALSTORAGE_NEXT_SUBLEVEL = "mindgame_next_sublevel";
+const LOCALSTORAGE_WATCHID = "mindgame_watchID";
+
+const MINDGAME_MAX_LEVEL = 9;
+const MINDGAME_MAX_SUBLEVEL = 3;
+
+const MINDGAME_PROGRESS_ENUM = Object.freeze({
+  HOME: "mindgame_home",
+  NOGO: "mindgame_nogo",
+  PRECHECK: "mindgame_precheck",
+});
+
+const MINDGAME_ROUTE_ENUM = Object.freeze({
+  HOME: "/",
+  NOGO: "/nogo",
+  PRECHECK: "/mindgame_precheck",
+});
+
 function getLocalStorageOrNull(key) {
   try {
     const value = localStorage.getItem(key);
@@ -6,6 +30,11 @@ function getLocalStorageOrNull(key) {
     console.error("Error retrieving from local storage:", error);
     return null;
   }
+}
+
+function getLocalStorage(key, default_value) {
+  const value = getLocalStorageOrNull(key);
+  return value == null ? default_value : value;
 }
 
 function getRandomNumberInclusive(min, max) {
@@ -22,10 +51,10 @@ function start_mqtt_data_collection() {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      level: getLocalStorageOrNull("currentLevel"),
-      sub_level: getLocalStorageOrNull("currentSubLevel"),
-      userID: getLocalStorageOrNull("userID"),
-      watchID: getLocalStorageOrNull("watchID"),
+      level: getLocalStorageOrNull(LOCALSTORAGE_CURR_LEVEL),
+      sub_level: getLocalStorageOrNull(LOCALSTORAGE_CURR_SUBLEVEL),
+      userID: getLocalStorageOrNull(LOCALSTORAGE_USERID),
+      watchID: getLocalStorageOrNull(LOCALSTORAGE_WATCHID),
     }),
   });
 }
@@ -38,7 +67,7 @@ function stop_mqtt_data_collection() {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      watchID: getLocalStorageOrNull("watchID"),
+      watchID: getLocalStorageOrNull(LOCALSTORAGE_WATCHID),
     }),
   })
     .then((res) => {

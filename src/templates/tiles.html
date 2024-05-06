@@ -129,8 +129,8 @@
     <div class="container">
       <header>
         <!-- Shows what level user is on -->
-        <p class="level_indicator">Level <span id="level"></span></p>
-        <p class="onlineStatus"></p>
+        <p id="mindgame_level_txt" class="level_indicator">Level <span id="level"></span></p>
+        <p id="mindgame_userID" class="level_indicator"></p>
 
         <!-- <div>User ID: <span id="userID"></span> </div> -->
       </header>
@@ -174,7 +174,7 @@
     </svg>
 
     <!-- Used to display the mouse metrics on the side of the screen -->
-    <script src="{{ url_for('static', filename='js/mouse_movement.js') }}"></script>
+    <!-- <script src="{{ url_for('static', filename='js/mouse_movement.js') }}"></script> -->
 
     <script src="{{ url_for('static', filename='js/helper_functions.js') }}"></script>
 

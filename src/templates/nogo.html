@@ -65,9 +65,10 @@
       <circle class="path" cx="25" cy="25" r="20" fill="none" stroke-width="5"></circle>
     </svg>
 
+    <script src="{{ url_for('static', filename='js/helper_functions.js') }}"></script>
     <script src="{{ url_for('static', filename='js/nogo.js') }}"></script>
     <script>
-      localStorage.setItem("mindgame_progress", "nogo");
+      localStorage.setItem(LOCALSTORAGE_PROGRESS, MINDGAME_PROGRESS_ENUM.NOGO);
     </script>
   </body>
 </html>

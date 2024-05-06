@@ -22,7 +22,6 @@ async function handleWatchStatusCheck(callback, init_watchID = null) {
 
   let watchID = init_watchID;
   if (watchID == null) {
-    console.log("DFSDF");
     watchID = g_watchID_input.value;
 
     //No watchID provided
@@ -48,6 +47,7 @@ async function handleWatchStatusCheck(callback, init_watchID = null) {
   } finally {
     toggleLoadingIndicator(false);
     g_is_watch_status_loading = false;
+    callback("online"); //REMOVE
   }
 }
 
@@ -66,13 +66,17 @@ function toggleLoadingIndicator(isLoading) {
  * @return {Promise<string>} The status of the watch ('online' or 'offline').
  */
 async function fetchWatchStatus(watchID) {
-  const response = await fetch("/check_mqtt_connection", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ watchID }),
-  });
-  const data = await response.json();
-  return data["status"];
+  try {
+    const response = await fetch("/check_mqtt_connection", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ watchID }),
+    });
+    const data = await response.json();
+    return data["status"];
+  } catch {
+    return "offline";
+  }
 }
 
 /**
@@ -81,6 +85,7 @@ async function fetchWatchStatus(watchID) {
  */
 function displayWatchStatus(status) {
   const isOnline = status == "online";
+
   console.log(isOnline);
   g_watch_status_text.innerText = isOnline ? "Online" : "Offline";
   g_watch_status_text.style.color = isOnline ? "green" : "red";

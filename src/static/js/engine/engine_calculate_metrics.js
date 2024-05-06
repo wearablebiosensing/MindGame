@@ -246,7 +246,7 @@ function postMouseMotionData() {
       data: mouse_motion_array, // Raw Mouse Data
       level: current_level,
       sub_level: current_sub_level,
-      userID: getLocalStorageOrNull("userID"),
+      userID: getLocalStorage(LOCALSTORAGE_USERID, "NoID"),
       window_width: window.screen.width, // Add screen width to the data
       window_height: window.screen.height,
     }),

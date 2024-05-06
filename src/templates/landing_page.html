@@ -44,10 +44,13 @@
 
         </div>
 
-        <div class="btn_container" style="margin-bottom: 10px;">
+        <div id="restore_btn_container" class="btn_container" style="margin-bottom: 10px;">
 
 
           <button id="restore_btn" class="start_button" >Restore Progress</button>
+          <button id="reset_ls_btn" class="start_button" >Reset LS</button>
+
+          <!-- <a href="{{ url_for('tutorial') }}"><button class="start_button" >Tutorial</button></a> -->
 
         </div>
 
@@ -67,98 +70,8 @@
 
 
     </div>
-  <script src="{{ url_for('static', filename='js/helper_functions.js') }}"></script>
-
+    <script src="{{ url_for('static', filename='js/helper_functions.js') }}"></script>
     <script src="{{ url_for('static', filename='js/home.js') }}"></script>
-    <script>
-      let mindgameStatus = getLocalStorageOrNull("mindgame_progress");
-      if(mindgameStatus == null){
-        localStorage.setItem("mindgame_progress", "home");
-      } 
-
-
-      const restoreBtn = document.getElementById("restore_btn");
-      restoreBtn.style.display = mindgameStatus !== "home" ? "block" : "none";
-
-      const navigation_buttons = document.getElementById("navigation_buttons");
-      navigation_buttons.style.display = mindgameStatus !== "home" ? "none" : "block";
-
-
-
-
-
-      function updateRestoreButtonText() {
-        if (mindgameStatus === "tiles" || mindgameStatus === "precheck") {
-          const currentLevel = Number(localStorage.getItem("mindgame_next_level"));
-          const sub = Number(localStorage.getItem("mindgame_next_sublevel"));
-          restoreBtn.innerHTML += ` Level ${currentLevel}-${sub}`;
-        } else if (mindgameStatus === "nogo") {
-          restoreBtn.innerHTML += ": NoGo";
-        } else if (mindgameStatus === "intake") {
-          restoreBtn.innerHTML += ": In Take Form";
-        }
-      }
-
-      function redirectToPage() {
-        switch (mindgameStatus) {
-          case "tiles":
-          case "precheck":
-            window.location = "/mindgame_precheck";
-            break;
-          case "nogo":
-            window.location = "/nogo";
-            break;
-          case "intake":
-            window.location = "/start_application/athome";
-            break;
-        }
-      }
-
-      if (mindgameStatus !== "home") {
-        updateRestoreButtonText();
-        restoreBtn.addEventListener("click", redirectToPage);
-      }
-      
-      
-    </script>
     
-
-    <script>
-      
-      /*const submitBtn = document.getElementById("submitBtn");
-      submitBtn.addEventListener("click", () => {
-
-        // Please remove
-        localStorage.setItem("watchID", watchID_input.value);
-        localStorage.setItem("userID", userID_input.value);
-        localStorage.setItem("currentLevel", 1);
-        localStorage.setItem("currentSubLevel", 1);
-
-  
-        window.location.href = "/tiles_game"; //Send to game
-
-
-        if (!watchID_input.value.match(/\S/)) {
-          alert("Watch ID is empty");
-          return;
-        }
-
-        if (!userID_input.value.match(/\S/)) {
-          alert("Identifier is empty");
-          return;
-        }
-
-        //localStorage.setItem("watchID", watchID_input.value);
-        //localStorage.setItem("userID", userID_input.value);
-        //localStorage.setItem("currentLevel", 1);
-        //localStorage.setItem("currentSubLevel", 1);
-
-  
-        //window.location.href = "/tiles_game"; //Send to game
-        
-
-      })*/
-      
-    </script>
   </body>
 </html>

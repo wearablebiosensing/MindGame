@@ -177,27 +177,31 @@
 
 
     const nextLevelBtn = document.getElementById("next_level_btn");
-    let current_level = Number(getLocalStorageOrNull("currentLevel")) || 1;
-    let current_sub = Number(getLocalStorageOrNull("currentSubLevel")) || 1;
+    let g_current_level = Number(getLocalStorage(LOCALSTORAGE_CURR_LEVEL, 1));
+    let g_current_sub = Number(getLocalStorage(LOCALSTORAGE_CURR_SUBLEVEL, 1));
+    let g_next_level = Number(getLocalStorage(LOCALSTORAGE_NEXT_SUBLEVEL, 1));
+    let g_next_sub = Number(getLocalStorage(LOCALSTORAGE_NEXT_SUBLEVEL, 1));
 
-    console.log(current_level, current_sub)
+    console.log(g_current_level, g_current_sub, g_next_level, g_next_sub)
 
-    localStorage.setItem("mindgame_progress", "tiles");
-    localStorage.setItem("mindgame_next_level", current_level + 1); // Go to next level
-    localStorage.setItem("mindgame_next_sublevel", getRandomNumberInclusive(1, 3)); // Pick random puzzle
+    // Calculate the next level to go to
+    const next_level_value = g_current_sub >= MINDGAME_MAX_SUBLEVEL ? g_current_level + 1 : g_current_level;
+    const next_sublevel_value = g_current_sub >= MINDGAME_MAX_SUBLEVEL ? 1 : g_current_sub + 1;
+
+    console.log(next_level_value, next_sublevel_value)
 
   </script>
 
 
   <script>
     let g_watch_status = false;
-    let next_level = Number(getLocalStorageOrNull("mindgame_next_level")) || 1;
-    let next_sub = Number(getLocalStorageOrNull("mindgame_next_sublevel")) || 1;
+    const isEntireGameFinished = g_current_level == MINDGAME_MAX_LEVEL && g_current_sub == MINDGAME_MAX_SUBLEVEL
 
-    if(current_level == 3){
+    // Finished all Levels
+    if(isEntireGameFinished){
       nextLevelBtn.classList.remove("pregame_disabled");
       nextLevelBtn.innerHTML = "Finish"
-      localStorage.setItem("mindgame_progress", "home");
+      localStorage.setItem(LOCALSTORAGE_PROGRESS , MINDGAME_PROGRESS_ENUM.HOME);
     }
 
     // Event listner for the check status button
@@ -214,30 +218,31 @@
           g_watch_status = false;
           nextLevelBtn.classList.add("pregame_disabled");
         }
-      }, getLocalStorageOrNull("watchID"));
+      }, getLocalStorageOrNull(LOCALSTORAGE_USERID));
     });
 
     // Update localStorage so that the next level is displayed on tiles_game page
     nextLevelBtn.addEventListener("click", () => {
 
-      if(nextLevelBtn.classList.contains("pregame_disabled")) return;
-
-
-
-      localStorage.setItem("currentLevel", next_level); // Go to next level
-      localStorage.setItem("currentSubLevel", next_sub); 
-
-      //Done with all levels
-      if(current_level == 3){
+      //Done with all levels, send back to home page
+      if(isEntireGameFinished){
         window.location.href = `/`;
         return;
       }
 
-      //localStorage.setItem("currentLevel", current_level + 1); // Go to next level
-      //localStorage.setItem("currentSubLevel", getRandomNumberInclusive(1, 3)); // Pick random puzzle
+      if(nextLevelBtn.classList.contains("pregame_disabled")) return;
+
+
+      // Start new game on next level
+      localStorage.setItem(LOCALSTORAGE_CURR_LEVEL, next_level_value);
+      localStorage.setItem(LOCALSTORAGE_CURR_SUBLEVEL, next_sublevel_value); 
       window.location = "/tiles_game";
 
     });
+
+    // Finished current Level so make sure next level is the next level
+    localStorage.setItem(LOCALSTORAGE_NEXT_LEVEL, next_level_value);
+    localStorage.setItem(LOCALSTORAGE_NEXT_SUBLEVEL, next_sublevel_value); 
 
 
 
