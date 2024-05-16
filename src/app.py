@@ -354,6 +354,14 @@ def CTDF(folder1, folder2, output_file):
     input_folder2 = glob.glob(os.path.join(folder2, '*'))
     input_file2 = max(input_folder2, key=os.path.getctime)
 
+    parts = input_file1.split('\\')
+
+    # Extracting the desired portion
+    uniqueFilename = parts[1].split('_')[-4:-1]
+
+    # Joining the desired portion
+    uniqueFilename = '_'.join(uniqueFilename)
+
     # Call the function to merge and trim lines from both files
     merge_and_save(input_file1, input_file2, output_file)
     dfList = create_dataframes(output_file)
@@ -372,9 +380,9 @@ def CTDF(folder1, folder2, output_file):
         # results.append(get_concated_features(i))
     
     if (total > 0):
-        return (oneCounter / total * 100), input_file1
+        return (oneCounter / total * 100), uniqueFilename
     else:
-        return 0, input_file1
+        return 0, uniqueFilename
 
 # Modified function to start data collection for specific user
 def start_data_collection(level, sub_level, userID, filename, watchID):
@@ -827,8 +835,7 @@ def processMouseMovementData():
 
 
     #Save Relevent Data to session to be used in scoring page
-    #session["AverageEuclidanPercentChange"] = math.floor(calculateEuclidanPercentChange(shortest_euclid_distances, user_euclid_distances))
-    #session["WatchPrediction"] = CTDF('data/watch_data/accelerometer_data', 'data/watch_data/accelerometer_data', 'data/watch_data/merger.csv')
+    session["AverageEuclidanPercentChange"] = math.floor(calculateEuclidanPercentChange(shortest_euclid_distances, user_euclid_distances))
     session["TimeToCompleteLevel"] = time_to_complete
     session["ExpectedTimeToCompleteLevel"] = EXPECTED_TTC[level][sub_level]
     
