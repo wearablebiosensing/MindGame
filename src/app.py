@@ -13,7 +13,8 @@ from firebase_admin import credentials, storage, db
 import pandas as pd
 import numpy as np
 import paho.mqtt.client as mqtt
-import csv
+import glob
+import pickle
 import time
 from functools import partial  # Import functools.partial
 import threading
@@ -186,10 +187,199 @@ def save_to_csv(data, dir, filename, watchID, header=None):
 
     # print(f"Data saved in CSV file: {file_path}")
 
+def parse_timestamp(timestamp_str):
+    # Parse the timestamp string and extract the time part
+    timestamp_obj = datetime.strptime(timestamp_str, '%Y-%m-%d %H:%M:%S.%f')
+    return timestamp_obj
+
+def clear_output_file(output_file):
+    with open(output_file, 'w', newline=''):
+        pass
+
+def create_dataframes(input_file):
+    with open(input_file, 'r') as f:
+        reader = csv.reader(f)
+        
+        # Read the header
+        header = next(reader)
+
+        # Initialize variables
+        dataframes_list = []
+        current_dataframe_rows = []
+
+        for line in reader:
+            # Replace empty cells or cells containing spaces with NaN
+            line = [cell if cell.strip() else '' for cell in line]
+            
+            if any(cell != '' for cell in line):
+                # print('yay')
+                # Accumulate lines for the current set
+                current_dataframe_rows.append(line)
+                
+            else:
+                # print('aya')
+                # Empty line encountered, create a new DataFrame
+                if current_dataframe_rows:
+                    
+                    current_dataframe = pd.DataFrame(current_dataframe_rows, columns=header)
+                    
+                    # Convert all columns (excluding timestamp columns) to floats
+                    non_timestamp_columns = current_dataframe.columns.difference(['Accel_internal_ts', 'Accel_watch_timestamp', 'Accel_relative_timestamp', 'Gyro_internal_ts', 'Gyro_watch_timestamp', 'Gyro_relative_timestamp'])
+                    current_dataframe[non_timestamp_columns] = current_dataframe[non_timestamp_columns].astype(float)
+                    
+                    dataframes_list.append(current_dataframe)
+                    current_dataframe_rows = []  # Reset for the next set of lines
+
+        # Create a DataFrame for the last set of lines
+        if current_dataframe_rows:
+            current_dataframe = pd.DataFrame(current_dataframe_rows, columns=header)
+            
+            # Convert all columns (excluding timestamp columns) to floats
+            non_timestamp_columns = current_dataframe.columns.difference(['Accel_internal_ts', 'Accel_watch_timestamp', 'Accel_relative_timestamp', 'Gyro_internal_ts', 'Gyro_watch_timestamp', 'Gyro_relative_timestamp'])
+            current_dataframe[non_timestamp_columns] = current_dataframe[non_timestamp_columns].astype(float)
+            
+            dataframes_list.append(current_dataframe)
+
+    return dataframes_list
+
+# features to analyse
+# mean
+def feature_mean(feature_name,accel_gyro_data):
+    mean = accel_gyro_data.mean()
+    mean_transposed_df = mean.to_frame().T
+    mean_transposed_df.columns = ["Accel_X_"+feature_name ,"Accel_Y_" +feature_name ,"Accel_Z_" +feature_name,"Gyro_X_" +feature_name, "Gyro_Y_" + feature_name ,"Gyro_Z_" +feature_name]
+    return mean_transposed_df
+
+#std
+def feature_std(feature_name,accel_gyro_data):
+    std = accel_gyro_data.std()
+    std_transposed_df = std.to_frame().T
+    std_transposed_df.columns = ["Accel_X_"+feature_name ,"Accel_Y_" +feature_name ,"Accel_Z_" +feature_name,"Gyro_X_" +feature_name, "Gyro_Y_" + feature_name ,"Gyro_Z_" +feature_name]
+    return std_transposed_df
+
+#kurtosis
+def feature_kurtosis(feature_name,accel_gyro_data):
+    kurtosis = accel_gyro_data.kurtosis()
+    kurtosis_transposed_df = kurtosis.to_frame().T
+    kurtosis_transposed_df.columns = ["Accel_X_"+feature_name ,"Accel_Y_" +feature_name ,"Accel_Z_" +feature_name,"Gyro_X_" +feature_name, "Gyro_Y_" + feature_name ,"Gyro_Z_"+feature_name]
+    return kurtosis_transposed_df
+
+#median
+def feature_median(feature_name,accel_gyro_data):
+    median = accel_gyro_data.median()
+    median_transposed_df = median.to_frame().T
+    median_transposed_df.columns = ["Accel_X_"+feature_name ,"Accel_Y_" +feature_name ,"Accel_Z_" +feature_name,"Gyro_X_" +feature_name, "Gyro_Y_" + feature_name ,"Gyro_Z_" + feature_name]
+    return median_transposed_df
+
+#skewness
+def feature_skewness(feature_name,accel_gyro_data):
+    skewness = accel_gyro_data.skew()
+    skewness_transposed_df = skewness.to_frame().T
+    skewness_transposed_df.columns = ["Accel_X_"+feature_name ,"Accel_Y_" +feature_name ,"Accel_Z_" +feature_name,"Gyro_X_" +feature_name, "Gyro_Y_" + feature_name ,"Gyro_Z_" + feature_name]
+    return skewness_transposed_df
+
+
+# 'Accel_X_mean', 'Accel_Y_mean', 'Accel_Z_mean', 'Gyro_X_mean',
+#        'Gyro_Y_mean', 'Gyro_Z_mean', 'Accel_X_std', 'Accel_Y_std',
+#        'Accel_Z_std', 'Gyro_X_std', 'Gyro_Y_std', 'Gyro_Z_std',
+#        'Accel_X_kurtosis', 'Accel_Y_kurtosis', 'Accel_Z_kurtosis',
+#        'Gyro_X_kurtosis', 'Gyro_Y_kurtosis', 'Gyro_Z_kurtosis',
+#        'Accel_X_skewness', 'Accel_Y_skewness', 'Accel_Z_skewness',
+#        'Gyro_X_skewness', 'Gyro_Y_skewness', 'Gyro_Z_skewness', 'type'],
+# create table 
+def get_concated_features(accel_gyro_data):
+    # Subset the DataFrame to include only the specified columns
+    accel_gyro_data = accel_gyro_data[['Accel_x(m/s^2)', 'Accel_y(m/s^2)', 'Accel_z(m/s^2)', 'Gyro_x(rad)', 'Gyro_y(rad)', 'Gyro_z(rad)']]
+    df1 = feature_mean("mean",accel_gyro_data)
+    # df2 = feature_median("median",accel_gyro_data)
+    df3 = feature_std("std",accel_gyro_data)
+    df4 = feature_kurtosis("kurtosis",accel_gyro_data)
+    df5 =feature_skewness("skewness",accel_gyro_data)
+    df = [df1, df3, df4, df5]
+    result_df = pd.concat(df, axis=1)
+    # testing
+    # print(result_df)
+    return result_df
+
+def merge_and_save(input_file1, input_file2, output_file):
+    with open(input_file1, 'r') as f1, open(input_file2, 'r') as f2, open(output_file, 'w', newline='') as output:
+        # Initialize CSV reader and writer
+        reader1 = csv.reader(f1)
+        reader2 = csv.reader(f2)
+        writer = csv.writer(output)
+
+        # Read headers from both files
+        header1 = next(reader1)
+        header2 = next(reader2)
+
+        # Rename categories in the first file
+        header1 = ['Accel_' + category for category in header1]
+
+        # Rename categories in the second file
+        header2 = ['Gyro_' + category for category in header2]
+
+        # Write the merged headers to the output file
+        writer.writerow(header1 + header2)
+
+        # Initialize the second variable
+        second = None
+
+        # Read the first lines from both files
+        line1 = next(reader1, None)
+        line2 = next(reader2, None)
+
+        while line1 is not None and line2 is not None:
+            timestamp1 = parse_timestamp(line1[-2])
+            timestamp2 = parse_timestamp(line2[-2])
+
+            if abs((timestamp1 - timestamp2).total_seconds()) <= 1:
+                if timestamp1.second == timestamp2.second:
+                    # Combine lines and push to the output file
+                    combined_line = line1 + line2
+                    writer.writerow(combined_line)
+                else:
+                    # Add an empty line between seconds
+                    writer.writerow([])
+
+            # Determine which file to read the next line from based on the timestamp
+            if timestamp1 <= timestamp2:
+                line1 = next(reader1, None)
+            else:
+                line2 = next(reader2, None)
+
+def CTDF(folder1, folder2, output_file):
+
+    input_folder1 = glob.glob(os.path.join(folder1, '*'))
+    input_file1 = max(input_folder1, key=os.path.getctime)
+    input_folder2 = glob.glob(os.path.join(folder2, '*'))
+    input_file2 = max(input_folder2, key=os.path.getctime)
+
+    # Call the function to merge and trim lines from both files
+    merge_and_save(input_file1, input_file2, output_file)
+    dfList = create_dataframes(output_file)
+    clear_output_file(output_file)
+    with open('static/AD-155_Deployment.pkl', 'rb') as file:
+        loaded_model = pickle.load(file)
+    # print(dfList)
+    # results = []
+    oneCounter = total = 0
+    for i in dfList:
+        tempResult = loaded_model.predict(get_concated_features(i))
+        if (tempResult.item() == 1):
+            oneCounter = oneCounter + 1
+        total = total + 1
+        # results.append(tempResult.item())
+        # results.append(get_concated_features(i))
+    
+    if (total > 0):
+        return (oneCounter / total * 100), input_file1
+    else:
+        return 0, input_file1
+
 # Modified function to start data collection for specific user
 def start_data_collection(level, sub_level, userID, filename, watchID):
     # Create a new MQTT client for the user
-    client = mqtt.Client()
+    client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION1)
 
     # Set up callbacks
     client.on_connect = partial(on_connect, watchID=watchID)
@@ -308,7 +498,7 @@ def check_watch_activity(watch_id, timeout=5):
     Returns:
     bool: True if the topic is active, False otherwise.
     """
-    client = mqtt.Client()
+    client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION1)
     message_received = False
 
     def on_message(client, userdata, message):
@@ -356,6 +546,9 @@ def tiles_game():
 
 @app.route('/updated_scoring', methods=['GET','POST'])
 def updated_scoring():
+  WatchPrediction, FileForPrediction = CTDF('data/watch_data/accelerometer_data', 'data/watch_data/gyroscope_data', 'data/watch_data/merger.csv')
+  session["WatchPrediction"] = WatchPrediction
+  session["FileForPrediction"] = FileForPrediction
   return render_template("updated_scoring.html")
 
 
@@ -634,7 +827,8 @@ def processMouseMovementData():
 
 
     #Save Relevent Data to session to be used in scoring page
-    session["AverageEuclidanPercentChange"] = math.floor(calculateEuclidanPercentChange(shortest_euclid_distances, user_euclid_distances))
+    #session["AverageEuclidanPercentChange"] = math.floor(calculateEuclidanPercentChange(shortest_euclid_distances, user_euclid_distances))
+    #session["WatchPrediction"] = CTDF('data/watch_data/accelerometer_data', 'data/watch_data/accelerometer_data', 'data/watch_data/merger.csv')
     session["TimeToCompleteLevel"] = time_to_complete
     session["ExpectedTimeToCompleteLevel"] = EXPECTED_TTC[level][sub_level]
     
