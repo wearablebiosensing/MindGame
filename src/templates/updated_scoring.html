@@ -27,7 +27,7 @@
 
   <body>
     <header>
-      <p class="level_indicator">Level <span id="level"> : Scoring</span></p>
+      <p class="level_indicator"><span id="ttc_actual">{{ session.get("FileForPrediction") }} : Scoring</span></p>
     </header>
 
     <div class="updated_scoring_page_container">
@@ -125,7 +125,7 @@
 
       <!-- Time to Complete -->
       <div class="updated_scoring_ttc_wrapper" style="align-items: center;">
-        <h2 class="updated_scoring_ttc_title">Time to Complete Task</h2>
+        <h2 class="updated_scoring_ttc_title">Results</h2>
         <div class="updated_scoring_ttc_container">
           <!-- <div class="ttc_expected">
             Expected Time: <span id="ttc_expected">{{ session.get("ExpectedTimeToCompleteLevel")["minutes"] }}:{{ session.get("ExpectedTimeToCompleteLevel")["seconds"] }}</span>
@@ -133,8 +133,8 @@
 
       <!-- <br />
       <br /> -->
-
-          <div class="ttc_actual" style="text-align: center;">You Took: <span id="ttc_actual">{{ session.get("WatchPrediction")}}:{{ session.get("FileForPrediction") }}</span></div>
+          <div class="ttc_actual" style="text-align: center;">Time Taken: <span id="ttc_actual">{{ session.get("TimeToCompleteLevel")["ttc_minutes"] }}:{{ session.get("TimeToCompleteLevel")["ttc_seconds"] }}</span></div>
+          <div class="ttc_actual" style="text-align: center;">Hyperactive: <span id="ttc_actual">{{ session.get("WatchPrediction")}}%  </span></div>
         </div>
       </div>
     </div>
