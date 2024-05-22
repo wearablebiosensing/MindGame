@@ -47,7 +47,7 @@ async function handleWatchStatusCheck(callback, init_watchID = null) {
   } finally {
     toggleLoadingIndicator(false);
     g_is_watch_status_loading = false;
-    callback("online"); //REMOVE
+    // callback("online"); //REMOVE
   }
 }
 

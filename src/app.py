@@ -70,6 +70,7 @@ SAVED_DATA_DIRECTORY = os.path.join("data", "")
 
 # Dictionary to hold multiple MQTT clients
 mqtt_clients = {}
+user_timeout = {}
 
 
 
@@ -160,7 +161,7 @@ def save_to_csv(data, dir, filename, watchID, header=None):
         # Calculate relative timestamp
         relative_timestamp = time.time() - mqtt_clients[watchID]["start_time"]
         
-    print(relative_timestamp)
+    # print(relative_timestamp)
 
     with open(file_path, "a", newline='') as csv_file:
         csv_writer = csv.writer(csv_file)
@@ -204,6 +205,10 @@ def start_data_collection(level, sub_level, userID, filename, watchID):
     #Need to also store filename, so when mqttstop is called we can then
     #Save the same file to firebase, maybe use an obj {"client": client, "filename": filename}
     mqtt_clients[watchID] = {"client": client, "filename": filename, "start_time": None}
+    
+    if watchID not in user_timeout.keys():
+        user_timeout[watchID] = {"start_ts": int(time.time())}
+        
     print(f"Started MQTT for watch {watchID} with filename: {filename}")
     print("All current clients: ", mqtt_clients)
 
@@ -245,6 +250,7 @@ def start_mqtt_collection():
     # Generate a unique identifier for the session
     session['unique_session_identifier'] = int(time.time())
     
+    
     #Filename creation
     filename = f"watch_{userID}_L{level}_S{sub_level}_{session['unique_session_identifier']}"
     logger.info(f"Starting MQTT data collection for WatchID of {watchID} for user {userID} for {level}-{sub_level}")
@@ -264,10 +270,33 @@ def stop_mqtt_collection():
     #Get data from request
     res = request.get_json()
     watchID = res["watchID"]
-    
+         
     logger.info(f"Stopping MQTT data collection for WatchID of {watchID}")
     stop_data_collection(watchID)
     return "", 201
+
+
+
+@app.route("/check_timeout_status", methods=['POST'])
+def check_timeout_status():
+    """API endpoint to let the frontend know if a specific watchID has timed out
+
+    Returns:
+        dict: true or false
+    """
+    
+    #Get data from request
+    res = request.get_json()
+    watchID = res["watchID"]
+    
+    start_ts = user_timeout[watchID]["start_ts"]
+    current_ts = int(time.time())
+    TIMOUT_IN_SECONDS = 600
+    print("TIMESTAMP", current_ts - start_ts, user_timeout)
+    if (current_ts - start_ts) >= 60:
+        return jsonify({"status": True})
+    else:
+        return jsonify({"status": False})
 
 
 
@@ -636,7 +665,9 @@ def processMouseMovementData():
     #Save Relevent Data to session to be used in scoring page
     session["AverageEuclidanPercentChange"] = math.floor(calculateEuclidanPercentChange(shortest_euclid_distances, user_euclid_distances))
     session["TimeToCompleteLevel"] = time_to_complete
-    session["ExpectedTimeToCompleteLevel"] = EXPECTED_TTC[level][sub_level]
+    # session["ExpectedTimeToCompleteLevel"] = EXPECTED_TTC[level][sub_level] 
+    session["ExpectedTimeToCompleteLevel"] = "N/A"
+    
     
     # print("HOPE", session.get("AverageEuclidanPercentChange"))
     # print("HOPE", session.get("TimeToCompleteLevel"))

@@ -16,7 +16,8 @@ let g_nogo_data = [];
 let g_timeout_id = null;
 
 // This will guarentee that there is exactly hald circles and half squares shown
-let shapeSequence = generateShapeSequence(MAX_SHAPES_SHOWN);
+// Seperated so there will be equal shapes for the practice rounds and the normal rounds
+let shapeSequence = generateShapeSequence(PRACTICE_SHAPES).concat(generateShapeSequence(MAX_SHAPES_SHOWN - PRACTICE_SHAPES));
 let currentShapeIndex = 0; // Keep track of the current index in the sequence
 
 //Prevention for space bar in rapid sucession

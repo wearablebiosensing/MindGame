@@ -22,6 +22,99 @@
 
     <link rel="stylesheet" href="{{ url_for('static', filename='css/precheck.css') }}" />
 
+    <!-- Modal CSS -->
+    <style>
+      .modal {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 0.4rem;
+        width: 450px;
+        padding: 1.3rem;
+        min-height: 250px;
+        position: absolute;
+        top: 20%;
+        background-color: white;
+        border: 1px solid #ddd;
+        border-radius: 15px;
+        z-index: 2;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      }
+      
+      .modal .flex {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      
+      .modal input {
+        padding: 0.7rem 1rem;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        font-size: 0.9em;
+      }
+      
+      .modal h3 {
+
+        color: #111111;
+        margin: 0.4rem 0 0.2rem;
+      }
+      .modal p {
+        font-size: 0.9rem;
+        color: #777;
+        margin: 0.4rem 0 0.2rem;
+      }
+      
+      .modal button {
+        cursor: pointer;
+        border: none;
+        font-weight: 600;
+      }
+      
+      .btn {
+        display: inline-block;
+        padding: 0.8rem 1.4rem;
+        font-weight: 700;
+        background-color: black;
+        color: white;
+        border-radius: 5px;
+        text-align: center;
+        font-size: 1em;
+      }
+      
+      .btn-open {
+        position: absolute;
+        bottom: 150px;
+      }
+      
+      .btn-close {
+        transform: translate(10px, -20px);
+        padding: 0.5rem 0.7rem;
+        background: #eee;
+        border-radius: 50%;
+      }
+
+      .overlay {
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(3px);
+        z-index: 1;
+      }
+
+      .hidden {
+        display: none;
+      }
+    </style>
+
   </head>
 
 
@@ -29,6 +122,7 @@
     <header>
       <p class="level_indicator">Level <span id="level"> : Scoring</span></p>
     </header>
+
 
     <div class="updated_scoring_page_container">
       <!-- Mouse Data Score -->
@@ -127,12 +221,6 @@
       <div class="updated_scoring_ttc_wrapper" style="align-items: center;">
         <h2 class="updated_scoring_ttc_title">Time to Complete Task</h2>
         <div class="updated_scoring_ttc_container">
-          <!-- <div class="ttc_expected">
-            Expected Time: <span id="ttc_expected">{{ session.get("ExpectedTimeToCompleteLevel")["minutes"] }}:{{ session.get("ExpectedTimeToCompleteLevel")["seconds"] }}</span>
-          </div> -->
-
-      <!-- <br />
-      <br /> -->
 
           <div class="ttc_actual" style="text-align: center;">You Took: <span id="ttc_actual">{{ session.get("TimeToCompleteLevel")["ttc_minutes"] }}:{{ session.get("TimeToCompleteLevel")["ttc_seconds"] }}</span></div>
         </div>
@@ -140,17 +228,6 @@
     </div>
 
 
-    <!-- <div style="display: flex; flex-direction: column; align-items: center; gap: 5px; width: 100%">
-      <input type="text" placeholder="Watch ID" id="watchID_input" />
-    </div> -->
-
-
-        <!-- Bring User to next level -->
-        <!-- <div style="display: flex; justify-content: center;">
-          <button id="next_level_btn" class="start_button pregame_disabled">
-            Next Puzzle
-          </button>
-        </div> -->
 
     <div class="pregame_status_container" style="flex-direction: row;">
       <button id="next_level_btn" class="start_button pregame_disabled">
@@ -166,12 +243,73 @@
     </div>
 
 
-
+    <!-- Modal HTML -->
+    <section class="modal hidden">
+      <div class="flex">
+        <button class="btn-close">⨉</button>
+      </div>
+      <div style="padding: 10px;">
+        <h3>You finished the session!</h3>
+        <p>
+          Please click the 'Finish' button to return to the Home Page
+        </p>
+      </div>
+      <button class="btn" id="modal_finish">Finish</button>
+    </section>
+    <div class="overlay hidden"></div>
 
   </body>
 
   <script src="{{ url_for('static', filename='js/helper_functions.js') }}"></script>
   <script src="{{ url_for('static', filename='js/watch_check.js') }}"></script>
+
+  <script>
+    const modal = document.querySelector(".modal");
+    const overlay = document.querySelector(".overlay");
+    const openModalBtn = document.querySelector(".btn-open");
+    const closeModalBtn = document.querySelector(".btn-close");
+    const modelFinishBtn = document.getElementById("modal_finish")
+
+    const openModal = function () {
+      modal.classList.remove("hidden");
+      overlay.classList.remove("hidden");
+    };
+
+    const closeModal = function () {
+      modal.classList.add("hidden");
+      overlay.classList.add("hidden");
+    };
+
+    closeModalBtn.addEventListener("click", closeModal);
+
+
+    // Check for timeout
+    async function checkTimeoutStatus(watchID){
+      if(watchID == null) return false;
+
+      try {
+        const response = await fetch("/check_timeout_status", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ watchID }),
+        });
+        const data = await response.json();
+        return data["status"];
+      } catch {
+        return false;
+      }
+    }
+
+    checkTimeoutStatus(getLocalStorageOrNull(LOCALSTORAGE_WATCHID)).then((shouldTimeout) => {
+      console.log("Timeout Status: ", shouldTimeout);
+      openModal()
+      modelFinishBtn.addEventListener("click", () => {
+        window.location.href = "/"
+      })
+    })
+
+
+  </script>
 
   <script>
 
@@ -218,7 +356,7 @@
           g_watch_status = false;
           nextLevelBtn.classList.add("pregame_disabled");
         }
-      }, getLocalStorageOrNull(LOCALSTORAGE_USERID));
+      }, getLocalStorageOrNull(LOCALSTORAGE_WATCHID));
     });
 
     // Update localStorage so that the next level is displayed on tiles_game page

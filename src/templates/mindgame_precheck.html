@@ -70,7 +70,7 @@
             g_watch_status = false;
             g_mindgame_start_btn.classList.add("pregame_disabled");
           }
-        });
+        }, localStorage.getItem(LOCALSTORAGE_WATCHID));
       });
 
       // Event listner for the start mindgame button
