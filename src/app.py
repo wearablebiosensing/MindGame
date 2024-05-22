@@ -435,7 +435,8 @@ def intake_data():
         os.makedirs(directory, exist_ok=True)
 
         # Construct the file path
-        file_name = f"intake_{user_id}.csv"
+        timestamp = int(time.time())
+        file_name = f"intake_{user_id}_{timestamp}.csv"
         file_path = os.path.join(directory, file_name)
 
         # Write data to CSV
@@ -817,7 +818,8 @@ def processnogo():
         # Define the file path and ensure the directory exists
         nogo_dir = "nogo/"
         # os.makedirs(nogo_path, exist_ok=True)
-        nogo_file_name = f"nogo_{userID}.csv"
+        timestamp = int(time.time())
+        nogo_file_name = f"nogo_{userID}_{timestamp}.csv"
 
         # Encode the CSV string to bytes and upload
         nogo_data = csv_string.encode("utf-8")
