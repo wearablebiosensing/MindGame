@@ -74,7 +74,7 @@
       });
 
       // Event listner for the start mindgame button
-      g_mindgame_start_btn.addEventListener("click", () => {
+      g_mindgame_start_btn.addEventListener("click", async () => {
         const watchID = g_watchID_input.value;
         if (!watchID.match(/\S/)) {
           alert("Watch ID is empty");
@@ -87,6 +87,13 @@
           alert("Cannot start MindGame as there is no userID saved to differentiate the data");
           return;
         }
+
+        // Start 10 minute timer
+        fetch("/mindgame_start_timer", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ watchID }),
+        });
 
         // Start Tiles Games, default to 1-1 if not specified
         localStorage.setItem(LOCALSTORAGE_CURR_LEVEL, getLocalStorageOrNull(LOCALSTORAGE_NEXT_LEVEL) == null ? 1 : getLocalStorageOrNull(LOCALSTORAGE_NEXT_LEVEL));

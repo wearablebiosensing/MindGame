@@ -12,7 +12,12 @@ function resizeCanvas() {
 function drawShapes() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   drawSectionLines();
-  shapes.forEach((shape) => shape.draw()); // Draw each shape
+  shapes.forEach((shape) => {
+    // if (shape instanceof Diamond) shape.drawHitbox();
+    // if (shape instanceof Trapezoid) shape.drawHitbox();
+
+    shape.draw();
+  }); // Draw each shape
 
   requestAnimationFrame(drawShapes); // Loop this function
 

@@ -51,11 +51,11 @@ let SetDst = (element, dst) => element.addEventListener("click", () => (window.l
 function handleHomeProgressStatus(status) {
   // Handle which group of buttons to show on home page
   if (status == MINDGAME_PROGRESS_ENUM.HOME) {
-    // Show(g_navigation_btn_container);
+    Show(g_navigation_btn_container);
     Hide(g_restore_btn_container);
     return; // Dont need top update restore button info
   } else {
-    // Hide(g_navigation_btn_container);
+    Hide(g_navigation_btn_container);
     Show(g_restore_btn_container);
   }
 

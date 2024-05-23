@@ -10,15 +10,9 @@
       href="{{ url_for('static', filename='css/tiles.css') }}"
     /> -->
 
-    <link
-      rel="stylesheet"
-      href="{{ url_for('static', filename='css/global.css') }}"
-    />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/global.css') }}" />
 
-    <link
-      rel="stylesheet"
-      href="{{ url_for('static', filename='css/updated_scoring.css') }}"
-    />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/updated_scoring.css') }}" />
 
     <link rel="stylesheet" href="{{ url_for('static', filename='css/precheck.css') }}" />
 
@@ -29,9 +23,9 @@
         flex-direction: column;
         justify-content: center;
         gap: 0.4rem;
-        width: 450px;
-        padding: 1.3rem;
-        min-height: 250px;
+        max-width: 450px;
+        padding: 15px;
+        min-height: 200px;
         position: absolute;
         top: 20%;
         background-color: white;
@@ -41,39 +35,42 @@
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
       }
-      
+
       .modal .flex {
         display: flex;
         align-items: center;
         justify-content: space-between;
       }
-      
+
       .modal input {
         padding: 0.7rem 1rem;
         border: 1px solid #ddd;
         border-radius: 5px;
         font-size: 0.9em;
       }
-      
-      .modal h3 {
 
+      .modal h3 {
         color: #111111;
         margin: 0.4rem 0 0.2rem;
+        font-size: 1.2rem;
+        text-align: center;
       }
       .modal p {
-        font-size: 0.9rem;
+        font-size: 1rem;
         color: #777;
         margin: 0.4rem 0 0.2rem;
+        text-align: center;
       }
-      
+
       .modal button {
         cursor: pointer;
         border: none;
         font-weight: 600;
+        background-color: #478f96;
       }
-      
+
       .btn {
         display: inline-block;
         padding: 0.8rem 1.4rem;
@@ -84,12 +81,12 @@
         text-align: center;
         font-size: 1em;
       }
-      
+
       .btn-open {
         position: absolute;
         bottom: 150px;
       }
-      
+
       .btn-close {
         transform: translate(10px, -20px);
         padding: 0.5rem 0.7rem;
@@ -114,22 +111,19 @@
         display: none;
       }
     </style>
-
   </head>
-
 
   <body>
     <header>
-      <p class="level_indicator">Level <span id="level"> : Scoring</span></p>
+      <!-- <p class="level_indicator">Level <span id="level"> : Scoring</span></p> -->
+      <p class="level_indicator">Level Finished</p>
     </header>
-
 
     <div class="updated_scoring_page_container">
       <!-- Mouse Data Score -->
-      <div class="updated_scoring_mouse_data_wrapper">
+      <!-- <div class="updated_scoring_mouse_data_wrapper">
         <h2 class="updated_scoring_mouse_data_title">How You Did</h2>
         <div class="updated_scoring_mouse_data_container">
-          <!-- Emoji containers -->
 
           <div class="updated_scoring_mouse_data_item">
 
@@ -160,7 +154,6 @@
                 src="{{ url_for('static', filename='images/sadYellowEmoji.svg') }}"
               />
             </div>
-            <!-- <p class="updated_scoring_mouse_data_item_desc">&nbsp;</p> -->
             <p class="updated_scoring_mouse_data_item_desc">You can do better</p>
 
 
@@ -190,7 +183,6 @@
 
 
           <div class="updated_scoring_mouse_data_item">
-            <!-- <p class="updated_scoring_mouse_data_item_desc">>10%</p> -->
 
           {% if session.get("AverageEuclidanPercentChange") and session.get("AverageEuclidanPercentChange") > 0 and session.get("AverageEuclidanPercentChange") <= 10  %}
           <div class="emoji_wrapper active">
@@ -211,53 +203,46 @@
 
 
 
-      </div>
+      </div> -->
 
       <br />
       <br />
       <br />
 
       <!-- Time to Complete -->
-      <div class="updated_scoring_ttc_wrapper" style="align-items: center;">
+      <!-- <div class="updated_scoring_ttc_wrapper" style="align-items: center">
         <h2 class="updated_scoring_ttc_title">Time to Complete Task</h2>
         <div class="updated_scoring_ttc_container">
-
-          <div class="ttc_actual" style="text-align: center;">You Took: <span id="ttc_actual">{{ session.get("TimeToCompleteLevel")["ttc_minutes"] }}:{{ session.get("TimeToCompleteLevel")["ttc_seconds"] }}</span></div>
+          <div class="ttc_actual" style="text-align: center">
+            You Took: <span id="ttc_actual">{{ session.get("TimeToCompleteLevel")["ttc_minutes"] }}:{{ session.get("TimeToCompleteLevel")["ttc_seconds"] }}</span>
+          </div>
         </div>
-      </div>
+      </div> -->
+      <div style="text-align: center; font-size: 2em; font-family: IBM Plex Sans, sans-serif; font-weight: 600">Please check your watch's status and then start the next puzzle</div>
     </div>
 
-
-
-    <div class="pregame_status_container" style="flex-direction: row;">
-      <button id="next_level_btn" class="start_button pregame_disabled">
-        Next Puzzle
-      </button>
-      <hr style="width: 2px; height: 30px; display: inline-block; margin: 0px 10px; background-color: black;">
+    <div class="pregame_status_container" style="flex-direction: row">
+      <button id="next_level_btn" class="start_button pregame_disabled">Next Puzzle</button>
+      <hr style="width: 2px; height: 30px; display: inline-block; margin: 0px 10px; background-color: black" />
       <button id="watch_status_check_btn" class="start_button">Check Watch Status</button>
       <div class="pregame_watch_status" id="watch_status_text">Offline</div>
       <svg id="watch_status_loading" class="second_spinner" viewBox="0 0 50 50">
         <circle class="path" cx="25" cy="25" r="20" fill="none" stroke-width="5"></circle>
       </svg>
-
     </div>
-
 
     <!-- Modal HTML -->
     <section class="modal hidden">
-      <div class="flex">
+      <!-- <div class="flex">
         <button class="btn-close">⨉</button>
-      </div>
-      <div style="padding: 10px;">
-        <h3>You finished the session!</h3>
-        <p>
-          Please click the 'Finish' button to return to the Home Page
-        </p>
+      </div> -->
+      <div style="padding: 10px">
+        <h3>You Completed the Session!</h3>
+        <p>Please click the 'Finish' button to return to the Home Page</p>
       </div>
       <button class="btn" id="modal_finish">Finish</button>
     </section>
     <div class="overlay hidden"></div>
-
   </body>
 
   <script src="{{ url_for('static', filename='js/helper_functions.js') }}"></script>
@@ -268,7 +253,7 @@
     const overlay = document.querySelector(".overlay");
     const openModalBtn = document.querySelector(".btn-open");
     const closeModalBtn = document.querySelector(".btn-close");
-    const modelFinishBtn = document.getElementById("modal_finish")
+    const modelFinishBtn = document.getElementById("modal_finish");
 
     const openModal = function () {
       modal.classList.remove("hidden");
@@ -280,12 +265,11 @@
       overlay.classList.add("hidden");
     };
 
-    closeModalBtn.addEventListener("click", closeModal);
-
+    //closeModalBtn.addEventListener("click", closeModal);
 
     // Check for timeout
-    async function checkTimeoutStatus(watchID){
-      if(watchID == null) return false;
+    async function checkTimeoutStatus(watchID) {
+      if (watchID == null) return false;
 
       try {
         const response = await fetch("/check_timeout_status", {
@@ -302,50 +286,52 @@
 
     checkTimeoutStatus(getLocalStorageOrNull(LOCALSTORAGE_WATCHID)).then((shouldTimeout) => {
       console.log("Timeout Status: ", shouldTimeout);
-      openModal()
-      modelFinishBtn.addEventListener("click", () => {
-        window.location.href = "/"
-      })
-    })
 
-
+      if (shouldTimeout) {
+        <!-- openModal(); -->
+        modelFinishBtn.addEventListener("click", () => {
+          // Remove 10 minute timer
+          fetch("/mindgame_remove_timer", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ watchID: getLocalStorageOrNull(LOCALSTORAGE_WATCHID) }),
+          });
+          window.location.href = "/";
+        });
+      }
+    });
   </script>
 
   <script>
-
-
     const nextLevelBtn = document.getElementById("next_level_btn");
     let g_current_level = Number(getLocalStorage(LOCALSTORAGE_CURR_LEVEL, 1));
     let g_current_sub = Number(getLocalStorage(LOCALSTORAGE_CURR_SUBLEVEL, 1));
     let g_next_level = Number(getLocalStorage(LOCALSTORAGE_NEXT_SUBLEVEL, 1));
     let g_next_sub = Number(getLocalStorage(LOCALSTORAGE_NEXT_SUBLEVEL, 1));
 
-    console.log(g_current_level, g_current_sub, g_next_level, g_next_sub)
+    console.log(g_current_level, g_current_sub, g_next_level, g_next_sub);
 
     // Calculate the next level to go to
     const next_level_value = g_current_sub >= MINDGAME_MAX_SUBLEVEL ? g_current_level + 1 : g_current_level;
     const next_sublevel_value = g_current_sub >= MINDGAME_MAX_SUBLEVEL ? 1 : g_current_sub + 1;
 
-    console.log(next_level_value, next_sublevel_value)
-
+    console.log(next_level_value, next_sublevel_value);
   </script>
-
 
   <script>
     let g_watch_status = false;
-    const isEntireGameFinished = g_current_level == MINDGAME_MAX_LEVEL && g_current_sub == MINDGAME_MAX_SUBLEVEL
+    const isEntireGameFinished = g_current_level == MINDGAME_MAX_LEVEL && g_current_sub == MINDGAME_MAX_SUBLEVEL;
 
     // Finished all Levels
-    if(isEntireGameFinished){
+    if (isEntireGameFinished) {
       nextLevelBtn.classList.remove("pregame_disabled");
-      nextLevelBtn.innerHTML = "Finish"
-      localStorage.setItem(LOCALSTORAGE_PROGRESS , MINDGAME_PROGRESS_ENUM.HOME);
+      nextLevelBtn.innerHTML = "Finish";
+      localStorage.setItem(LOCALSTORAGE_PROGRESS, MINDGAME_PROGRESS_ENUM.HOME);
     }
 
     // Event listner for the check status button
     g_watch_check_watch_status_btn.addEventListener("click", async () => {
       nextLevelBtn.classList.add("pregame_disabled");
-
 
       //localStorage.setItem("watchID", watchID);
       await handleWatchStatusCheck((status) => {
@@ -361,30 +347,22 @@
 
     // Update localStorage so that the next level is displayed on tiles_game page
     nextLevelBtn.addEventListener("click", () => {
-
       //Done with all levels, send back to home page
-      if(isEntireGameFinished){
+      if (isEntireGameFinished) {
         window.location.href = `/`;
         return;
       }
 
-      if(nextLevelBtn.classList.contains("pregame_disabled")) return;
-
+      if (nextLevelBtn.classList.contains("pregame_disabled")) return;
 
       // Start new game on next level
       localStorage.setItem(LOCALSTORAGE_CURR_LEVEL, next_level_value);
-      localStorage.setItem(LOCALSTORAGE_CURR_SUBLEVEL, next_sublevel_value); 
+      localStorage.setItem(LOCALSTORAGE_CURR_SUBLEVEL, next_sublevel_value);
       window.location = "/tiles_game";
-
     });
 
     // Finished current Level so make sure next level is the next level
     localStorage.setItem(LOCALSTORAGE_NEXT_LEVEL, next_level_value);
-    localStorage.setItem(LOCALSTORAGE_NEXT_SUBLEVEL, next_sublevel_value); 
-
-
-
+    localStorage.setItem(LOCALSTORAGE_NEXT_SUBLEVEL, next_sublevel_value);
   </script>
 </html>
-
-

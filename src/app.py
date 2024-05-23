@@ -206,8 +206,6 @@ def start_data_collection(level, sub_level, userID, filename, watchID):
     #Save the same file to firebase, maybe use an obj {"client": client, "filename": filename}
     mqtt_clients[watchID] = {"client": client, "filename": filename, "start_time": None}
     
-    if watchID not in user_timeout.keys():
-        user_timeout[watchID] = {"start_ts": int(time.time())}
         
     print(f"Started MQTT for watch {watchID} with filename: {filename}")
     print("All current clients: ", mqtt_clients)
@@ -287,16 +285,49 @@ def check_timeout_status():
     
     #Get data from request
     res = request.get_json()
-    watchID = res["watchID"]
+    watchID = res.get("watchID", None)
+    
+    if watchID == None or watchID not in user_timeout.keys():
+        return jsonify({"status": False})
+        
     
     start_ts = user_timeout[watchID]["start_ts"]
     current_ts = int(time.time())
     TIMOUT_IN_SECONDS = 600
     print("TIMESTAMP", current_ts - start_ts, user_timeout)
-    if (current_ts - start_ts) >= 60:
+    if (current_ts - start_ts) >= 30:
         return jsonify({"status": True})
     else:
         return jsonify({"status": False})
+    
+@app.route('/mindgame_start_timer', methods=['POST'])
+def mindgame_start_timer():
+    """Start the 10 minute timer untill the user stops playing the game
+    """
+    res = request.get_json()
+    watchID = res["watchID"]
+    
+    # Global dictionary
+    user_timeout[watchID] = {"start_ts": int(time.time())}
+    print(f"Starting timer for: {watchID}")
+
+    
+    return jsonify({"status": True})
+    
+    
+@app.route('/mindgame_remove_timer', methods=['POST'])
+def mindgame_remove_timer():
+    """Remove the 10 minute timer
+    """
+    res = request.get_json()
+    watchID = res["watchID"]
+    
+    # Global dictionary
+    if watchID in user_timeout.keys():
+        del user_timeout[watchID]
+
+    
+    return jsonify({"status": True})
 
 
 
@@ -359,6 +390,9 @@ def check_watch_activity(watch_id, timeout=5):
     client.disconnect()  # Ensure disconnection even if no message is received
 
     return message_received
+
+
+
 
 
 
