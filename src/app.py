@@ -295,10 +295,11 @@ def check_timeout_status():
     current_ts = int(time.time())
     TIMOUT_IN_SECONDS = 600
     print("TIMESTAMP", current_ts - start_ts, user_timeout)
-    if (current_ts - start_ts) >= 30:
-        return jsonify({"status": True})
+    elapsed_time = current_ts - start_ts
+    if (elapsed_time) >= TIMOUT_IN_SECONDS:
+        return jsonify({"status": True, "elapsed_time": elapsed_time})
     else:
-        return jsonify({"status": False})
+        return jsonify({"status": False, "elapsed_time": elapsed_time})
     
 @app.route('/mindgame_start_timer', methods=['POST'])
 def mindgame_start_timer():

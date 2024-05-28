@@ -123,6 +123,30 @@
         font-weight: bold;
         font-family: "IBM Plex Sans", sans-serif;
       }
+
+      /*Countdown Timer*/
+      /* Countdown Timer */
+      .counter {
+        width: 200px;
+        height: 60px;
+        font-family: "IBM Plex Sans", sans-serif;
+        font-weight: 500;
+        font-size: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        background-color: rgb(240, 240, 240);
+        border: 2px solid black;
+        border-radius: 20px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      .time_value {
+        transition: all 0.5s ease;
+      }
     </style>
   </head>
   <body>
@@ -173,6 +197,10 @@
       <circle class="path" cx="25" cy="25" r="20" fill="none" stroke-width="5"></circle>
     </svg>
 
+    <div class="counter">
+      <div class="time_value" id="time_value"></div>
+    </div>
+
     <!-- Used to display the mouse metrics on the side of the screen -->
     <!-- <script src="{{ url_for('static', filename='js/mouse_movement.js') }}"></script> -->
 
@@ -191,5 +219,52 @@
 
     <!-- Changes level to current localStorage values -->
     <script src="{{ url_for('static', filename='js/engine/engine_setup.js') }}"></script>
+
+    <script>
+      // Get Elapsed time
+      async function checkElapsedTime(watchID) {
+        if (watchID == null) return false;
+
+        try {
+          const response = await fetch("/check_timeout_status", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ watchID }),
+          });
+          const data = await response.json();
+          return data["elapsed_time"];
+        } catch {
+          return 0;
+        }
+      }
+
+      function formatTime(seconds) {
+        const minutes = Math.floor(seconds / 60);
+        const remainingSeconds = seconds % 60;
+        return `${minutes}:${remainingSeconds < 10 ? "0" : ""}${remainingSeconds}`;
+      }
+
+      function startTimer(initialTime) {
+        let elapsedTime = initialTime;
+
+        function updateTimer() {
+          elapsedTime += 1;
+          const TEN_MINUTES = 600;
+          if (elapsedTime >= TEN_MINUTES) {
+            document.getElementById("time_value").style.color = "red";
+          }
+          document.getElementById("time_value").textContent = formatTime(elapsedTime);
+        }
+
+        setInterval(updateTimer, 1000);
+      }
+
+      //startTimer(580); Just for testing
+      checkElapsedTime(getLocalStorageOrNull(LOCALSTORAGE_WATCHID)).then((elapsed_time) => {
+        console.log("Elapsed Time:", elapsed_time);
+        document.getElementById("time_value").textContent = formatTime(elapsed_time);
+        startTimer(elapsed_time);
+      });
+    </script>
   </body>
 </html>

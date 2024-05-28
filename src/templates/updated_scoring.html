@@ -237,7 +237,7 @@
         <button class="btn-close">⨉</button>
       </div> -->
       <div style="padding: 10px">
-        <h3>You Completed the Session!</h3>
+        <h3>You completed the 10 minute session!</h3>
         <p>Please click the 'Finish' button to return to the Home Page</p>
       </div>
       <button class="btn" id="modal_finish">Finish</button>
@@ -288,7 +288,7 @@
       console.log("Timeout Status: ", shouldTimeout);
 
       if (shouldTimeout) {
-        <!-- openModal(); -->
+        openModal();
         modelFinishBtn.addEventListener("click", () => {
           // Remove 10 minute timer
           fetch("/mindgame_remove_timer", {
