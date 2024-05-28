@@ -306,7 +306,7 @@
     const nextLevelBtn = document.getElementById("next_level_btn");
     let g_current_level = Number(getLocalStorage(LOCALSTORAGE_CURR_LEVEL, 1));
     let g_current_sub = Number(getLocalStorage(LOCALSTORAGE_CURR_SUBLEVEL, 1));
-    let g_next_level = Number(getLocalStorage(LOCALSTORAGE_NEXT_SUBLEVEL, 1));
+    let g_next_level = Number(getLocalStorage(LOCALSTORAGE_NEXT_LEVEL, 1));
     let g_next_sub = Number(getLocalStorage(LOCALSTORAGE_NEXT_SUBLEVEL, 1));
 
     console.log(g_current_level, g_current_sub, g_next_level, g_next_sub);
@@ -349,6 +349,11 @@
     nextLevelBtn.addEventListener("click", () => {
       //Done with all levels, send back to home page
       if (isEntireGameFinished) {
+        localStorage.setItem(LOCALSTORAGE_CURR_LEVEL, 1);
+        localStorage.setItem(LOCALSTORAGE_CURR_SUBLEVEL, 1);
+        localStorage.setItem(LOCALSTORAGE_NEXT_LEVEL, 1);
+        localStorage.setItem(LOCALSTORAGE_NEXT_SUBLEVEL, 1);
+
         window.location.href = `/`;
         return;
       }
