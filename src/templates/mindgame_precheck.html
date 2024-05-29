@@ -35,6 +35,11 @@
     <script src="{{ url_for('static', filename='js/watch_check.js') }}"></script>
 
     <script>
+      // Make sure its stopped
+      stop_mqtt_data_collection();
+    </script>
+
+    <script>
       localStorage.setItem(LOCALSTORAGE_PROGRESS, MINDGAME_PROGRESS_ENUM.PRECHECK);
     </script>
 
