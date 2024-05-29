@@ -18,7 +18,7 @@ import time
 from functools import partial  # Import functools.partial
 import threading
 csv_lock = threading.Lock()
-
+from sys import platform # Check if on linux or windows
 import logging
 
 #Logging setup
@@ -39,6 +39,11 @@ app.secret_key = "super secret key"
 
 #Firebase Config
 cred_path = os.path.join(".", "carewear-77d8e-b0c3a74e907c.json")
+if platform == "linux" or platform == "linux2":
+    # For deployment on server
+    cred_path = "/var/www/MindGamev2/src/carewear-77d8e-b0c3a74e907c.json"
+
+    
 cred = credentials.Certificate(cred_path) 
 firebaseConfig = {
   "apiKey": "AIzaSyDyjHLuokjuGEPr3HOSsX8FP16qxyS62W8",
@@ -62,6 +67,10 @@ ref = db.reference('/sensors_message')  # Path to your sensor data node in the d
 SAVE_FILES_TO_LOCAL_SYSTEM = True
 SAVE_FILES_TO_CLOUD = False
 SAVED_DATA_DIRECTORY = os.path.join("data", "")
+if platform == "linux" or platform == "linux2":
+    # For deployment on server
+    SAVED_DATA_DIRECTORY = "/var/www/MindGamev2/src/data"
+
 
 
 
@@ -98,7 +107,7 @@ def on_connect(client, userdata, flags, rc, watchID):
         print(f"Failed to connect, return code: {rc}")
         
         
-def get_csv_headers_from_topic(topic: str) -> list[str]:
+def get_csv_headers_from_topic(topic: str):
     """Ouputs the correct csv header for a specific topic of data
 
     Args:

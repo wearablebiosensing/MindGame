@@ -267,7 +267,7 @@ const LEVELS = {
 
       GreenEquilateralTriangle(LEVEL_X - 55, LEVEL_Y - 235, 200, true), //neck left
       GreenEquilateralTriangle(LEVEL_X + 60, LEVEL_Y - 235, 280, true), //neck right
-      GreenEquilateralTriangle(LEVEL_X - 30, LEVEL_Y - 50, 270, true),
+      GreenEquilateralTriangle(LEVEL_X - 40, LEVEL_Y - 50, 270, true), // LEVEL_X - 30 broke it so its -40 now
       GreenEquilateralTriangle(LEVEL_X + 30, LEVEL_Y - 50, 90, true),
       GreenEquilateralTriangle(LEVEL_X - 60, LEVEL_Y + 125, 330, true),
       GreenEquilateralTriangle(LEVEL_X + 60, LEVEL_Y + 125, 30, true),

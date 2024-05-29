@@ -320,13 +320,19 @@
 
   <script>
     let g_watch_status = false;
+    const SHOULD_KEEP_LOOPING_LEVELS = true;
     const isEntireGameFinished = g_current_level == MINDGAME_MAX_LEVEL && g_current_sub == MINDGAME_MAX_SUBLEVEL;
 
     // Finished all Levels
     if (isEntireGameFinished) {
       nextLevelBtn.classList.remove("pregame_disabled");
-      nextLevelBtn.innerHTML = "Finish";
       localStorage.setItem(LOCALSTORAGE_PROGRESS, MINDGAME_PROGRESS_ENUM.HOME);
+
+      if (SHOULD_KEEP_LOOPING_LEVELS) {
+        nextLevelBtn.innerHTML = "Next Puzzle";
+      } else {
+        nextLevelBtn.innerHTML = "Finish";
+      }
     }
 
     // Event listner for the check status button
@@ -354,7 +360,11 @@
         localStorage.setItem(LOCALSTORAGE_NEXT_LEVEL, 1);
         localStorage.setItem(LOCALSTORAGE_NEXT_SUBLEVEL, 1);
 
-        window.location.href = `/`;
+        if (SHOULD_KEEP_LOOPING_LEVELS) {
+          window.location = "/tiles_game";
+        } else {
+          window.location.href = `/`;
+        }
         return;
       }
 
