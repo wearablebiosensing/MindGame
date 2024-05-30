@@ -289,14 +289,17 @@
 
       if (shouldTimeout) {
         openModal();
-        modelFinishBtn.addEventListener("click", () => {
+        modelFinishBtn.addEventListener("click", (e) => {
+          e.preventDefault(); // Firefox is stupid
+
           // Remove 10 minute timer
           fetch("/mindgame_remove_timer", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ watchID: getLocalStorageOrNull(LOCALSTORAGE_WATCHID) }),
+          }).then(() => {
+            window.location.href = "/";
           });
-          window.location.href = "/";
         });
       }
     });
@@ -336,7 +339,9 @@
     }
 
     // Event listner for the check status button
-    g_watch_check_watch_status_btn.addEventListener("click", async () => {
+    g_watch_check_watch_status_btn.addEventListener("click", async (e) => {
+      e.preventDefault(); // Firefox is stupid
+
       nextLevelBtn.classList.add("pregame_disabled");
 
       //localStorage.setItem("watchID", watchID);
@@ -352,7 +357,9 @@
     });
 
     // Update localStorage so that the next level is displayed on tiles_game page
-    nextLevelBtn.addEventListener("click", () => {
+    nextLevelBtn.addEventListener("click", (e) => {
+      e.preventDefault(); // Firefox is stupid
+
       //Done with all levels, send back to home page
       if (isEntireGameFinished) {
         localStorage.setItem(LOCALSTORAGE_CURR_LEVEL, 1);

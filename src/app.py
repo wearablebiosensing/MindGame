@@ -296,6 +296,8 @@ def check_timeout_status():
     res = request.get_json()
     watchID = res.get("watchID", None)
     
+    print("CHECKING TIMEOUT STATUS FOR ID: ", watchID)
+    
     if watchID == None or watchID not in user_timeout.keys():
         return jsonify({"status": False})
         
@@ -303,7 +305,7 @@ def check_timeout_status():
     start_ts = user_timeout[watchID]["start_ts"]
     current_ts = int(time.time())
     TIMOUT_IN_SECONDS = 600
-    print("TIMESTAMP", current_ts - start_ts, user_timeout)
+    print("Timout for ", watchID, " is ", current_ts - start_ts)
     elapsed_time = current_ts - start_ts
     if (elapsed_time) >= TIMOUT_IN_SECONDS:
         return jsonify({"status": True, "elapsed_time": elapsed_time})
@@ -316,6 +318,8 @@ def mindgame_start_timer():
     """
     res = request.get_json()
     watchID = res["watchID"]
+    
+    print("Started timeout timer for ID: ", watchID)
     
     # Global dictionary
     user_timeout[watchID] = {"start_ts": int(time.time())}
@@ -331,9 +335,13 @@ def mindgame_remove_timer():
     """
     res = request.get_json()
     watchID = res["watchID"]
+    print("ATTEMPTING TO Remove timeout timer for ID: ", watchID)
+    
     
     # Global dictionary
     if watchID in user_timeout.keys():
+        print("SUCCESS Removed timeout timer for ID: ", watchID)
+        
         del user_timeout[watchID]
 
     

@@ -55,7 +55,9 @@
       prefillWatchWithLocalStorage();
 
       // Event listner for the check status button
-      g_watch_check_watch_status_btn.addEventListener("click", async () => {
+      g_watch_check_watch_status_btn.addEventListener("click", async (e) => {
+        e.preventDefault(); // Firefox is stupid
+
         // Disable button so we dont press again
         g_mindgame_start_btn.classList.add("pregame_disabled");
 
@@ -80,7 +82,9 @@
       });
 
       // Event listner for the start mindgame button
-      g_mindgame_start_btn.addEventListener("click", async () => {
+      g_mindgame_start_btn.addEventListener("click", async (e) => {
+        e.preventDefault(); // Firefox is stupid
+
         const watchID = g_watchID_input.value;
         if (!watchID.match(/\S/)) {
           alert("Watch ID is empty");
@@ -94,17 +98,18 @@
           return;
         }
 
+        // Start Tiles Games, default to 1-1 if not specified
+        localStorage.setItem(LOCALSTORAGE_CURR_LEVEL, getLocalStorageOrNull(LOCALSTORAGE_NEXT_LEVEL) == null ? 1 : getLocalStorageOrNull(LOCALSTORAGE_NEXT_LEVEL));
+        localStorage.setItem(LOCALSTORAGE_CURR_SUBLEVEL, getLocalStorageOrNull(LOCALSTORAGE_NEXT_SUBLEVEL) == null ? 1 : getLocalStorageOrNull(LOCALSTORAGE_NEXT_SUBLEVEL));
+
         // Start 10 minute timer
         fetch("/mindgame_start_timer", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ watchID }),
+        }).then(() => {
+          window.location = "/tiles_game";
         });
-
-        // Start Tiles Games, default to 1-1 if not specified
-        localStorage.setItem(LOCALSTORAGE_CURR_LEVEL, getLocalStorageOrNull(LOCALSTORAGE_NEXT_LEVEL) == null ? 1 : getLocalStorageOrNull(LOCALSTORAGE_NEXT_LEVEL));
-        localStorage.setItem(LOCALSTORAGE_CURR_SUBLEVEL, getLocalStorageOrNull(LOCALSTORAGE_NEXT_SUBLEVEL) == null ? 1 : getLocalStorageOrNull(LOCALSTORAGE_NEXT_SUBLEVEL));
-        window.location = "/tiles_game";
       });
 
       // Show userID
