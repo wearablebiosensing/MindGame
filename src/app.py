@@ -7,7 +7,7 @@ from datetime import datetime
 import json
 import math
 
-from flask import Flask, render_template, request, jsonify, redirect,url_for, Response, session
+from flask import Flask, render_template, request, jsonify, redirect, send_from_directory,url_for, Response, session
 import firebase_admin
 from firebase_admin import credentials, storage, db
 import pandas as pd
@@ -419,6 +419,11 @@ def check_watch_activity(watch_id, timeout=5):
 #Start_mqtt we will send the ID from the watch so we will listen on the right topic /acceleration/id
 
 
+
+@app.route('/favicon.ico',methods=['GET'])
+def favicon():
+    return send_from_directory(os.path.join(app.root_path, 'static'),
+                               'images/favicon.ico')
 
 @app.route('/')
 @app.route('/landing')
