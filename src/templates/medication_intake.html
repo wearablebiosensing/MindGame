@@ -212,14 +212,6 @@
 
           if (isValidForm(selectedMedication, otherMedication, intakeTime)) {
             submitForm(selectedMedication, otherMedication, intakeTime);
-
-            // Handle if this is an athome or in Lab
-            let application_type = "{{ type|safe }}";
-            if (application_type == "inlab") {
-              window.location = "/nogo";
-            } else if (application_type == "athome") {
-              window.location = "/mindgame_precheck";
-            }
           } else {
             alert("Please fill in both the medication name and intake time.");
           }
@@ -259,9 +251,15 @@
             data: data,
             userID: getLocalStorageOrNull(LOCALSTORAGE_USERID),
           }),
-        })
-          .then((data) => {})
-          .catch((error) => console.error("Error:", error));
+        }).then(() => {
+          // Handle if this is an athome or in Lab
+          let application_type = "{{ type|safe }}";
+          if (application_type == "inlab") {
+            window.location = "/nogo";
+          } else if (application_type == "athome") {
+            window.location = "/mindgame_precheck";
+          }
+        });
       }
     </script>
   </body>
