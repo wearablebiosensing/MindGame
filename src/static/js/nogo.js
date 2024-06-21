@@ -5,8 +5,8 @@ const g_nogo_shape = document.getElementById("nogo_shape");
 const g_nogo_spinner = document.getElementById("nogo_spinner");
 const g_nogo_progress_txt = document.getElementById("nogo_progress");
 const g_nogo_practice_status_txt = document.getElementById("practice_status");
-const MAX_SHAPES_SHOWN = 220; //Standard 220, 20 for practice, 100 Go, 100 NoGo
-const PRACTICE_SHAPES = 20;
+const MAX_SHAPES_SHOWN = 2; //Standard 220, 20 for practice, 100 Go, 100 NoGo
+const PRACTICE_SHAPES = 1;
 const MAX_TIME = 1000; //ms
 const TIME_BETWEEN_SHAPES = 2800; //ms
 let g_times_shape_shown = 0;
@@ -88,7 +88,7 @@ function nogo_post_data() {
     },
     body: JSON.stringify({
       data: g_nogo_data,
-      userID: getLocalStorageOrNull("userID"),
+      userID: getLocalStorageOrNull("mindgame_userID"),
     }),
   }).finally(() => {
     window.location.href = "/mindgame_precheck";

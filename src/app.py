@@ -145,6 +145,7 @@ def on_message(client, userdata, message, filename, watchID):
 
 # Callback for when the client disconnects from the server
 def on_disconnect(client, userdata, rc):
+    print("Disconeccted MQTT")
     if rc != 0:
         print(f"Unexpected disconnection, return code: {rc}")
 
@@ -227,16 +228,16 @@ def stop_data_collection(watchID):
         mqtt_clients[watchID]["client"].disconnect()
         mqtt_clients[watchID]["client"].loop_stop()
         
-        #Save CSV to firebase
-        filename = mqtt_clients[watchID]["filename"]
-        # filepath = save_to_csv("", filename) #Make sure correct filepath
+        topic = f"{watchID}/accelerometer"
+        topic2 = f"{watchID}/gyroscope"
+        topic3 = f"{watchID}/heartrate"
+        topic4 = f"{watchID}/linear_acceleration"
         
-        # if(os.path.exists(filepath) == False):
-        #     print(f"File not found at {filepath}")
-        #     return
         
-        # print(filepath)
-        # upload_csv_to_firebase(filepath, f"MagneticTiles/watch_data/{filename}")
+        mqtt_clients[watchID]["client"].unsubscribe(topic)
+        mqtt_clients[watchID]["client"].unsubscribe(topic2)
+        mqtt_clients[watchID]["client"].unsubscribe(topic3)
+        mqtt_clients[watchID]["client"].unsubscribe(topic4)
         
         #Delete client
         del mqtt_clients[watchID]
@@ -857,6 +858,7 @@ def processnogo():
         res = request.get_json()
         data = res.get("data")
         userID = res.get("userID")
+        print("NONONONONONO")
         
         if not data or not userID:
             logger.error("Missing 'data' or 'userID' in the request payload")
