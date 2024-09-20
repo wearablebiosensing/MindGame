@@ -12,153 +12,118 @@
       href="{{ url_for('static', filename='css/landing_page.css') }}"
     />
     <title>Landing Page</title>
-
     <style>
-      #watch_status{
-        font-family:Verdana, Geneva, Tahoma, sans-serif;
+      .gfg {
+          margin: 3%;
+          position: relative;
+      }
+     
+    /*This CSS code is defining the styles for a container that holds text*/
+      .text-container {
+          font-family: "IBM Plex Sans", sans-serif;
+          position: absolute;
+          color: #478F96;
+          text-align: center;
+          font-size: calc(4vh + 3vw);
+          left: 18rem;
+          top: -3rem;
+          margin-left: 15%;
+          /* background-color: rgb(41, 41, 41, 0.8); */
+          padding: 0 1rem;
+      }
+      .text-container-m5connection {
+          font-family: "IBM Plex Sans", sans-serif;
+          position: absolute;
+          color: #979797;
+          text-align: center;
+          font-size: 30px;
+          left: 18rem;
+          top: 34rem;
+          margin-left: 15%;
+          /* background-color: rgb(41, 41, 41, 0.8); */
+          padding: 0 1rem;
+      }
+      .start-button {
+        position: absolute;
+        background-color: #478F96; /* Green */
+        border-radius: 10px;
+        border: none;
+        color: white;
+        padding: 15px 32px;
+        width: 150px;
+        left: 18rem;
+          top: 38rem;
+          margin-left: 24%;
+
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 25px;
+        cursor: pointer;
         font-weight: bold;
-        font-size: 20px;
-      }
-    </style>
+        font-family: "IBM Plex Sans", sans-serif;
+
+        }
+
+        .disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
+        }
+  </style>
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.1.2/socket.io.js"></script>
+    <script>
+        const socket = io.connect('http://' + document.domain + ':' + location.port);
+        socket.on('mqtt_message2', function(msg) {
+            document.getElementById('mqtt-init').innerHTML = msg.data;
+        });
+    </script> -->
+
   </head>
-  
   <body>
-
-
-      <div class="center landing_container">
-        <div class="landing_title">Mind Game</div>
-        <img 
-        style="width:min(100%, 550px); height: auto ; ",
-        src="{{ url_for('static', filename='images/landing_page_v2.png') }}"
+      <div class="gfg">
+        <img class="landing_hero_image",
+        style="height: 700px ; width:1000px; margin-left: 15%; margin-top: 0;",
+        src="{{ url_for('static', filename='images/landing_page_logo.png') }}"
         alt="Group">
-
-        <!-- <div class="text_container_m5connection">Waiting for M5 to connect... </div> -->
-
-
-
-        <div class="input-container watch">
-          <div style="display: flex; flex-direction: column; align-items: center; gap: 5px; width: 100%;">
-            <input type="text" placeholder="Identifier" id="identifier" />
-            <!-- <input type="text" placeholder="Watch ID" id="watchID" /> -->
-          </div>
-
-        </div>
-
-        <div class="btn_container" style="margin-bottom: 10px;">
-
-
-          <button id="restore_btn" class="start_button" >Restore Progress</button>
-
-        </div>
-
-        <div class="btn_container" id="navigation_buttons">
-
-
-          <button id="in_lab_btn" class="start_button" >In Lab</button>
-          <button id="at_home_btn" class="start_button" >At Home</button>
-          <a href="{{ url_for('tutorial') }}"><button class="start_button" >Tutorial</button></a>
-
-          <!-- <button id="submitBtn"  class="start_button" required> Start </button> -->
-        </div>
-
-
-      </div>
+                    <div class="text-container">Mind Game</div>
+                    <div class="text-container-m5connection">Waiting for M5 to connect... </div>
+                    <button id="submitBtn"  class="start-button" required> Start </button>
+            </div>
       
 
+      <!-- <div class="input-wrapper">
+        <div class="input-container">
+          <input type="text" placeholder="Watch ID" id="userID" />
+        </div>
 
+        <button type="submit" id="submitBtn" required>Submit</button>
+      </div> -->
     </div>
-  <script src="{{ url_for('static', filename='js/helper_functions.js') }}"></script>
-
-    <script src="{{ url_for('static', filename='js/home.js') }}"></script>
-    <script>
-      let mindgameStatus = getLocalStorageOrNull("mindgame_progress");
-      if(mindgameStatus == null){
-        localStorage.setItem("mindgame_progress", "home");
-      } 
-
-
-      const restoreBtn = document.getElementById("restore_btn");
-      restoreBtn.style.display = mindgameStatus !== "home" ? "block" : "none";
-
-      const navigation_buttons = document.getElementById("navigation_buttons");
-      navigation_buttons.style.display = mindgameStatus !== "home" ? "none" : "block";
-
-
-
-
-
-      function updateRestoreButtonText() {
-        if (mindgameStatus === "tiles" || mindgameStatus === "precheck") {
-          const currentLevel = Number(localStorage.getItem("mindgame_next_level"));
-          const sub = Number(localStorage.getItem("mindgame_next_sublevel"));
-          restoreBtn.innerHTML += ` Level ${currentLevel}-${sub}`;
-        } else if (mindgameStatus === "nogo") {
-          restoreBtn.innerHTML += ": NoGo";
-        } else if (mindgameStatus === "intake") {
-          restoreBtn.innerHTML += ": In Take Form";
-        }
-      }
-
-      function redirectToPage() {
-        switch (mindgameStatus) {
-          case "tiles":
-          case "precheck":
-            window.location = "/mindgame_precheck";
-            break;
-          case "nogo":
-            window.location = "/nogo";
-            break;
-          case "intake":
-            window.location = "/start_application/athome";
-            break;
-        }
-      }
-
-      if (mindgameStatus !== "home") {
-        updateRestoreButtonText();
-        restoreBtn.addEventListener("click", redirectToPage);
-      }
-      
-      
-    </script>
-    
 
     <script>
-      
-      /*const submitBtn = document.getElementById("submitBtn");
+      const submitBtn = document.getElementById("submitBtn");
+
       submitBtn.addEventListener("click", () => {
-
-        // Please remove
-        localStorage.setItem("watchID", watchID_input.value);
-        localStorage.setItem("userID", userID_input.value);
+        localStorage.setItem("userID", "test");
         localStorage.setItem("currentLevel", 1);
-        localStorage.setItem("currentSubLevel", 1);
-
   
         window.location.href = "/tiles_game"; //Send to game
 
+      })
 
-        if (!watchID_input.value.match(/\S/)) {
-          alert("Watch ID is empty");
-          return;
+
+      /*const ID_Input = document.getElementById("userID");
+
+      submitBtn.addEventListener("click", () => {
+        if (!ID_Input.value.match(/\S/)) {
+          alert("Field is blank");
+        } else {
+          localStorage.setItem("userID", ID_Input.value);
+          localStorage.setItem("currentLevel", 1);
+
+          window.location.href = "/tiles_game"; //Send to game
         }
-
-        if (!userID_input.value.match(/\S/)) {
-          alert("Identifier is empty");
-          return;
-        }
-
-        //localStorage.setItem("watchID", watchID_input.value);
-        //localStorage.setItem("userID", userID_input.value);
-        //localStorage.setItem("currentLevel", 1);
-        //localStorage.setItem("currentSubLevel", 1);
-
-  
-        //window.location.href = "/tiles_game"; //Send to game
-        
-
-      })*/
-      
+      }); */
     </script>
   </body>
 </html>

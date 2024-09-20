@@ -1,7 +1,7 @@
 // Global Constants
 const userID = getLocalStorageOrNull("userID");
 const level = getLocalStorageOrNull("currentLevel");
-// const completetion_time_display = document.getElementById("completion_time");
+const completetion_time_display = document.getElementById("completion_time");
 
 // Update localStorage so that the next level is displayed on tiles_game page
 const nextLevelBtn = document.getElementById("next_level");
@@ -11,16 +11,16 @@ nextLevelBtn.addEventListener("click", () => {
 });
 
 // Make a fetch request to the completion-time endpoint
-// fetch(`/completion_time/${userID}/${level}`)
-//   .then((response) => response.text())
-//   .then((completionTime) => {
-//     // Display the completion time on the page
-//     completetion_time_display.textContent = completionTime;
-//   })
-//   .catch((error) => {
-//     completetion_time_display.textContent = "Error fetching completion time";
-//     console.error("Error fetching completion time:", error);
-//   });
+fetch(`/completion_time/${userID}/${level}`)
+  .then((response) => response.text())
+  .then((completionTime) => {
+    // Display the completion time on the page
+    completetion_time_display.textContent = completionTime;
+  })
+  .catch((error) => {
+    completetion_time_display.textContent = "Error fetching completion time";
+    console.error("Error fetching completion time:", error);
+  });
 
 //Getting Graphs from flask server
 function loadImage(url, container) {
@@ -69,5 +69,5 @@ function getGraph(currentUserID, currentLevel, containerID) {
 }
 
 // Call the function with appropriate parameters and unique element IDs
-// getGraph(userID, level, "mouse_movement_graph");
-// getGraph(userID, level, "acceleration_graph");
+getGraph(userID, level, "mouse_movement_graph");
+getGraph(userID, level, "acceleration_graph");

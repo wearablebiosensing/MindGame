@@ -4,42 +4,28 @@ import csv
 import re
 import os
 from datetime import datetime
-import json
-import math
 
-from flask import Flask, render_template, request, jsonify, redirect,url_for, Response, session
+from flask import Flask, render_template, request, jsonify, redirect,url_for, Response
 import firebase_admin
 from firebase_admin import credentials, storage, db
 import pandas as pd
 import numpy as np
+import scipy.signal as signal
+import matplotlib
+matplotlib.use('Agg')
+from matplotlib import pyplot as plt
+from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+from flask_socketio import SocketIO
 import paho.mqtt.client as mqtt
-import csv
-import time
-from functools import partial  # Import functools.partial
+# pip3 install -r flask firebase-admin pandas scipy numpy matplotlib
 import threading
 csv_lock = threading.Lock()
 
-import logging
-
-#Logging setup
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
-
-# Create a handler that logs to console (stdout)
-handler = logging.StreamHandler()
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-handler.setFormatter(formatter)
-logger.addHandler(handler)
-
-
-#Flask Config
 app = Flask(__name__)
-app.secret_key = "super secret key"
+root = "/Users/shehjarsadhu/Desktop/UniversityOfRhodeIsland/Graduate/WBL/Project_Carehub/CareWear-PortalView/CareWear-MagneticTilesActivity/"
 
+cred = credentials.Certificate('./carewear-77d8e-b0c3a74e907c.json') 
 
-#Firebase Config
-cred_path = os.path.join(".", "carewear-77d8e-b0c3a74e907c.json")
-cred = credentials.Certificate(cred_path) 
 firebaseConfig = {
   "apiKey": "AIzaSyDyjHLuokjuGEPr3HOSsX8FP16qxyS62W8",
   "authDomain": "carewear-77d8e.firebaseapp.com",
@@ -54,289 +40,134 @@ firebase_admin.initialize_app(cred, {
         'databaseURL': 'https://carewear-77d8e-default-rtdb.firebaseio.com/'
 })
 ref = db.reference('/sensors_message')  # Path to your sensor data node in the database
+socketio = SocketIO(app)
+# Subscribe to multiple topics
+# topics = [("M5StackcPlus/acceleration", 0), ("M5StackcPlus/hello", 0)]  # Replace with your desired topics and QoS level
 
-
-
-
-#Constant
-SAVE_FILES_TO_LOCAL_SYSTEM = True
-SAVE_FILES_TO_CLOUD = False
-SAVED_DATA_DIRECTORY = os.path.join("data", "")
-
-
-
-
-
-
-# Dictionary to hold multiple MQTT clients
-mqtt_clients = {}
-
-
-
-# Callback for when the client receives a CONNACK response from the server
-def on_connect(client, userdata, flags, rc, watchID):
+# MQTT callback functions
+def on_connect(client, userdata, flags, rc):
     if rc == 0:
-        topic = f"{watchID}/accelerometer"
-        topic2 = f"{watchID}/gyroscope"
-        topic3 = f"{watchID}/heartrate"
-        topic4 = f"{watchID}/linear_acceleration"
-        
-        print("Connected to MQTT broker on ", topic)
-        print("Connected to MQTT broker on ", topic2)
-        print("Connected to MQTT broker on ", topic3)
-        
-        
-        client.subscribe(topic)
-        client.subscribe(topic2)
-        client.subscribe(topic3)
-        client.subscribe(topic4)
-        
-        
-        
-    else:
-        print(f"Failed to connect, return code: {rc}")
-        
-        
-def get_csv_headers_from_topic(topic: str) -> list[str]:
-    """Ouputs the correct csv header for a specific topic of data
+        print("Connected to MQTT broker")
+    # for topic, qos in topics:
+    client.subscribe("M5StackcPlus/acceleration",0)  # Subscribe to the MQTT topic
 
-    Args:
-        topic (str)
+def on_message(client, userdata, message):
+    topic = message.topic
+    payload = message.payload.decode("utf-8")
+    print(f"Received message on topic '{topic}': {payload}")
+    # if topic.split("/") == "hello":
+    #     data = message.payload.decode()
+    #     print(f"Received message Hello Topic: {topic}")
+    #     print(f"Received message: {data}")
+    #     socketio.emit('mqtt_message2', {'data': data})
+    data = message.payload.decode()
+    print(f"Received message acceleration: {topic}")
+    print(f"Received message: {data}")
+    socketio.emit('mqtt_message', {'data': data})
 
-    Returns:
-        list[str]: list of headers to be written to the csv
-    """
+
+
+mqtt_client = mqtt.Client()
+mqtt_client.on_connect = on_connect
+mqtt_client.on_message = on_message
+mqtt_client.connect("test.mosquitto.org", 1883)
+
+@app.route('/mqtt_connect_page')
+def mqtt_connect():
+    return render_template('mqtt_template.html')
+
+@socketio.on('connect')
+def handle_connect():
+    print('WebSocket connected')
+
+## For each individual file within the Watch folder Eg: 638116435299306610_30hz.csv
+## Quality check for each file get the parameters and write to a results file.
+# per_watch - is a list of CSV files in a folder.
+def local_file_read(per_watch,root):
+    df_acc_list = []
+    for file in per_watch: # Get the CSV files for the given watch ID.
+        if re.search('acc', file):
+            print("All Acc files: ",file)
+            df_acc = pd.read_csv(root + "/"+file)
+            df_acc_list.append(df_acc)
+    df_20 = pd.concat(df_acc_list)
+    print(df_20.head())
+    print("Start and End Timestamp: ",df_20.iloc[0]["DateTime"],df_20.iloc[df_20.shape[0]-1]["DateTime"])
+    # Convert the Timestamp column to datetime objects
+    df_20['Timestamp'] = pd.to_datetime(df_20['DateTime'], format='%H:%M:%S:%f')
+    # Sort the DataFrame by the Timestamp column
+    df_20_sorted = df_20.sort_values('Timestamp')
+    print("Sorted Start and End Timestamp: ",df_20_sorted.iloc[0]["DateTime"],df_20_sorted.iloc[df_20_sorted.shape[0]-1]["DateTime"])
+    print("New sorted df",df_20_sorted.columns)
+    accel_data_x = np.array(df_20_sorted[' x'])
+    accel_data_y = np.array(df_20_sorted['y'])
+    accel_data_z = np.array(df_20_sorted['z'])
+    zcr_x = calculate_zero_crossing_rate(accel_data_x)
+    zcr_y = calculate_zero_crossing_rate(accel_data_y)
+    zcr_z = calculate_zero_crossing_rate(accel_data_z)
+    print("ZCR X:", zcr_x)
+    print("ZCR Y:", zcr_y)
+    print("ZCR Z:", zcr_z)
     
-    if(topic == "accelerometer"):
-        return ["x(m/s^2)", "y(m/s^2)", "z(m/s^2)", "internal_ts", "watch_timestamp", "relative_timestamp"]
-    
-    if(topic == "gyroscope"):
-        return ["x(rad)", "y(rad)", "z(rad)", "internal_ts", "watch_timestamp", "relative_timestamp"]
-    
-    if(topic == "heartrate"):
-        return ["bpm", "internal_ts", "watch_timestamp", "relative_timestamp"]
-    
-    if(topic == "linear_acceleration"):
-        return ["x(m/s^2)", "y(m/s^2)", "z(m/s^2)", "internal_ts", "watch_timestamp", "relative_timestamp"]
-        
-def on_message(client, userdata, message, filename, watchID):
-    try:
-        topic_base = message.topic.split('/')[1]  # Extracts 'acceleration' or 'gyro' from the topic
-        directory = f"watch_data/{topic_base}_data/"  # Creates directory path based on topic
-        full_filename = f"{filename}_{topic_base}"  # Appends topic to the filename
+# Takes in a numpy array of values from the accelerometer data
+def calculate_zero_crossing_rate(accel_data):
+    accel_data = (accel_data - np.mean(accel_data)) / np.std(accel_data)
+        # Calculate Zerocrossing rate.
+    zero_crossings = np.nonzero(np.diff(np.signbit(accel_data)))[0]
+    zcr = len(zero_crossings) / (2.0 * len(accel_data))
+    return zcr
 
-        data = message.payload.decode()
-        save_to_csv(data, directory, full_filename, watchID, get_csv_headers_from_topic(topic_base))
-    except Exception as e:
-        print(f"Error processing mqtt message: {e}")
+# Read data form cloud. 
+def read_csv_from_firebase():
+    bucket = storage.bucket()
+    blobs = bucket.list_blobs()
+    print("blobs: ",blobs)
+    main_list = []
+    acc_df_list = []
+    for blob in blobs:
+        if blob.name.endswith('.csv') and blob.name.split("/")[0]=="fff6be8bb6243e97" and blob.name.split("/")[1]=="11-07-2023":  
+            print("blob.name.split: ",blob.name.split("/"))
+            main_list.append(blob.name.split("/"))
+        if blob.name.endswith('.csv') and 'acc' in blob.name and blob.name.split("/")[0]=="fff6be8bb6243e97" and blob.name.split("/")[1]=="11-07-2023":
+              print("blob.name. ACC data === ",blob.name)
+              csv_data = blob.download_as_text()
+              df_acc = pd.read_csv(io.StringIO(csv_data))
+              acc_df_list.append(df_acc)
+    acc_df = pd.concat(acc_df_list, ignore_index=True)
+    # Convert the Timestamp column to datetime objects
+    acc_df['Timestamp'] = pd.to_datetime(acc_df['DateTime'], format='%H:%M:%S:%f')
+    # Sort the DataFrame by the Timestamp column
+    acc_df_sorted = acc_df.sort_values('Timestamp')
+    print("Sorted Start and End Timestamp: ",acc_df_sorted.iloc[0]["DateTime"],acc_df_sorted.iloc[acc_df_sorted.shape[0]-1]["DateTime"])
+    print("New sorted df",acc_df_sorted.columns)  
+    print(acc_df.columns,acc_df.shape)
+    # This is a list of all files in the folder. 
+    files_list_df = pd.DataFrame(main_list,columns=["deviceID","date","file_name"])
+    return files_list_df
 
-
-
-
-# Callback for when the client disconnects from the server
-def on_disconnect(client, userdata, rc):
-    if rc != 0:
-        print(f"Unexpected disconnection, return code: {rc}")
-
-# Function to save data to CSV
-def save_to_csv(data, dir, filename, watchID, header=None):
-    # Correct directory name
-    directory = os.path.join(SAVED_DATA_DIRECTORY, dir)
-    
-    os.makedirs(directory, exist_ok=True)
-
-    # Correct file path
-    file_path = os.path.join(directory, f"{filename}.csv")
-
-    # Check if file exists before opening it
-    file_exists = os.path.exists(file_path)
-    
-    
-    relative_timestamp = 0
-    # == Relative Timestamp == Initialize start_time if it's the first message
-    if mqtt_clients[watchID]["start_time"] is None:
-        mqtt_clients[watchID]["start_time"] = time.time()
-    else:
-        # Calculate relative timestamp
-        relative_timestamp = time.time() - mqtt_clients[watchID]["start_time"]
-        
-    print(relative_timestamp)
-
-    with open(file_path, "a", newline='') as csv_file:
-        csv_writer = csv.writer(csv_file)
-
-        # Write the header only if the file did not exist and a header is provided
-        if not file_exists and header is not None:
-            csv_writer.writerow(header)
-
-        # Splite the gitant string blob into each row, still also just a big string
-        rows = data.split('\n')
-        
-        
-        # 2D array each row is a row for csv
-        # Each column is a entry in each row
-        csv_data = [row.split(',') for row in rows]
-        
-        for row in csv_data:
-            row.append(str(relative_timestamp))
-
-        csv_writer.writerows(csv_data)
-        
-    return file_path
-
-    # print(f"Data saved in CSV file: {file_path}")
-
-# Modified function to start data collection for specific user
-def start_data_collection(level, sub_level, userID, filename, watchID):
-    # Create a new MQTT client for the user
-    client = mqtt.Client()
-
-    # Set up callbacks
-    client.on_connect = partial(on_connect, watchID=watchID)
-    client.on_message = partial(on_message, filename=filename, watchID=watchID)
-    client.on_disconnect = on_disconnect
-
-    # Connect the client
-    client.connect("broker.hivemq.com", 1883)
-    client.loop_start()
-
-    # Store the client in the dictionary
-    #Need to also store filename, so when mqttstop is called we can then
-    #Save the same file to firebase, maybe use an obj {"client": client, "filename": filename}
-    mqtt_clients[watchID] = {"client": client, "filename": filename, "start_time": None}
-    print(f"Started MQTT for watch {watchID} with filename: {filename}")
-    print("All current clients: ", mqtt_clients)
-
-# Modified function to stop data collection for specific user
-def stop_data_collection(watchID):
-    print(mqtt_clients)
-    if watchID in mqtt_clients:
-        print(f"Stopping MQTT data collection for watchID {watchID}")
-        mqtt_clients[watchID]["client"].disconnect()
-        mqtt_clients[watchID]["client"].loop_stop()
-        
-        #Save CSV to firebase
-        filename = mqtt_clients[watchID]["filename"]
-        # filepath = save_to_csv("", filename) #Make sure correct filepath
-        
-        # if(os.path.exists(filepath) == False):
-        #     print(f"File not found at {filepath}")
-        #     return
-        
-        # print(filepath)
-        # upload_csv_to_firebase(filepath, f"MagneticTiles/watch_data/{filename}")
-        
-        #Delete client
-        del mqtt_clients[watchID]
-    else:
-        print(f"No MQTT client found for user {watchID}")
-
-# Flask route to start MQTT data collection
-@app.route("/start_mqtt", methods=['GET', 'POST'])
-def start_mqtt_collection():
-    
-    #Get data from request
-    res = request.get_json()
-    level = res["level"]
-    sub_level = res["sub_level"]
-    userID = res["userID"]
-    watchID = res["watchID"]
-    
-    # Generate a unique identifier for the session
-    session['unique_session_identifier'] = int(time.time())
-    
-    #Filename creation
-    filename = f"watch_{userID}_L{level}_S{sub_level}_{session['unique_session_identifier']}"
-    logger.info(f"Starting MQTT data collection for WatchID of {watchID} for user {userID} for {level}-{sub_level}")
-    
-    
-    #Start mqtt connection
-    start_data_collection(level, sub_level, userID, filename, watchID)
-    return "", 201
-
-# Flask route to stop MQTT data collection
-@app.route("/stop_mqtt", methods=['GET', 'POST'])
-def stop_mqtt_collection():
-    """API endpoint to let the frontent disconnect the connection to the
-    mqtt client that is reciving data from the watch
-    """
-    
-    #Get data from request
-    res = request.get_json()
-    watchID = res["watchID"]
-    
-    logger.info(f"Stopping MQTT data collection for WatchID of {watchID}")
-    stop_data_collection(watchID)
-    return "", 201
-
-
-
-@app.route("/check_mqtt_connection", methods=['GET', 'POST'])
-def check_mqtt_connection():
-    """API endpoint to let the frontend know if a specific watchID is connected and 
-    sending data to one of our mqtt topics
-
-    Returns:
-        dict: online or offline
-    """
-    
-    #Get data from request
-    res = request.get_json()
-    watchID = res["watchID"]
-    logger.info(f"Checking MQTT watch connection for WatchID of {watchID}")
-    
-    
-    if check_watch_activity(watchID):
-        response = {'status': "online"}
-        return jsonify(response)
-    else:
-        response = {'status': "offline"}
-        # response = {'status': "online"} For testing without watch
-        
-        return jsonify(response)
-    
-
-
-def check_watch_activity(watch_id, timeout=5):
-    """
-    Check if a specific topic is receiving data.
-
-    Args:
-    watch_id (str): The ID of the watch.
-    timeout (int): Time in seconds to wait for a message (Default 5s)
-
-    Returns:
-    bool: True if the topic is active, False otherwise.
-    """
-    client = mqtt.Client()
-    message_received = False
-
-    def on_message(client, userdata, message):
-        nonlocal message_received
-        logging.info(f"Message received on topic {message.topic}")
-        message_received = True
-        client.disconnect()  # Ensure disconnection after receiving a message
-
-    client.on_message = on_message
-    client.connect("broker.hivemq.com", 1883, 60)
-    client.subscribe(f"{watch_id}/gyroscope") # Any topic that we send data on
-
-    client.loop_start()
-    start_time = time.time()
-    while not message_received and time.time() - start_time < timeout:
-        time.sleep(0.1)  # Short sleep to yield control and wait efficiently
-
-    client.loop_stop()
-    client.disconnect()  # Ensure disconnection even if no message is received
-
-    return message_received
-
-
-
-#User inputs ID they see on watch
-#Watch will be publishing on the topic /acceleration/id
-#Start_mqtt we will send the ID from the watch so we will listen on the right topic /acceleration/id
-
+def count_files(files_list_df):
+    file_count_json = {}
+    for i in files_list_df["deviceID"].unique():
+        if i == "fff6be8bb6243e97":
+          # first subset the pandas df by unique device ID.
+          files_list_df_device = files_list_df[files_list_df["deviceID"]==i] 
+          # then subet by files: scc,gry,hr, and battery changed.
+          files_list_df_acc = files_list_df_device[files_list_df_device["file_name"].str.contains('acc')]
+          files_list_df_gry = files_list_df_device[files_list_df_device["file_name"].str.contains('gry')]
+          files_list_df_hr = files_list_df_device[files_list_df_device["file_name"].str.contains('hr')]
+          files_list_df_battery = files_list_df_device[files_list_df_device["file_name"].str.contains('on')]
+          # print("files_list_df_acc:::: ",files_list_df_acc)
+          # for acc_file in files_list_df_acc:
+          #     csv_data = acc_file.download_as_text()
+          #     df_acc = pd.read_csv(io.StringIO(csv_data))
+          #     acc_df_list.append(df_acc)
+          len_acc_files = files_list_df_acc.shape
+          len_gry_files = files_list_df_gry.shape
+          len_hr_files =files_list_df_hr.shape
+          len_battery_files = files_list_df_battery.shape
+          print("FILE ACC INFO ",i,len_acc_files[0])
+          file_count_json[i] =[len_acc_files[0],len_gry_files[0],len_hr_files[0],len_battery_files[0]]
+    return file_count_json
 
 
 @app.route('/')
@@ -344,464 +175,236 @@ def check_watch_activity(watch_id, timeout=5):
 def home():
   return render_template("landing_page.html")
 
-@app.route('/mindgame_precheck', methods=['GET','POST'])
-def mindgame_precheck():
-  return render_template("mindgame_precheck.html")
-
 
 @app.route('/tiles_game', methods=['GET','POST'])
 def tiles_game():
   return render_template("tiles.html")
 
 
-@app.route('/updated_scoring', methods=['GET','POST'])
-def updated_scoring():
-  return render_template("updated_scoring.html")
+# ----------- Routes for the scoring Page -----------------
+
+#Shows renders the scoring page with some parameters
+@app.route('/scoring_page', methods=['GET','POST'])
+def scoring_page():
+    userID = request.args.get('userID')
+    level = int(request.args.get('level'))
+    return render_template("scoring_module.html", userID=userID, level=level)
 
 
-@app.route('/tutorial', methods=['GET','POST'])
-def tutorial():
-  return render_template("tutorial.html")
+#The scoring page calls to this route when loading to get the graph based on input
+@app.route('/mouse_movement_graph/<userID>/<level>')
+def scoring_graph(userID, level):
+    csv_file = f"Level_{level} - user{userID}.csv"  # Adjust the file naming pattern as needed
+    with csv_lock:
+        image_data = plot_mouse_movement(csv_file)
+    return Response(image_data, mimetype='image/png')
 
-@app.route('/nogo', methods=['GET','POST'])
-def nogo():
+
+@app.route('/acceleration_graph/<userID>/<level>')
+def acceleration_graph(userID, level):
+    csv_file = f"Level_{level} - user{userID}.csv"  # Adjust the file naming pattern as needed
+    with csv_lock:
+        image_data = plot_acceleration_data(csv_file)
+    return Response(image_data, mimetype='image/png')
+
+
+# Route to return completion time
+@app.route('/completion_time/<userID>/<level>')
+def completion_time(userID, level):
+    csv_file = f"Level_{level} - user{userID}.csv"  # Adjust the file naming pattern as needed
+
+    level_completion_time = calculate_completion_time(csv_file)
+    return level_completion_time
+
+#================= Helper Functions =============================
+
+# Function to calculate time taken to complete a level
+def calculate_completion_time(csv_file):
+    timestamps = []
     
-  return render_template("nogo.html")
-
-@app.route('/intake', methods=['GET','POST'])
-def intake(type: str):
-  return render_template("medication_intake.html")
-
-@app.route('/start_application/<string:type>', methods=['GET','POST'])
-def start_application(type: str):
-    
-    #Just as a sanity check, make sure watch is sending mqtt data
-    # watchID = request.args.get('watchID', "")
-    # if check_watch_activity(watchID, 2) == False:
-    #     return render_template("landing_page.html")
-        
-    return render_template("medication_intake.html", type = type)
-
-
-
-
-@app.route('/intake_data', methods=['GET', 'POST'])
-def intake_data():
-    """
-    Endpoint to intake medication data for a user.
-    Extracts JSON data from the request, creates a directory if it doesn't exist, 
-    and writes the data into a CSV file named after the user ID.
-
-    Returns:
-        dict-> Status:Message
-    """
-    try:
-        # Attempt to get JSON data from the request
-        request_data = request.get_json()
-        user_id = request_data["userID"]
-        data = request_data["data"]
-        
-        # Define the directory and ensure its existence
-        directory = os.path.join(SAVED_DATA_DIRECTORY, "intake")  # Use os.path.join for cross-platform compatibility
-        os.makedirs(directory, exist_ok=True)
-
-        # Construct the file path
-        file_name = f"intake_{user_id}.csv"
-        file_path = os.path.join(directory, file_name)
-
-        # Write data to CSV
-        with open(file_path, "w", newline='') as csv_file:
-            csv_writer = csv.writer(csv_file)
-            csv_writer.writerow(["userID", "medication", "time"])
-            csv_writer.writerow([user_id, data["medication"], data["time"]])
-            
-        logger.info(f"Sucesfully saved Medication Intake data for user {user_id}");
-            
-        # Optionally, return a success message or JSON data
-        return jsonify({"message": "Data intake successful"}), 201
-    except KeyError as e:
-        # Log missing key errors and return an error response
-        logger.error(f"Missing key in the request data: {e}")
-        return jsonify({"error": "Bad request, missing key in the JSON data"}), 400
-    except Exception as e:
-        # Log unexpected errors and return a generic error response
-        logger.error(f"An error occurred: {e}")
-        return jsonify({"error": "Internal server error"}), 500
-
-
-# Helper Functions 
-def calculateEuclidanPercentChange(shortestData: dict, userData:dict) -> float:
-    """
-        Calculates the average percent change between the shortest path the shapes could take
-        compared the the users path
-    Args:
-        shortestData (dict): Key is the shape, value is the euclidan distance
-        userData (dict): Key is the shape, value is the euclidan distance
-
-    Returns:
-        float: The averaged percent change for the distances moved
-    """
-    percent_change_acc = 0
-    total_shapes = 0
-    
-    for key in shortestData.keys():
-        shortestDistance = shortestData[key]
-        userDistance = userData[key]
-        # print("Percent Change values ", shortestDistance, ", ", userDistance)
-        
-        percent_change = (abs(shortestDistance - userDistance) / ((shortestDistance + userDistance) / 2)) * 100
-        # percent_change = (abs(shortestDistance - userDistance) / ((shortestDistance)) * 100
-        
-        percent_change_acc += percent_change
-        total_shapes += 1
-        # print(f"Percent Change for {key} = {percent_change}")
-        
-    averaged_percent_change = percent_change_acc / total_shapes
-    # print(f"Averaged Percent Change = {averaged_percent_change}")
-    return averaged_percent_change
-
-
-
-
-def ensure_directory_exists(directory):
-    try:
-        os.makedirs(directory, exist_ok=True)
-    except Exception as e:
-        logger.error(f"An error occurred while creating directory {directory}: {e}")
-
-    
-    
-def upload_csv_to_firebase(file_path, firebase_path):
-    """
-    Uploads a CSV file to Firebase Storage.
-    
-    Args:
-        file_path (str): Path to the local CSV file.
-        firebase_path (str): Path in Firebase Storage where the file will be stored.
-    """
-    bucket = storage.bucket()
-    blob = bucket.blob(firebase_path)
-    
-    if(os.path.exists(file_path) == False):
-        logger.error(f"The file {file_path} does not exist")
-        return
-    
-    with open(file_path, 'rb') as file:
-        blob.upload_from_file(file)
-        
-    if(SAVE_FILES_TO_LOCAL_SYSTEM == False):
-        #Delete CSV
-        if os.path.exists(file_path):
-            os.remove(file_path)
-        else:
-            logger.error(f"The file {file_path} does not exist when trying to remove")
-        
-        
-    
-def createAndUpload(fileDir: str, fileName: str, data: bytes):
-    """Abstracts the way we create the data files and upload
-    them to Firebase
-
-    Args:
-        filePath (str): Sub folder to put the file in
-        fileName (_type_): name of the file
-        data (_type_): utf8 encoded bytes??
-    """
-    
-    directory = os.path.join(SAVED_DATA_DIRECTORY, fileDir)
-    ensure_directory_exists(directory)
-    full_path = os.path.join(directory, fileName)
-    
-    try:
-        
-        if(SAVE_FILES_TO_LOCAL_SYSTEM):
-            with open(full_path, mode="w+b") as file:
+    with open(csv_file, 'r') as file:
+        csv_reader = csv.DictReader(file)
+        for row in csv_reader:
+            if row['timestamp'] != '0':
+                timestamps.append(row['timestamp'])
                 
-                file.write(data)
-                
-                if(SAVE_FILES_TO_CLOUD):
-                    file.seek(0)  # Rewind the file pointer to the beginning
-                    bucket = storage.bucket()
-                    blob = bucket.blob(f"MagneticTiles/{fileDir}/{fileName}") 
-                    blob.upload_from_file(file_obj=file, rewind=True)
+    # Parse the timestamps and calculate the time duration            
+    first_timestamp = timestamps[0]
+    last_timestamp = timestamps[-1]
+    
+    format_str = '%H:%M:%S:%f'
+    first_time = datetime.strptime(first_timestamp, format_str)
+    last_time = datetime.strptime(last_timestamp, format_str)
+    duration = last_time - first_time
+
+    # Convert duration to a formatted string
+    total_seconds = duration.total_seconds()
+    minutes = int(total_seconds // 60)
+    seconds = int(total_seconds % 60)
+    return f"{minutes} minutes {seconds} seconds"
+
+#Retuns the image data of the mouse movment graph given a csv file
+def plot_mouse_movement(csv_file):
+    colors = {'Square': '#ec940e', 'Circle': '#F29595', 'Right Triangle': '#90C0FF', 'Hexagon': '#1184e2', 'Trapezoid': '#61a962', 'Equilateral Triangle': '#a1e87e', 'Yellow Diamond': '#FFCC4D', 'Purple Diamond': '#9F9AFF'}
+
+
+    df = pd.read_csv(csv_file)
+    strokes = []
+    current_stroke = []
+    unique_shapes = set()  # To keep track of unique shapes
+
+    for _, row in df.iterrows():
+        if row['x'] == "END_OF_STROKE":
+            if current_stroke:
+                strokes.append(current_stroke)
+                current_stroke = []
         else:
+            current_stroke.append(row)
+            unique_shapes.add(row['shape'])  # Add the shape to the unique_shapes set
+
+    if current_stroke:
+        strokes.append(current_stroke)
+
+    # Set a larger figure size for the graph (adjust the numbers as needed)
+    fig, ax = plt.subplots(figsize=(12, 6))
+    ax.invert_yaxis()  # Flip the y-axis
+
+    for stroke in strokes:
+        if len(stroke) > 1:
+            shape = stroke[-1]['shape']  # Get the shape from the last row of the stroke
+            # screenWidth = stroke[-1]['screenWidth']
+            # screenHeight = stroke[-1]['screenHeight']
             
-            if(SAVE_FILES_TO_CLOUD):
-                with tempfile.NamedTemporaryFile(delete=False) as file:
-                    file.write(data)
-                    
-                    file.seek(0)  # Rewind the file pointer to the beginning
-                    bucket = storage.bucket()
-                    blob = bucket.blob(f"MagneticTiles/{fileDir}/{fileName}") 
-                    blob.upload_from_file(file_obj=file, rewind=True)
-        
+            #Plot Data
+            data = pd.DataFrame(stroke)
+            color = colors.get(shape, 'black')
             
-    except Exception as e:
-        logger.error(f"An error occurred (createAndUpload):({fileName}) -> {str(e)}")
+            # Convert 'x' values to numeric
+            data['x'] = pd.to_numeric(data['x'])
+            # print(data['x'])
+            
+            plt.plot(data['x'], data['y'], color=color, label=shape)
 
 
 
+    plt.xlabel('X Position')
+    plt.ylabel('Y Position')
+    plt.title('Mouse Movement Strokes')
+
+    # Generate a single legend entry for each unique shape
+    handles, labels = ax.get_legend_handles_labels()
+    by_label = dict(zip(labels, handles))
+    unique_legend = [by_label[shape] for shape in unique_shapes]
+    plt.legend(handles=unique_legend, labels=unique_shapes)
+
+    # plt.gca().set_aspect('equal')  # Set aspect ratio to preserve the screen's aspect ratio
 
 
 
-# Specify the expected time to complete Level
-EXPECTED_TTC = {
-    #-- Level --
-    1:{
-        #-- SubLevel --
-        
-        #Train
-        1: {
-            "minutes": 0,
-            "seconds" : 33,
-        },
-        
-        2: {
-            "minutes": 0,
-            "seconds" : 25,
-        },
-        3: {
-            "minutes": 0,
-            "seconds" : 24,
-        },
-    },
+    # Add custom x-ticks with rotation
+    screenWidth = strokes[-1][-1]['screenWidth']  # Get the screenWidth from the last stroke
+    screenHeight = strokes[-1][-1]['screenHeight']  # Get the screenWidth from the last stroke
     
+        
     
-    #Level 2
-    2:{
-        #-- SubLevel --
-        
+    plt.xticks([val for val in range(0, screenWidth + 1, int(screenWidth / 20))],
+            [str(val) for val in range(0, screenWidth + 1, int(screenWidth / 20))], rotation=90)
 
-        1: {
-            "minutes": 0,
-            "seconds" : 24,
-        },
-        
-        2: {
-            "minutes": 0,
-            "seconds" : 23,
-        },
-        3: {
-            "minutes": 0,
-            "seconds" : 31,
-        },
-    },
+    plt.grid()  # Add grid lines for better visualization
+
+    # Convert the plot to a PNG image in memory
+    image_stream = io.BytesIO()
+    FigureCanvas(fig).print_png(image_stream)
+    plt.close(fig)
+
+    # Get the image data as a base64-encoded string
+    image_data = image_stream.getvalue()
     
-    #Level
-    3:{
-        #-- SubLevel --
-        
 
-        1: {
-            "minutes": 0,
-            "seconds" : 10,
-        },
-        
-        2: {
-            "minutes": 0,
-            "seconds" : 20,
-        },
-        3: {
-            "minutes": 0,
-            "seconds" : 30,
-        },
-    }
-    
-}
+    return image_data
 
+def plot_acceleration_data(csv_file):
+    df = pd.read_csv(csv_file)
+
+    # Remove rows with 'END_OF_STROKE' entries
+    df = df[df['x(px/s^2)'] != 'END_OF_STROKE']
+
+    # Convert timestamp column to datetime format
+    df['timestamp'] = pd.to_datetime(df['timestamp'], format='%H:%M:%S:%f')
+
+    # Convert acceleration columns to numeric values
+    df['x(px/s^2)'] = pd.to_numeric(df['x(px/s^2)'])
+    df['y(px/s^2)'] = pd.to_numeric(df['y(px/s^2)'])
+
+    # Create a new figure
+    fig, ax = plt.subplots(figsize=(10, 6))
+
+    # Plot acceleration x and y over time
+    ax.plot(df['timestamp'], df['x(px/s^2)'], label='Acceleration x')
+    ax.plot(df['timestamp'], df['y(px/s^2)'], label='Acceleration y')
+
+    # Set plot labels and title
+    ax.set_xlabel('Time')
+    ax.set_ylabel('Acceleration')
+    ax.set_title(f'Acceleration x and y over Time - {csv_file}')
+    ax.legend()
+
+    # Convert the plot to a PNG image in memory
+    image_stream = io.BytesIO()
+    FigureCanvas(fig).print_png(image_stream)
+    plt.close(fig)
+
+    # Get the image data as a base64-encoded string
+    image_data = image_stream.getvalue()
+
+    return image_data
+
+# Specify the directory for the temporary file
+TEMP_FILE_DIRECTORY = './'
 
 @app.route('/process-mouse-data', methods=['POST'])
 def processMouseMovementData():
-    
-    #Retrive Data from Post request
     res = request.get_json()
     data = res["data"]
     level = res["level"] #Current level that posted data is from
-    sub_level = res["sub_level"]
     userID = res["userID"] #Used to differentiate csv files from differet subjects
-    time_to_complete = res["time_to_complete"]
-    user_euclid_distances = res["user_euclid_movement_distances"]
-    shortest_euclid_distances = res["shortest_euclid_distances"]
-    window_width = res["window_width"]
-    window_height = res["window_height"]
-    
-    logger.info(f"Processing Mouse data for user {userID} on level {level}-{sub_level}")
-    logger.info(f"Shortest Euclid: {shortest_euclid_distances}\n")
-    logger.info(f"User Euclid: {user_euclid_distances}\n")
     
     
-    
+    # Generate a unique prefix for the tempfile using level and userID
+    temp_file_name = f"Level_{level} - user{userID}.csv"
 
+    # Create a named temporary file in memory
+    # with tempfile.NamedTemporaryFile(prefix=temp_file_prefix, mode="w+b", delete=False, suffix=".csv", dir=TEMP_FILE_DIRECTORY) as temp_file:
+    
+    with open(temp_file_name, mode="w+b") as temp_file:
 
-    #Save Relevent Data to session to be used in scoring page
-    session["AverageEuclidanPercentChange"] = math.floor(calculateEuclidanPercentChange(shortest_euclid_distances, user_euclid_distances))
-    session["TimeToCompleteLevel"] = time_to_complete
-    session["ExpectedTimeToCompleteLevel"] = EXPECTED_TTC[level][sub_level]
-    
-    # print("HOPE", session.get("AverageEuclidanPercentChange"))
-    # print("HOPE", session.get("TimeToCompleteLevel"))
-    
-    
-    
-    unique_file_identifier =  session.get('unique_session_identifier')
-    
-    if not unique_file_identifier:
-        logger.error("Cannot get session identifier")
-
-    
-    
-    #======================================    
-    #              INFO FILE
-    #======================================
         
-    info_file_dir = "level_info"
-    info_file_name = f"info_{userID}_L{level}_S{sub_level}_{unique_file_identifier}.json"
-    
-    # Construct the data dictionary
-    info_data = {
-        "ScreenSize": {
-            "width": window_width,
-            "height": window_height
-        },
-        "Level": {
-            "main": level,
-            "sub": sub_level
-        },
-        "UserID": userID,
-        "TimeToCompleteLevel": f"{time_to_complete['ttc_minutes']}:{time_to_complete['ttc_seconds']}"
-    }
-    # Serialize the dictionary to a JSON string
-    info_json = json.dumps(info_data, indent=4)
-    
-    # Convert JSON string to bytes, since your createAndUpload function seems to expect bytes
-    info_file_data = info_json.encode("utf-8")
+        # Create the header row
+        header_row = ['x', 'y', 'timestamp', 'shape', 'x(px/s^2)', 'y(px/s^2)', 'screenWidth', 'screenHeight']
+        csv_data = [header_row] + data
 
-    # Define the string with indentation
-    # info_file_string = f"""
-    #     Screen Size: 
-    #     {str(window_width)}x{str(window_height)}
+        # Convert the accumulated data to a CSV string
+        csv_data = '\n'.join([','.join(map(str, row)) for row in csv_data])
+        csv_data = csv_data.encode('utf-8')
 
-    #     Level: 
-    #     {str(level)}, {str(sub_level)}
+        # Write the CSV data to the temporary file
+        temp_file.write(csv_data)
 
-    #     UserID: 
-    #     {str(userID)}
+        # Reset the file position back to the beginning
+        temp_file.seek(0)
 
-    #     Time to Complete Level: 
-    #     {time_to_complete['ttc_minutes']}:{time_to_complete['ttc_seconds']}
-    # """
-
-    # # Remove leading spaces from each line in the string
-    # info_file_string = '\n'.join(line.lstrip() for line in info_file_string.splitlines())
-    # info_file_data = info_file_string.encode("utf-8")
-    
-    #Info File
-    createAndUpload(info_file_dir, info_file_name, info_file_data)
-    
-    
-
-    
-    
-
-    
-    #======================================    
-    #              EUCLID FILES
-    #======================================
-    euclid_dir = "euclid"
-    shortest_euclid_file_name = f"shortest_{userID}_L{level}_S{sub_level}_{unique_file_identifier}.json"
-    user_euclid_file_name = f"user_{userID}_L{level}_S{sub_level}_{unique_file_identifier}.json"
-    
-
-    #Shortest Distances JSON
-    shortest_euclid_data = json.dumps(shortest_euclid_distances).encode("utf-8")
-    createAndUpload(euclid_dir, shortest_euclid_file_name, shortest_euclid_data)
-       
-        
-    #User Distances JSON
-    user_euclid_data = json.dumps(user_euclid_distances).encode("utf-8")
-    createAndUpload(euclid_dir, user_euclid_file_name, user_euclid_data)
-    
-    
-    
-    
-    
-    
-    
-    #======================================    
-    #              MOUSE FILE
-    #======================================
-    mouse_data_dir = "mouse_data"
-    mouse_data_file_name = f"mouse_{userID}_L{level}_S{sub_level}_{unique_file_identifier}.csv"
-    
-    # Create the header row
-    header_row = ['x', 'y', 'timestamp', 'shape', 'x(px/s^2)', 'y(px/s^2)']
-    csv_data = [header_row] + data
-
-    # Convert the accumulated data to a CSV string
-    csv_data = '\n'.join([','.join(map(str, row)) for row in csv_data])
-    csv_data = csv_data.encode('utf-8')
-    
-    #Upload Mouse Data
-    createAndUpload(mouse_data_dir, mouse_data_file_name, csv_data)
-    
-      
-        
+        # Upload the CSV file to Firebase Storage
+        #UNCOMMENT BELOW TO UPLOAD TO FIREBASE
+        # bucket = storage.bucket()
+        # file_name = temp_file.name.split('\\')[-1]
+        # print(file_name)
+        # blob = bucket.blob('MagneticTiles/' + file_name)  # Use the temp file name as the blob name
+        # blob.upload_from_file(temp_file)
     response = {'message': 'Data received and processed successfully'}
     return jsonify(response)
 
 
-@app.route('/process-nogo-data', methods=['POST'])
-def processnogo():
-    """
-    Endpoint to process and save data from the No-Go game.
-    
-    This endpoint expects a JSON payload with 'data' containing a list of dictionaries 
-    with No-Go game results, and 'userID' indicating the unique identifier for the user.
 
-    The data is saved in a CSV file within a 'nogo' directory, named using the user's ID.
-
-    Returns:
-        JSON response with a message indicating the success or failure of the operation.
-    """
-    try:
-        # Retrieve Data from the Post request
-        res = request.get_json()
-        data = res.get("data")
-        userID = res.get("userID")
-        
-        if not data or not userID:
-            logger.error("Missing 'data' or 'userID' in the request payload")
-            return jsonify({"error": "Missing 'data' or 'userID' in the request payload"}), 400
-
-        # Initialize CSV output
-        output = io.StringIO()
-        writer = csv.DictWriter(output, fieldnames=data[0].keys())
-
-        # Write the data to the CSV string
-        writer.writeheader()
-        for row in data:
-            writer.writerow(row)
-        csv_string = output.getvalue()
-
-        # Define the file path and ensure the directory exists
-        nogo_dir = "nogo/"
-        # os.makedirs(nogo_path, exist_ok=True)
-        nogo_file_name = f"nogo_{userID}.csv"
-
-        # Encode the CSV string to bytes and upload
-        nogo_data = csv_string.encode("utf-8")
-        createAndUpload(nogo_dir, nogo_file_name, nogo_data)
-        
-        logger.info(f"Successfully processed and saved No-Go data for userID {userID}")
-        return jsonify({"message": "Data received and processed successfully"}), 201
-
-    except Exception as e:
-        logger.error(f"An error occurred while processing No-Go data: {e}")
-        return jsonify({"error": "Internal server error"}), 500
-
-    
-    
-
-# if __name__ == '__main__':
-#     mqtt_client.loop_start()
-#     socketio.run(app, debug=True)
+if __name__ == '__main__':
+    mqtt_client.loop_start()
+    socketio.run(app, debug=True)
