@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mind Game</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/global.css') }}"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/tiles.css') }}"
+    />
+
+    <style>
+      .mouse_analytics_container {
+        position: absolute;
+        width: 25%;
+        height: 100%;
+        right: 0;
+
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 20px;
+      }
+
+      .mouse_analytics_item {
+        width: 90%;
+        height: 60px;
+        background-color: #92bdc1;
+        color: #fdfdfd;
+        border-radius: 15px;
+        font-family: "Inter", sans-serif;
+        font-size: 2cqw; /*Scale text size based on conatiner size*/
+        /*font-size: calc(2rem * 2vw);*/
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .shapeFeedbackText {
+        position: absolute;
+        font-family: "Inter", sans-serif;
+        font-weight: bold;
+        color: rgb(243, 63, 63);
+        font-size: 2em;
+
+        top: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <!-- Shows what level user is on -->
+        <p class="level_indicator">Level <span id="level"></span></p>
+
+        <!-- <div>User ID: <span id="userID"></span> </div> -->
+      </header>
+      <main>
+        <div class="canvas-container" id="container">
+          <!-- Text to show when user dosent get right shape -->
+          <div class="shapeFeedbackText">Wrong Shape... Please Try Again</div>
+
+          <!-- Four Mouse Data Points on the Right of the Screen -->
+          <div class="mouse_analytics_container">
+            <div class="mouse_analytics_item">
+              Mouse X : &nbsp<span id="mouse_analytics_xpos"></span>&nbsp px
+            </div>
+            <div class="mouse_analytics_item">
+              Mouse Y : &nbsp<span id="mouse_analytics_ypos"></span>&nbsp px
+            </div>
+
+            <div class="mouse_analytics_item">
+              Acc X : &nbsp<span id="mouse_analytics_xacc"></span>&nbsp px/s^2
+            </div>
+            <div class="mouse_analytics_item">
+              Acc Y : &nbsp<span id="mouse_analytics_yacc"></span>&nbsp px/s^2
+            </div>
+          </div>
+
+          <canvas id="canvas"></canvas>
+        </div>
+      </main>
+    </div>
+
+    <!-- Progress Bar -->
+    <div class="progressBarWrapper">
+      <div class="progress-bar">
+        <h1 id="progress-bar-percent">0% complete</h1>
+        <div class="progress-bar-inner" id="progressBar"></div>
+      </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/popup.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/mouse_movement.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/drag_drop.js') }}"></script>
+
+    <script>
+      const userID_display = document.getElementById("userID");
+      const currentLevel_display = document.getElementById("level");
+
+      /*This function comes from drag_drop.js
+      Make sure it is included before this is called*/
+      //This function will change the specific level user is on
+      const currentLevel = Number(getLocalStorageOrNull("currentLevel"));
+      changeCurrentLevel(currentLevel, 1); //NOTHING WILL WORK WITHOUT THIS
+
+      //Update text on page
+      // userID_display.innerText = getLocalStorageOrNull("userID") ?? "";
+      currentLevel_display.innerText = currentLevel ?? "";
+    </script>
+  </body>
+</html>
