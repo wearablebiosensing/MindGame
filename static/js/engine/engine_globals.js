@@ -75,7 +75,7 @@ function checkPlacementAccuracy(previousProgress) {
 //Mouse Data
 let mouse_motion_array = [];
 let lastCollectionTime = 0;
-const throttlingInterval = 200; // 200 milliseconds
+const throttlingInterval = 2; // 2 milliseconds ie 500 Hz
 
 // Mouse Acceleration Tracking
 let prevMouseX = 0;

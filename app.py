@@ -91,7 +91,7 @@ def create_folder_structure(base_dir, location, user_id, session_number):
         raise ValueError("Missing required parameters for folder creation.")
     
     now = datetime.now()
-    time_of_day = "Morning" if now.hour < 16 else "Evening"
+    time_of_day = "Morning" if now.hour < 12 else "Evening"
     date_str = now.strftime("%Y-%m-%d")
 
     full_path = os.path.join(base_dir, location, user_id, time_of_day, f"session_{date_str}_{session_number}")
@@ -386,12 +386,12 @@ def mindgame_start_timer():
         # Base directory for storing user data
         base_dir = SAVED_DATA_DIRECTORY
         current_date = datetime.now().strftime("%Y-%m-%d")
-        time_of_day = "Morning" if datetime.now().hour < 16 else "Evening"
+        time_of_day = "Morning" if datetime.now().hour < 12 else "Evening"
         json_file_name = f"{userID}_session_info.json"
 
         # Determine the folder path using userID
         folder_path = os.path.join(base_dir, location, userID, time_of_day)
-        json_file_path = os.path.join(folder_path, json_file_name)
+        json_file_path = os.path.join(base_dir, location, userID, json_file_name)
 
         # Initialize session data
         session_number = 1
@@ -637,9 +637,9 @@ def get_session_number(user_id, location):
     """Retrieve the current session number from the metadata file."""
     try:
         base_dir = SAVED_DATA_DIRECTORY
-        time_of_day = "Morning" if datetime.now().hour < 16 else "Evening"
+        time_of_day = "Morning" if datetime.now().hour < 12 else "Evening"
         folder_path = os.path.join(base_dir, location, user_id, time_of_day)
-        json_file_path = os.path.join(folder_path, f"{user_id}_session_info.json")
+        json_file_path = os.path.join(base_dir, location, user_id, f"{user_id}_session_info.json")
 
         if os.path.exists(json_file_path):
             with open(json_file_path, 'r') as f:

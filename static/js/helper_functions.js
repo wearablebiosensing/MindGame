@@ -54,7 +54,7 @@ function getUnplayedLevels() {
   );
 }
 
-// Function to update random level without repeats
+// Function to update random level without repeats //ISSUE: ERROR CAUSING LEVEL NOT TO LOAD (POSSIBILITY CAUSING DATALOSS)
 function updateRandomLevelSelectionWithoutRepeats() {
   const unplayedLevels = getUnplayedLevels();
   if (unplayedLevels.length === 0) {

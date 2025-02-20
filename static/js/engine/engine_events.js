@@ -4,6 +4,7 @@
 
 //When the user clicks on the screen
 function mouse_down(event) {
+  console.log("Mouse Down Event Triggered");
   event.preventDefault();
 
   let clientX = 0;
@@ -103,7 +104,7 @@ function mouse_move(event) {
       getProgressBarPercentage() // Store progress at the time of movement
   ]);
 
-  // 🚀 Fix: Ensure shape dragging works again
+  //Ensure shape dragging works again
   if (current_shape_index !== null) {
       let closestDistanceToShape = null;
       const shape = shapes[current_shape_index];
@@ -121,46 +122,22 @@ function mouse_move(event) {
           updateProgressBar();
       }
 
-      // 🚀 Ensure shape follows the mouse while dragging
+      //Ensure shape follows the mouse while dragging
       shapes[current_shape_index].mouseMove(x, y);
   }
 }
 
-
+const SNAP_DISTANCE_THRESHOLD = 50; // Adjust as necessary
 
 function mouse_up(event) {
+  console.log("Mouse Up Event Triggered");
   event.preventDefault();
-
-  if (current_shape_index === null) return;
-
-  const shape = shapes[current_shape_index];
-
-  //Shape is not over correct shape, give feedback
-  if (shape.type != closest_shape_to_current.type) {
-    //Get Building Block so we can move shape back
-    let buildingBlockOfShape = null;
-
-    for (let buildingBlock of shapes.filter((s) => s.isBuildingBlock)) {
-      if (shape.type == buildingBlock.type) {
-        buildingBlockOfShape = buildingBlock;
-      }
-    }
-
-    showFeedbackText();
-
-    //Move shape back to Building Block
-    animateShapeToBuildingBlock(shape, buildingBlockOfShape);
-  }
-
-  shape.mouseUp();
-  current_shape_index = null;
 
   let clientX = 0;
   let clientY = 0;
 
   // Handle touch events as well
   if (event.type === "touchmove") {
-    // Get touch coordinates
     const touch = event.touches[0];
     clientX = Math.round(touch.clientX);
     clientY = Math.round(touch.clientY);
@@ -169,27 +146,54 @@ function mouse_up(event) {
     clientY = event.clientY;
   }
 
-  //Collect mouse data every interval set by global var
-  const currentTime = Date.now();
-
+  // Get Mouse Position
   const { x, y } = calculateMousePos(clientX, clientY);
 
-  // Add the identifier for the end of stroke
-  mouse_motion_array.push([Math.round(x), Math.round(y), getTimestamp(), "END_OF_STROKE", "END_OF_STROKE", "END_OF_STROKE"]);
+  if (current_shape_index !== null) {
+    const shape = shapes[current_shape_index];
 
-  // LEVEL IS COMPLETE
-  if (getProgressBarPercentage() == 100) {
-    if (isDataSentAlready == false) {
-      if (mouse_motion_array.length != 0) {
-        console.log("POSING");
-        postLevelMouseData(); //Create csv
-        stop_mqtt_data_collection();
+    // Ensure shape returns to the correct location if misplaced
+    if (shape.type !== closest_shape_to_current.type || 
+        shape.getDistanceToShape(closest_shape_to_current) > SNAP_DISTANCE_THRESHOLD) {
+
+      let buildingBlockOfShape = null;
+      for (let buildingBlock of shapes.filter((s) => s.isBuildingBlock)) {
+        if (shape.type === buildingBlock.type) {
+          buildingBlockOfShape = buildingBlock;
+          break;
+        }
       }
+
+      showFeedbackText();
+      animateShapeToBuildingBlock(shape, buildingBlockOfShape); // Move shape back
     }
 
+    // ✅ Shape logic is complete, reset state
+    current_shape_index = null;
+  }
+
+  // ✅ ALWAYS Add "END_OF_STROKE" marker for all mouse-up actions
+  console.log("END_OF_STROKE ADDED");
+  mouse_motion_array.push([
+    Math.round(x), 
+    Math.round(y), 
+    getTimestamp(), 
+    "END_OF_STROKE", 
+    "END_OF_STROKE", 
+    "END_OF_STROKE"
+  ]);
+
+  // ✅ Check if level is complete and finalize data collection
+  if (getProgressBarPercentage() === 100) {
+    if (!isDataSentAlready && mouse_motion_array.length !== 0) {
+      console.log("POSING");
+      postLevelMouseData(); // Create CSV
+      stop_mqtt_data_collection();
+    }
     isDataSentAlready = true;
   }
 }
+
 
 //Called to rotate in degrees
 function rotateCurrentShape(deg) {
