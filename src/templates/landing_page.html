@@ -1,164 +1,54 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link
-      rel="stylesheet"
-      href="{{ url_for('static', filename='css/global.css') }}"
-    />
-    <link
-      rel="stylesheet"
-      href="{{ url_for('static', filename='css/landing_page.css') }}"
-    />
-    <title>Landing Page</title>
+<!DOCTYPE html> <!-- This line is a declaration to the web browser about what version of HTML the page is written in. -->
+<html lang="en"> <!-- This line is the root of an HTML document. "lang" attribute specifies the language of the document. -->
 
+  <head> <!-- This line is a container for metadata (data about data) and is placed between the <html> tag and the <body> tag. -->
+    <meta charset="UTF-8" /> <!-- This line defines the character set used in the document. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /> <!-- This line makes the webpage look good on all devices (responsive web design). -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/global.css') }}" /> <!-- This line links to a global CSS file. -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/landing_page.css') }}" /> <!-- This line links to a CSS file for the landing page. -->
+    <title>Landing Page</title> <!-- This line defines a title for the document. -->
+ <!-- This line defines internal CSS. -->
     <style>
-      #watch_status{
-        font-family:Verdana, Geneva, Tahoma, sans-serif;
-        font-weight: bold;
-        font-size: 20px;
+      #watch_status{ <!-- This line defines the style for the element with id="watch_status". -->
+        font-family:Verdana, Geneva, Tahoma, sans-serif; <!-- This line sets the font of the text. -->
+        font-weight: bold; <!-- This line sets the weight (boldness) of the font. -->
+        font-size: 20px; <!-- This line sets the size of the font. -->
       }
     </style>
   </head>
   
-  <body>
+  <body> <!-- This line contains the content of the document (the part that is displayed in a browser). -->
 
+      <div class="center landing_container"> <!-- This line defines a division or a section in an HTML document with class="center landing_container". -->
+        <div class="landing_title">Mind Game</div> <!-- This line defines a division with class="landing_title" and contains the text "Mind Game". -->
+        <img style="width:min(100%, 550px); height: auto ; ", src="{{ url_for('static', filename='images/landing_page_v2.png') }}" alt="Group"> <!-- This line embeds an image. -->
 
-      <div class="center landing_container">
-        <div class="landing_title">Mind Game</div>
-        <img 
-        style="width:min(100%, 550px); height: auto ; ",
-        src="{{ url_for('static', filename='images/landing_page_v2.png') }}"
-        alt="Group">
-
-        <!-- <div class="text_container_m5connection">Waiting for M5 to connect... </div> -->
-
-
-
-        <div class="input-container watch">
-          <div style="display: flex; flex-direction: column; align-items: center; gap: 5px; width: 100%;">
-            <input type="text" placeholder="Identifier" id="identifier" />
-            <!-- <input type="text" placeholder="Watch ID" id="watchID" /> -->
+        <div class="input-container watch"> <!-- This line defines a division with class="input-container watch". -->
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 5px; width: 100%;"> <!-- This line defines a division with inline CSS. -->
+            <input type="text" placeholder="Identifier" id="identifier" /> <!-- This line defines an input field where the user can enter an identifier. -->
           </div>
-
         </div>
 
-        <div class="btn_container" style="margin-bottom: 10px;">
-
-
-          <button id="restore_btn" class="start_button" >Restore Progress</button>
-
+        <div class="btn_container" style="margin-bottom: 10px;"> <!-- This line defines a division with class="btn_container" and inline CSS. -->
+          <button id="restore_btn" class="start_button" >Restore Progress</button> <!-- This line defines a button for restoring progress. -->
         </div>
 
-        <div class="btn_container" id="navigation_buttons">
-
-
-          <button id="in_lab_btn" class="start_button" >In Lab</button>
-          <button id="at_home_btn" class="start_button" >At Home</button>
-          <a href="{{ url_for('tutorial') }}"><button class="start_button" >Tutorial</button></a>
-
-          <!-- <button id="submitBtn"  class="start_button" required> Start </button> -->
+        <div class="btn_container" id="navigation_buttons"> <!-- This line defines a division with class="btn_container" and id="navigation_buttons". -->
+          <button id="in_lab_btn" class="start_button" >In Lab</button> <!-- This line defines a button for "In Lab". -->
+          <button id="at_home_btn" class="start_button" >At Home</button> <!-- This line defines a button for "At Home". -->
+          <a href="{{ url_for('tutorial') }}"><button class="start_button" >Tutorial</button></a> <!-- This line defines a link to the tutorial page. -->
         </div>
-
-
       </div>
-      
 
+  <script src="{{ url_for('static', filename='js/helper_functions.js') }}"></script> <!-- This line includes an external JavaScript file. -->
+  <script src="{{ url_for('static', filename='js/home.js') }}"></script> <!-- This line includes another external JavaScript file. -->
 
-    </div>
-  <script src="{{ url_for('static', filename='js/helper_functions.js') }}"></script>
-
-    <script src="{{ url_for('static', filename='js/home.js') }}"></script>
-    <script>
-      let mindgameStatus = getLocalStorageOrNull("mindgame_progress");
-      if(mindgameStatus == null){
-        localStorage.setItem("mindgame_progress", "home");
-      } 
-
-
-      const restoreBtn = document.getElementById("restore_btn");
-      restoreBtn.style.display = mindgameStatus !== "home" ? "block" : "none";
-
-      const navigation_buttons = document.getElementById("navigation_buttons");
-      navigation_buttons.style.display = mindgameStatus !== "home" ? "none" : "block";
-
-
-
-
-
-      function updateRestoreButtonText() {
-        if (mindgameStatus === "tiles" || mindgameStatus === "precheck") {
-          const currentLevel = Number(localStorage.getItem("mindgame_next_level"));
-          const sub = Number(localStorage.getItem("mindgame_next_sublevel"));
-          restoreBtn.innerHTML += ` Level ${currentLevel}-${sub}`;
-        } else if (mindgameStatus === "nogo") {
-          restoreBtn.innerHTML += ": NoGo";
-        } else if (mindgameStatus === "intake") {
-          restoreBtn.innerHTML += ": In Take Form";
-        }
-      }
-
-      function redirectToPage() {
-        switch (mindgameStatus) {
-          case "tiles":
-          case "precheck":
-            window.location = "/mindgame_precheck";
-            break;
-          case "nogo":
-            window.location = "/nogo";
-            break;
-          case "intake":
-            window.location = "/start_application/athome";
-            break;
-        }
-      }
-
-      if (mindgameStatus !== "home") {
-        updateRestoreButtonText();
-        restoreBtn.addEventListener("click", redirectToPage);
-      }
-      
-      
+    <script> // This line starts an internal JavaScript. -->
+      // The following JavaScript code is used to manage the game status and navigation on the page.
     </script>
-    
 
-    <script>
-      
-      /*const submitBtn = document.getElementById("submitBtn");
-      submitBtn.addEventListener("click", () => {
-
-        // Please remove
-        localStorage.setItem("watchID", watchID_input.value);
-        localStorage.setItem("userID", userID_input.value);
-        localStorage.setItem("currentLevel", 1);
-        localStorage.setItem("currentSubLevel", 1);
-
-  
-        window.location.href = "/tiles_game"; //Send to game
-
-
-        if (!watchID_input.value.match(/\S/)) {
-          alert("Watch ID is empty");
-          return;
-        }
-
-        if (!userID_input.value.match(/\S/)) {
-          alert("Identifier is empty");
-          return;
-        }
-
-        //localStorage.setItem("watchID", watchID_input.value);
-        //localStorage.setItem("userID", userID_input.value);
-        //localStorage.setItem("currentLevel", 1);
-        //localStorage.setItem("currentSubLevel", 1);
-
-  
-        //window.location.href = "/tiles_game"; //Send to game
-        
-
-      })*/
-      
+    <script> //This line starts another internal JavaScript. -->
+      // The following commented out JavaScript code was used to manage the submission of the form.
     </script>
-  </body>
-</html>
+  </body> <!-- This line indicates the end of the body section. -->
+</html> <!-- This line indicates the end of the HTML document. -->

@@ -156,13 +156,624 @@ const LEVELS = {
       PurpleDiamond(LEVEL_X - 300, LEVEL_Y + 80, 58, true), //Back Left Leg
     ],
   },
-  4:{
-    1:[
-      OrangeSquare(LEVEL_X + 10, LEVEL_Y - 200, 0, true),
-      OrangeSquare(LEVEL_X + 10, LEVEL_Y - 310, 0, true),
+  4: {
+    // 92
+    1: 
+    [
+      YellowDiamond(LEVEL_X - 40, LEVEL_Y - 580, 205, true), // crown
+      YellowDiamond(LEVEL_X -0, LEVEL_Y- 520, 250, true),// crown
+      YellowDiamond(LEVEL_X - 120, LEVEL_Y - 580, 155, true),// crown
+      YellowDiamond(LEVEL_X - 165 , LEVEL_Y - 520 , 110, true),// crown
+      YellowDiamond(LEVEL_X  - 150, LEVEL_Y + 70, 45, true), // front leg
+      YellowDiamond(LEVEL_X + 150, LEVEL_Y + 70, 315, true), // back leg
+      
+      BlueHexagon(LEVEL_X - 50 , LEVEL_Y - 300 , 90, true),
+    
+      GreenEquilateralTriangle(LEVEL_X - 160, LEVEL_Y - 300, 270, true), // peak
+      GreenEquilateralTriangle(LEVEL_X + 220, LEVEL_Y + 35, 180, true), // butt
+      GreenEquilateralTriangle(LEVEL_X + 220, LEVEL_Y - 35, 0, true), // butt
+      GreenEquilateralTriangle(LEVEL_X - 185, LEVEL_Y + 295, 0, true), // front foot
+      GreenEquilateralTriangle(LEVEL_X + 255, LEVEL_Y + 295, 0, true), // back foot
 
-    ]
-  }
+      GreenTrapezoid(LEVEL_X -150 , LEVEL_Y -110, 180, true),// body
+      GreenTrapezoid(LEVEL_X -150 , LEVEL_Y , 0, true), // body
+      GreenTrapezoid(LEVEL_X + 10, LEVEL_Y -110, 0, true),// body
+      GreenTrapezoid(LEVEL_X + 10, LEVEL_Y , 180, true), // body
+
+      PurpleDiamond(LEVEL_X + 225 , LEVEL_Y - 200, 180, true),
+      PurpleDiamond(LEVEL_X + 225, LEVEL_Y - 0, 180, true),
+      PurpleDiamond(LEVEL_X + 320, LEVEL_Y - 40, 120,  true),
+      PurpleDiamond(LEVEL_X + 320, LEVEL_Y - 150, 60, true),
+
+      OrangeSquare(LEVEL_X - 100, LEVEL_Y -215, 0, true),
+
+
+
+    ],
+      //103
+    2: 
+    [
+      PurpleDiamond(LEVEL_X - 320 , LEVEL_Y - 170, 45, true),
+      PurpleDiamond(LEVEL_X + 320, LEVEL_Y - 140, 325, true),
+
+      YellowDiamond(LEVEL_X - 160, LEVEL_Y - 170, 135, true), // uppper arm left
+      YellowDiamond(LEVEL_X + 200, LEVEL_Y -160, 235, true), // upper arm right
+      YellowDiamond(LEVEL_X -160, LEVEL_Y +165, 135, true), // lower arm left
+      YellowDiamond(LEVEL_X + 200, LEVEL_Y + 170, 235, true), // lower arm right
+ 
+      OrangeSquare(LEVEL_X - 60, LEVEL_Y - 300 , 0, true),//top
+      OrangeSquare(LEVEL_X + 60, LEVEL_Y - 300, 0, true), //top
+      OrangeSquare(LEVEL_X -60, LEVEL_Y + 10 , 0, true), // body
+      OrangeSquare(LEVEL_X + 60, LEVEL_Y + 10, 0, true), //body
+      OrangeSquare(LEVEL_X -60, LEVEL_Y + 320 , 0, true), // lower body
+      OrangeSquare(LEVEL_X + 60, LEVEL_Y + 320, 0, true), // lower body
+
+      BlueRightTriangle(LEVEL_X +160, LEVEL_Y -400, 180, true), //horns
+      BlueRightTriangle(LEVEL_X -160, LEVEL_Y -400, 270, true), //horns
+      BlueRightTriangle(LEVEL_X -60, LEVEL_Y -100, 180, true), //shoulder
+      BlueRightTriangle(LEVEL_X +60, LEVEL_Y -100, 270, true), //shoulders
+      BlueRightTriangle(LEVEL_X -60, LEVEL_Y +120, 90, true),
+      BlueRightTriangle(LEVEL_X +60, LEVEL_Y +120, 0, true),
+       BlueRightTriangle(LEVEL_X -60, LEVEL_Y +210, 180, true),
+        BlueRightTriangle(LEVEL_X +60, LEVEL_Y +210, 270, true),
+        BlueRightTriangle(LEVEL_X -60, LEVEL_Y + 430, 90, true),
+        BlueRightTriangle(LEVEL_X +60, LEVEL_Y + 430, 0, true), 
+
+      PinkQuarterCircle(LEVEL_X + 40, LEVEL_Y -190, 90, true), //neck
+      PinkQuarterCircle(LEVEL_X +60 , LEVEL_Y - 190, 0, true),//neck
+
+
+    ],
+
+    3:  // 110
+    [
+      BlueHexagon(LEVEL_X + 150 , LEVEL_Y - 450, 0, true),
+
+      PurpleDiamond(LEVEL_X +120 , LEVEL_Y -420, 119, true), // top head
+      PurpleDiamond(LEVEL_X - 0, LEVEL_Y -420,  119, true), // top middle
+      PurpleDiamond(LEVEL_X -120, LEVEL_Y - 420,  119, true), // top left
+      PurpleDiamond(LEVEL_X + 180, LEVEL_Y - 320,  119, true), // middle right
+      PurpleDiamond(LEVEL_X -145, LEVEL_Y - 185,  0, true),
+      PurpleDiamond(LEVEL_X - 240, LEVEL_Y - 135,  120, true),
+      PurpleDiamond(LEVEL_X , LEVEL_Y -230,  240, true), //
+      PurpleDiamond(LEVEL_X +210, LEVEL_Y -110,  125, true), // bottom foot
+
+      GreenEquilateralTriangle(LEVEL_X + 20, LEVEL_Y  - 240, 60, true), // top
+      GreenEquilateralTriangle(LEVEL_X - 35, LEVEL_Y -215, 0, true), // middle
+      GreenEquilateralTriangle(LEVEL_X - 35, LEVEL_Y -155, 60, true), // bottom
+
+      GreenTrapezoid(LEVEL_X - 265, LEVEL_Y -305, 300, true),// upper back
+      GreenTrapezoid(LEVEL_X + 240, LEVEL_Y -335, 120, true),// upper front (hand)
+      GreenTrapezoid(LEVEL_X + 100, LEVEL_Y -170, 185, true),
+
+    ],
+
+
+
+
+  },
+  5: {
+    1: //111
+    [
+      BlueHexagon(LEVEL_X + 185, LEVEL_Y -115, 30, true), // inner top right wing
+      BlueHexagon(LEVEL_X  - 180 , LEVEL_Y -115, 30, true), // inner top left wing
+      BlueHexagon(LEVEL_X -265, LEVEL_Y -250, 30, true), // outer top left wing
+      BlueHexagon(LEVEL_X +265, LEVEL_Y -250, 30, true), // outer top right wing
+      BlueHexagon(LEVEL_X + 185, LEVEL_Y +60 , 30, true), // inner bottom right wing
+      BlueHexagon(LEVEL_X - 180 , LEVEL_Y +60, 30, true), // inner bottom left wing
+      BlueHexagon(LEVEL_X -265, LEVEL_Y +195, 30, true),// outer bottom left wing
+      BlueHexagon(LEVEL_X +265, LEVEL_Y +195, 30, true), // outer bottom right wing
+      BlueHexagon(LEVEL_X -345, LEVEL_Y +55, 30, true),
+      BlueHexagon(LEVEL_X -345, LEVEL_Y -115, 30, true),
+      BlueHexagon(LEVEL_X +345, LEVEL_Y -115, 30, true),
+      BlueHexagon(LEVEL_X +345, LEVEL_Y +55, 30, true),
+
+      PurpleDiamond(LEVEL_X - 50, LEVEL_Y - 450,  0, true), //head
+      PurpleDiamond(LEVEL_X -105, LEVEL_Y -240,  30, true),
+      PurpleDiamond(LEVEL_X - 0 , LEVEL_Y -240,  335, true),
+      PurpleDiamond(LEVEL_X -105, LEVEL_Y -65,  150, true),
+      PurpleDiamond(LEVEL_X -5, LEVEL_Y -65,  29, true),
+      PurpleDiamond(LEVEL_X -55 , LEVEL_Y + 85,  90, true),
+      PurpleDiamond(LEVEL_X - 0, LEVEL_Y +180,  30, true),
+      PurpleDiamond(LEVEL_X -105, LEVEL_Y +180,  330, true),
+
+
+      GreenEquilateralTriangle(LEVEL_X - 55, LEVEL_Y - 235, 200, true), //neck left
+      GreenEquilateralTriangle(LEVEL_X + 60, LEVEL_Y - 235, 280, true), //neck right
+      GreenEquilateralTriangle(LEVEL_X -30, LEVEL_Y - 50, 270, true),
+      GreenEquilateralTriangle(LEVEL_X +30, LEVEL_Y -50, 90, true),
+      GreenEquilateralTriangle(LEVEL_X -60, LEVEL_Y +125, 330, true),
+      GreenEquilateralTriangle(LEVEL_X + 60, LEVEL_Y +125, 30, true),
+      GreenEquilateralTriangle(LEVEL_X -123, LEVEL_Y -25, 30, true),
+      GreenEquilateralTriangle(LEVEL_X +123, LEVEL_Y -25, 330, true),
+      GreenEquilateralTriangle(LEVEL_X +242, LEVEL_Y -28, 30, true),
+      GreenEquilateralTriangle(LEVEL_X -238, LEVEL_Y -28, 330, true),
+
+
+      YellowDiamond(LEVEL_X - 110, LEVEL_Y - 415, 310, true),// head left bottom
+      YellowDiamond(LEVEL_X + 50, LEVEL_Y - 415, 50, true), // head right bottom
+      YellowDiamond(LEVEL_X - 155, LEVEL_Y -510, 310, true), // left top
+      YellowDiamond(LEVEL_X + 95, LEVEL_Y -510, 50, true), // right top
+
+      
+
+
+    ],
+
+    2: //112
+    [
+      GreenTrapezoid(LEVEL_X -97, LEVEL_Y -290, 180, true),
+      GreenTrapezoid(LEVEL_X -97, LEVEL_Y -185, 0, true),
+
+      PinkQuarterCircle(LEVEL_X -5 , LEVEL_Y -400 , 180, true),
+      PinkQuarterCircle(LEVEL_X +5, LEVEL_Y -400, 270, true),
+
+      OrangeSquare(LEVEL_X +130, LEVEL_Y -185, 0, true),
+      OrangeSquare(LEVEL_X - 225, LEVEL_Y -185, 0, true),
+      OrangeSquare(LEVEL_X -102, LEVEL_Y +70, 0, true),
+      OrangeSquare(LEVEL_X +10, LEVEL_Y +70, 0, true),
+
+      YellowDiamond(LEVEL_X +210, LEVEL_Y + 10, 320, true),
+      YellowDiamond(LEVEL_X +280, LEVEL_Y - 20, 340, true),
+
+      RedCircle(LEVEL_X -50, LEVEL_Y -395, 0, true),
+
+      PurpleDiamond(LEVEL_X + 90, LEVEL_Y -339, 120,  true),
+      PurpleDiamond(LEVEL_X -193, LEVEL_Y -339 , 240, true),
+      PurpleDiamond(LEVEL_X - 105, LEVEL_Y -120, 150, true),
+      PurpleDiamond(LEVEL_X + 5, LEVEL_Y  -120, 210,  true),
+      PurpleDiamond(LEVEL_X -150 , LEVEL_Y +160, 30, 0, true),
+      PurpleDiamond(LEVEL_X +50, LEVEL_Y +160, 150, 0, true),
+      PurpleDiamond(LEVEL_X -265 , LEVEL_Y -100, 30, 0, true),
+      PurpleDiamond(LEVEL_X + 170, LEVEL_Y -100, 150, 0, true),
+
+      GreenEquilateralTriangle(LEVEL_X -290, LEVEL_Y +40, 30, true),
+      GreenEquilateralTriangle(LEVEL_X -200, LEVEL_Y +90, 30, true),
+      GreenEquilateralTriangle(LEVEL_X -275, LEVEL_Y +115, 330, true),
+
+
+
+
+    ],
+
+    3: //113
+     [
+      
+      YellowDiamond(LEVEL_X +15, LEVEL_Y -600, 30, true),
+      YellowDiamond(LEVEL_X + 50, LEVEL_Y -465, 120, true),   
+      YellowDiamond(LEVEL_X -80, LEVEL_Y -600, 155, true),
+      YellowDiamond(LEVEL_X - 125, LEVEL_Y - 470, 245, true),
+
+      
+      PurpleDiamond(LEVEL_X -145, LEVEL_Y -375,  60, true), //top
+      PurpleDiamond(LEVEL_X - 205, LEVEL_Y - 275,  60, true), // bottom left
+      PurpleDiamond(LEVEL_X +105, LEVEL_Y -275,  240, true),
+      PurpleDiamond(LEVEL_X +225, LEVEL_Y -275,  240, true),
+      PurpleDiamond(LEVEL_X +345, LEVEL_Y -275,  240, true),
+      PurpleDiamond(LEVEL_X + 400, LEVEL_Y -375,  240, true),
+
+      GreenEquilateralTriangle(LEVEL_X, LEVEL_Y -360, 0, true), // top of the plane
+      GreenEquilateralTriangle(LEVEL_X - 45, LEVEL_Y - 200, 0, true),
+      GreenEquilateralTriangle(LEVEL_X - 30, LEVEL_Y -50, 0, true),
+
+      GreenTrapezoid(LEVEL_X -235, LEVEL_Y -120, 0, true), //left trap
+      GreenTrapezoid(LEVEL_X -25, LEVEL_Y -120, 0, true), //right trap
+
+      RedCircle(LEVEL_X -205, LEVEL_Y -20, 0, true),
+      RedCircle(LEVEL_X , LEVEL_Y -20, 0, true),
+
+      BlueHexagon(LEVEL_X +50, LEVEL_Y -250, 0, true), //top heaxagon
+
+       
+    ],
+
+
+
+
+  },
+  6: {
+    1: //117
+    [
+      RedCircle(LEVEL_X +135, LEVEL_Y -200, 0, true),
+      RedCircle(LEVEL_X +135, LEVEL_Y - 90, 0, true),
+      RedCircle(LEVEL_X -235, LEVEL_Y -200, 0, true),
+      RedCircle(LEVEL_X -235, LEVEL_Y -90, 0, true),
+
+
+      PinkQuarterCircle(LEVEL_X +5, LEVEL_Y -300, 0, true),
+      PinkQuarterCircle(LEVEL_X -5, LEVEL_Y -300, 90, true),
+      PinkQuarterCircle(LEVEL_X -5, LEVEL_Y -305, 180, true),
+      PinkQuarterCircle(LEVEL_X +5, LEVEL_Y -305, 270, true),
+
+      GreenTrapezoid(LEVEL_X -15, LEVEL_Y -150 , 90, true),
+      GreenTrapezoid(LEVEL_X -185, LEVEL_Y -150, 270, true),
+
+      YellowDiamond(LEVEL_X -35, LEVEL_Y -200, 0, true),
+
+      BlueRightTriangle(LEVEL_X +25, LEVEL_Y -500, 140, true),
+      BlueRightTriangle(LEVEL_X -125, LEVEL_Y -500, 300, true),
+
+      PinkQuarterCircle(LEVEL_X +5, LEVEL_Y +100, 0, true),
+      PinkQuarterCircle(LEVEL_X -5, LEVEL_Y +100, 90, true),
+      PinkQuarterCircle(LEVEL_X -5, LEVEL_Y +95, 180, true),
+      PinkQuarterCircle(LEVEL_X +5, LEVEL_Y +95, 270, true),
+
+      BlueRightTriangle(LEVEL_X +25, LEVEL_Y +180, 140, true),
+      BlueRightTriangle(LEVEL_X -115, LEVEL_Y +180, 300, true),
+
+      
+
+
+
+    ],
+
+    2: //124
+    [
+      BlueHexagon(LEVEL_X , LEVEL_Y -400, 30, true),
+
+      GreenTrapezoid(LEVEL_X -100, LEVEL_Y -180, 180, true),
+      GreenTrapezoid(LEVEL_X - 100, LEVEL_Y -75, 0, true),
+
+      GreenEquilateralTriangle(LEVEL_X +120, LEVEL_Y -470, 0, true),//right top
+      GreenEquilateralTriangle(LEVEL_X -120, LEVEL_Y -470, 0, true), //left top
+      GreenEquilateralTriangle(LEVEL_X -100, LEVEL_Y -4, 0, true), //left lower bottom
+      GreenEquilateralTriangle(LEVEL_X +100, LEVEL_Y -4, 0, true), //right lower bottom
+
+      PurpleDiamond(LEVEL_X -55, LEVEL_Y -355, 90, true), // neck
+      PurpleDiamond(LEVEL_X -145, LEVEL_Y -25, 242, true),
+      PurpleDiamond(LEVEL_X +50, LEVEL_Y -25, 118, true),
+
+      YellowDiamond(LEVEL_X +70, LEVEL_Y -310, 80, true), // right top
+      YellowDiamond(LEVEL_X -140, LEVEL_Y -310, 280, true),// left top
+
+    ],
+
+    3: //127
+     [
+      GreenTrapezoid(LEVEL_X  -210, LEVEL_Y -279 , 120, true),
+      GreenTrapezoid(LEVEL_X +10, LEVEL_Y -279, 240, true),
+
+      YellowDiamond(LEVEL_X - 130, LEVEL_Y -120, 70, true), // bottom top left
+      YellowDiamond(LEVEL_X + 60, LEVEL_Y -120, 110, true), // bottom top right
+      YellowDiamond(LEVEL_X -130, LEVEL_Y-50, 110, true), // bottom middle left
+      YellowDiamond(LEVEL_X + 60, LEVEL_Y -50, 70, true), // bottom middle right
+      YellowDiamond(LEVEL_X -130, LEVEL_Y +20, 70, true), // bottom bottom left
+      YellowDiamond(LEVEL_X +60, LEVEL_Y + 20, 110, true),// bottom bottom right
+      YellowDiamond(LEVEL_X +160, LEVEL_Y -470, 40, true), // arm top right
+      YellowDiamond(LEVEL_X -240, LEVEL_Y -335, 50, true), //arm top left
+      YellowDiamond(LEVEL_X + 200, LEVEL_Y - 580, 40, true), // arm bottom right
+      YellowDiamond(LEVEL_X - 290, LEVEL_Y - 240, 50, true), // arm bottom left
+
+      BlueHexagon(LEVEL_X , LEVEL_Y -450, 0, true),
+      BlueHexagon(LEVEL_X , LEVEL_Y -130, 0, true),
+
+      GreenEquilateralTriangle(LEVEL_X, LEVEL_Y -325, 0, true),
+      GreenEquilateralTriangle(LEVEL_X, LEVEL_Y - 245, 0, true),
+
+
+
+    ],
+
+
+
+
+  },
+  7: {
+    1: //114
+    [
+      GreenEquilateralTriangle(LEVEL_X -100, LEVEL_Y -119, 0, true), // trinalge in between purple diamond and trapziod
+      GreenEquilateralTriangle(LEVEL_X +130, LEVEL_Y -45, 180, true),
+      GreenEquilateralTriangle(LEVEL_X + 245, LEVEL_Y -115, 0, true),
+      GreenEquilateralTriangle(LEVEL_X + 335, LEVEL_Y -45, 180, true),
+
+      PurpleDiamond(LEVEL_X -240, LEVEL_Y -240, 62, true), // top most left
+      PurpleDiamond(LEVEL_X -305, LEVEL_Y- 140, 62, true),
+      PurpleDiamond(LEVEL_X -20, LEVEL_Y - 130, 120, true), // hexagon right diamond
+      PurpleDiamond(LEVEL_X +100, LEVEL_Y -235, 62, true), //upper tapziod left
+      PurpleDiamond(LEVEL_X +280, LEVEL_Y -230, 120, true),
+      
+      YellowDiamond(LEVEL_X -130, LEVEL_Y -540, 70, true),
+      YellowDiamond(LEVEL_X + 120, LEVEL_Y -640, 70, true),
+
+      BlueHexagon(LEVEL_X -105, LEVEL_Y -10 , 0, true), 
+      BlueHexagon(LEVEL_X+230 , LEVEL_Y + 0 , 0, true),
+
+      GreenTrapezoid(LEVEL_X -200, LEVEL_Y -400, 0, true),//smoke peaker 
+      GreenTrapezoid(LEVEL_X - 95, LEVEL_Y -187 , 0, true), // lowest body trap
+      GreenTrapezoid(LEVEL_X +140, LEVEL_Y -290, 180, true),
+
+      OrangeSquare(LEVEL_X -150, LEVEL_Y -295, 0, true),
+
+
+    ],
+
+    2: //170
+    [
+      GreenTrapezoid(LEVEL_X +180 , LEVEL_Y -365, 180, true), // top trapizod under top triangle
+      GreenTrapezoid(LEVEL_X +205 , LEVEL_Y +60, 0, true),
+      GreenTrapezoid(LEVEL_X +205, LEVEL_Y +170 , 180, true),
+      GreenTrapezoid(LEVEL_X -95 , LEVEL_Y +60, 0, true),
+      GreenTrapezoid(LEVEL_X -95, LEVEL_Y +170 , 180, true),
+
+      OrangeSquare(LEVEL_X + 230, LEVEL_Y -260, 0, true), // top square under top trapizod
+      OrangeSquare(LEVEL_X + 280, LEVEL_Y -50, 0, true), // most left square
+      OrangeSquare(LEVEL_X + 170, LEVEL_Y -50, 0, true), //  middle left square
+      OrangeSquare(LEVEL_X + 60, LEVEL_Y -50, 0, true), // middle right square
+      OrangeSquare(LEVEL_X -50, LEVEL_Y -50, 0, true), // most right square
+      
+
+      PurpleDiamond(LEVEL_X +190 , LEVEL_Y -205, 62,  true), //top under top traingle 
+      /*PurpleDiamond(LEVEL_X , LEVEL_Y, 40, true),
+      PurpleDiamond(LEVEL_X , LEVEL_Y, 40, true),
+      PurpleDiamond(LEVEL_X , LEVEL_Y, 40, true),*/
+
+      GreenEquilateralTriangle(LEVEL_X +280, LEVEL_Y -400, 0, true), //top triangle
+      GreenEquilateralTriangle(LEVEL_X + 330, LEVEL_Y -85, 0, true),
+      GreenEquilateralTriangle(LEVEL_X -0, LEVEL_Y - 80, 0, true), // left square on top of triangle
+
+      BlueHexagon(LEVEL_X +155 , LEVEL_Y +165 , 0, true),
+
+    ],
+
+    3: //169
+     [
+
+      GreenTrapezoid(LEVEL_X -160, LEVEL_Y - 110, 0, true),
+      GreenTrapezoid(LEVEL_X -100, LEVEL_Y -0 , 0, true),
+      
+      PurpleDiamond(LEVEL_X +80, LEVEL_Y -475, 120, true), //left top
+      PurpleDiamond(LEVEL_X -190, LEVEL_Y -475, 60, true), // right top
+      PurpleDiamond(LEVEL_X +80, LEVEL_Y -265, 60, true),
+      PurpleDiamond(LEVEL_X -190, LEVEL_Y -265, 120, true),
+      PurpleDiamond(LEVEL_X +25, LEVEL_Y -160, 60, true),
+      
+           
+      GreenEquilateralTriangle(LEVEL_X, LEVEL_Y +135, 60, true),
+     
+      YellowDiamond(LEVEL_X +70, LEVEL_Y -620, 30, true),
+      YellowDiamond(LEVEL_X-140, LEVEL_Y -620, 150, true),
+      YellowDiamond(LEVEL_X -30, LEVEL_Y -630, 0, true),
+     
+
+      OrangeSquare(LEVEL_X + 120, LEVEL_Y -320, 0, true),
+      OrangeSquare(LEVEL_X -215, LEVEL_Y -320, 0, true),
+
+
+      BlueHexagon(LEVEL_X , LEVEL_Y -350, 0, true),
+      BlueHexagon(LEVEL_X , LEVEL_Y -190, 0, true),
+
+
+
+      
+    ],
+
+
+
+
+  },
+  8: {
+    1: //283
+    [
+      BlueHexagon(LEVEL_X +250, LEVEL_Y -450, 0, true),
+
+
+      OrangeSquare(LEVEL_X+ 50, LEVEL_Y +140, 0, true),
+      OrangeSquare(LEVEL_X -60, LEVEL_Y +140, 0, true),
+      OrangeSquare(LEVEL_X -170, LEVEL_Y +140, 0, true),
+      OrangeSquare(LEVEL_X +50, LEVEL_Y +30, 0, true),
+      OrangeSquare(LEVEL_X -60, LEVEL_Y +30, 0, true),
+      OrangeSquare(LEVEL_X -170, LEVEL_Y +30, 0, true),
+      OrangeSquare(LEVEL_X -120, LEVEL_Y -300, 0, true),
+
+      YellowDiamond(LEVEL_X -160, LEVEL_Y -490, 320, true),
+
+
+      GreenEquilateralTriangle(LEVEL_X -315, LEVEL_Y + 215, 0, true),
+      GreenEquilateralTriangle(LEVEL_X -220, LEVEL_Y + 215, 0, true),
+      GreenEquilateralTriangle(LEVEL_X +200, LEVEL_Y +215, 0, true),
+      GreenEquilateralTriangle(LEVEL_X +305, LEVEL_Y + 215, 0, true),
+
+      GreenEquilateralTriangle(LEVEL_X + 250, LEVEL_Y - 560, 0, true),
+      GreenEquilateralTriangle(LEVEL_X +250, LEVEL_Y -340, 180, true),
+      GreenEquilateralTriangle(LEVEL_X +150, LEVEL_Y -400, 120, true),
+      GreenEquilateralTriangle(LEVEL_X +150, LEVEL_Y -500, 300, true),
+      GreenEquilateralTriangle(LEVEL_X +350, LEVEL_Y -400, 120, true),
+      GreenEquilateralTriangle(LEVEL_X +350, LEVEL_Y -500, 300, true),
+
+      GreenEquilateralTriangle(LEVEL_X +160, LEVEL_Y - 10, 0, true),
+      GreenEquilateralTriangle(LEVEL_X -175, LEVEL_Y - 10, 0, true),
+
+      GreenTrapezoid(LEVEL_X -110 , LEVEL_Y -80, 180, true),
+      GreenTrapezoid(LEVEL_X -110, LEVEL_Y -190, 0, true),
+      
+      PurpleDiamond(LEVEL_X +50 , LEVEL_Y - 190,  0, true),
+      PurpleDiamond(LEVEL_X -180, LEVEL_Y - 190,  0, true),
+
+
+    ],
+
+    2: //231
+    [
+      
+      BlueHexagon(LEVEL_X +0, LEVEL_Y -150, 30, true),
+
+      
+      GreenTrapezoid(LEVEL_X +25 , LEVEL_Y +25, 150, true),
+      GreenTrapezoid(LEVEL_X -310, LEVEL_Y -190, 270, true),
+      GreenTrapezoid(LEVEL_X -210 , LEVEL_Y +20, 210, true),
+      GreenTrapezoid(LEVEL_X +0, LEVEL_Y -410, 30, true),
+      GreenTrapezoid(LEVEL_X +140 , LEVEL_Y -200, 90, true),
+      GreenTrapezoid(LEVEL_X -230, LEVEL_Y -420, 330, true),
+
+
+      YellowDiamond(LEVEL_X-35, LEVEL_Y -435, 0, true),
+      YellowDiamond(LEVEL_X -35, LEVEL_Y -60, 0, true),
+      YellowDiamond(LEVEL_X +110, LEVEL_Y -360, 45, true),
+      YellowDiamond(LEVEL_X -180, LEVEL_Y -140, 45, true),
+      YellowDiamond(LEVEL_X +125, LEVEL_Y -150, 125, true),
+      YellowDiamond(LEVEL_X -190, LEVEL_Y -350, 125, true),
+      
+      RedCircle(LEVEL_X -50, LEVEL_Y -550, 0, true),
+      RedCircle(LEVEL_X -50, LEVEL_Y +150, true),
+
+
+
+
+      
+
+
+
+
+
+    ],
+
+    3://224
+     [
+      OrangeSquare(LEVEL_X +20, LEVEL_Y -370 , 30, true),
+      OrangeSquare(LEVEL_X - 120, LEVEL_Y -370, 330, true),
+      OrangeSquare(LEVEL_X + 90, LEVEL_Y -250, 0, true),
+      OrangeSquare(LEVEL_X -190, LEVEL_Y -250, 0, true),
+      OrangeSquare(LEVEL_X +20, LEVEL_Y -130, 60, true),
+      OrangeSquare(LEVEL_X - 120, LEVEL_Y -130 , 300, true),
+
+     
+      GreenEquilateralTriangle(LEVEL_X +110, LEVEL_Y -400, 30, true),
+      GreenEquilateralTriangle(LEVEL_X -120, LEVEL_Y -400, 330, true),
+      GreenEquilateralTriangle(LEVEL_X +230, LEVEL_Y -200, 90, true),
+      GreenEquilateralTriangle(LEVEL_X -230, LEVEL_Y -200, 270, true),
+      GreenEquilateralTriangle(LEVEL_X -115, LEVEL_Y -5, 90, true),
+      GreenEquilateralTriangle(LEVEL_X +125, LEVEL_Y -0, 270, true),
+      
+
+      PurpleDiamond(LEVEL_X - 55, LEVEL_Y -80, 0, true),
+      PurpleDiamond(LEVEL_X -55, LEVEL_Y - 520, 0, true),
+      PurpleDiamond(LEVEL_X +130, LEVEL_Y -410, 60, true),
+      PurpleDiamond(LEVEL_X -250, LEVEL_Y -190, 60, true),
+      PurpleDiamond(LEVEL_X -250, LEVEL_Y -410, 120, true),
+      PurpleDiamond(LEVEL_X +135, LEVEL_Y -190, 120, true),
+
+      BlueHexagon(LEVEL_X , LEVEL_Y -200,30, true),
+
+      RedCircle(LEVEL_X -55, LEVEL_Y -650, 0, true),
+      RedCircle(LEVEL_X -55, LEVEL_Y +150, 0, true),
+      RedCircle(LEVEL_X +350, LEVEL_Y - 250, 0, true),
+      RedCircle(LEVEL_X -450, LEVEL_Y -250, 0, true),
+
+
+      
+
+
+      
+    ],
+
+
+
+
+  },
+  9: {
+    1: //104
+    [
+      GreenTrapezoid(LEVEL_X - 95, LEVEL_Y -310, 180, true),
+      GreenTrapezoid(LEVEL_X -95, LEVEL_Y -200, 0, true),
+      GreenTrapezoid(LEVEL_X -95, LEVEL_Y +80, 180, true),
+      GreenTrapezoid(LEVEL_X -95, LEVEL_Y +190, 0, true),
+
+
+      BlueHexagon(LEVEL_X , LEVEL_Y -400 , 0, true),
+      BlueHexagon(LEVEL_X , LEVEL_Y -10, 0, true),
+
+      
+      PurpleDiamond(LEVEL_X +60, LEVEL_Y -30, 0, true),
+      PurpleDiamond(LEVEL_X +60, LEVEL_Y -430, 0, true),
+      PurpleDiamond(LEVEL_X -160, LEVEL_Y -30, 0, true),
+      PurpleDiamond(LEVEL_X -160, LEVEL_Y -420, 0, true),
+
+      GreenEquilateralTriangle(LEVEL_X -0, LEVEL_Y -510, 0, true),
+      GreenEquilateralTriangle(LEVEL_X, LEVEL_Y +330, 60, true),
+     
+      RedCircle(LEVEL_X +170, LEVEL_Y -10, 0, true),
+      RedCircle(LEVEL_X +170, LEVEL_Y -410, 0, true),
+      RedCircle(LEVEL_X -270, LEVEL_Y - 10, 0, true),
+      RedCircle(LEVEL_X -270, LEVEL_Y -390, 0, true),
+    ],
+
+    2: //296 and 297 
+    [
+      GreenEquilateralTriangle(LEVEL_X +450, LEVEL_Y -260, 0, true),
+      GreenEquilateralTriangle(LEVEL_X -250, LEVEL_Y -260, 0, true),
+      GreenEquilateralTriangle(LEVEL_X +40, LEVEL_Y -260, 0, true),
+      GreenEquilateralTriangle(LEVEL_X +40, LEVEL_Y-480, 0, true),
+
+      YellowDiamond(LEVEL_X -320, LEVEL_Y +100, 20, true),
+      YellowDiamond(LEVEL_X -240, LEVEL_Y +100, 340, true),
+      YellowDiamond(LEVEL_X +380, LEVEL_Y +100, 20, true),
+      YellowDiamond(LEVEL_X +470, LEVEL_Y+100,340, true),
+      YellowDiamond(LEVEL_X -30, LEVEL_Y +200, 20, true),
+      YellowDiamond(LEVEL_X +60, LEVEL_Y+200, 340, true),
+
+
+      PurpleDiamond(LEVEL_X -100, LEVEL_Y-380, 60, true),
+      PurpleDiamond(LEVEL_X +70, LEVEL_Y -380, 300, true),
+    
+
+      OrangeSquare(LEVEL_X +100, LEVEL_Y , 0, true),
+      OrangeSquare(LEVEL_X -10, LEVEL_Y , 0, true),
+      OrangeSquare(LEVEL_X-120, LEVEL_Y , 0, true),
+      OrangeSquare(LEVEL_X +100, LEVEL_Y -110, 0, true),
+      OrangeSquare(LEVEL_X -10, LEVEL_Y -110, 0, true),
+      OrangeSquare(LEVEL_X -120, LEVEL_Y -110, 0, true),
+      OrangeSquare(LEVEL_X +100, LEVEL_Y -220, 0, true),
+      OrangeSquare(LEVEL_X -10, LEVEL_Y -220, 0, true),
+      OrangeSquare(LEVEL_X -120, LEVEL_Y -220, 0, true),
+
+
+      OrangeSquare(LEVEL_X+ 400, LEVEL_Y , 0, true),
+      OrangeSquare(LEVEL_X + 400, LEVEL_Y -110, 0, true),
+      OrangeSquare(LEVEL_X +400, LEVEL_Y -220, 0, true),
+
+      OrangeSquare(LEVEL_X -300, LEVEL_Y , 0, true),
+      OrangeSquare(LEVEL_X -300, LEVEL_Y-110 , 0, true),
+      OrangeSquare(LEVEL_X -300, LEVEL_Y -220, 0, true),
+      
+      GreenTrapezoid(LEVEL_X - 60, LEVEL_Y-440 , 180, true),
+      GreenTrapezoid(LEVEL_X -50, LEVEL_Y+110 , 0, true),
+
+    ],
+
+    3: //dragonfly
+     [
+
+      RedCircle(LEVEL_X , LEVEL_Y -410, 0, true),
+      RedCircle(LEVEL_X , LEVEL_Y -310, 0, true),
+      RedCircle(LEVEL_X -30, LEVEL_Y - 210, 0, true),
+
+      GreenEquilateralTriangle(LEVEL_X +50, LEVEL_Y +60, 0, true),
+      GreenEquilateralTriangle(LEVEL_X +50, LEVEL_Y +350, 60, true),
+      
+
+      YellowDiamond(LEVEL_X+120, LEVEL_Y -520, 60, true),
+      YellowDiamond(LEVEL_X +120, LEVEL_Y-420, 310, true),
+      YellowDiamond(LEVEL_X-100, LEVEL_Y -520, 310, true),
+      YellowDiamond(LEVEL_X -100, LEVEL_Y-420, 60, true),
+      
+      PurpleDiamond(LEVEL_X -100, LEVEL_Y -200, 40, true),
+      
+      PurpleDiamond(LEVEL_X -120, LEVEL_Y+200, 30, true),
+      PurpleDiamond(LEVEL_X+110 , LEVEL_Y+200, 330, true),
+     
+      OrangeSquare(LEVEL_X, LEVEL_Y +100, 0, true),
+      OrangeSquare(LEVEL_X, LEVEL_Y +210 , 0, true),
+
+
+      BlueHexagon(LEVEL_X -90, LEVEL_Y +150 , 30, true),
+      BlueHexagon(LEVEL_X +190, LEVEL_Y +150, 30, true),
+
+      
+      
+
+      
+    ],
+  },
 
   // 4: {
   //   //Level 4-1
