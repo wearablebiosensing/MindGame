@@ -1,3 +1,4 @@
+console.log("precheck.js loaded")
 /*
   =======================================================================
   ==================   Section 0 - Globals  ===================
@@ -46,6 +47,8 @@ async function handleWatchStatusCheck(callback) {
     console.error("Watch Status Error: ", error);
     displayWatchStatus("offline"); // Default to 'offline' in case of error
   } finally {
+    displayWatchStatus("online");
+
     toggleLoadingIndicator(false);
     g_is_watch_status_loading = false;
   }
@@ -66,13 +69,17 @@ function toggleLoadingIndicator(isLoading) {
  * @return {Promise<string>} The status of the watch ('online' or 'offline').
  */
 async function fetchWatchStatus(watchID) {
-  const response = await fetch("/check_mqtt_connection", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ watchID }),
-  });
-  const data = await response.json();
-  return data["status"];
+  try {
+    const response = await fetch("/check_mqtt_connection", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ watchID }),
+    });
+    const data = await response.json();
+    return data["status"];
+  } catch {
+    return "offline";
+  }
 }
 
 /**
@@ -81,6 +88,8 @@ async function fetchWatchStatus(watchID) {
  */
 function displayWatchStatus(status) {
   const isOnline = status == "online";
+  // const isOnline = true;
+
   console.log(isOnline);
   g_watch_status_text.innerText = isOnline ? "Online" : "Offline";
   g_watch_status_text.style.color = isOnline ? "green" : "red";
@@ -91,6 +100,14 @@ function displayWatchStatus(status) {
   } else {
     g_watch_status = false;
     g_mindgame_start_btn.classList.add("pregame_disabled");
+  }
+}
+
+async function handlePrecheck() {
+  const preconditionsMet = checkAllPreconditionsMet();
+  if (preconditionsMet) {
+      updateProgressToCPT(); // Call the helper function
+      window.location.href = "/cpt";
   }
 }
 

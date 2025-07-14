@@ -15,13 +15,11 @@ const ctx = canvas.getContext("2d");
  */
 const container = document.getElementById("container");
 
-// canvas.width = container.clientWidth + 450;
-// canvas.height = container.clientHeight + 450;
-
-canvas.width = window.innerWidth + 420;
+// Dynamic canvas size
+canvas.width = window.innerWidth + 800;
 canvas.height = window.innerHeight + 420;
 
-//Used for creating the levels of the game realtive to the center
+//Used for creating the levels of the game relative to the center
 let LEVEL_X = canvas.width / 2;
 let LEVEL_Y = canvas.height / 2;
 
@@ -44,8 +42,8 @@ let closest_shape_to_current = null;
 const user_start_timestamp = Date.now();
 
 //Level Data
-let current_level = 1;
-let current_sub_level = 1;
+let current_level = parseInt(localStorage.getItem("mindgame_level"), 10) || 1;
+let current_sub_level = parseInt(localStorage.getItem("mindgame_sublevel"), 10) || 1;
 
 //Text to show when wrong shape
 /**
@@ -57,13 +55,29 @@ const shapeFeedbackText = document.querySelector(".shapeFeedbackText");
 const progressBar = document.getElementById("progressBar");
 const progressBarPercent = document.getElementById("progress-bar-percent");
 
+function getProgressLevel() {
+    return getProgressBarPercentage();  // Retrieve actual progress percentage
+}
+
+
+function checkPlacementAccuracy(previousProgress) {
+    let currentProgress = getProgressLevel();
+
+    console.log("Previous Progress (Before Stroke Ends):", previousProgress);
+    console.log("Current Progress (After Stroke Ends):", currentProgress);
+
+    return currentProgress > previousProgress ? "True" : "False";
+}
+
+
+
+
 //Mouse Data
 let mouse_motion_array = [];
 let lastCollectionTime = 0;
-const throttlingInterval = 200; // 200 milliseconds
+const throttlingInterval = 2; // 2 milliseconds ie 500 Hz
 
-//  -> Mouse Acceleration
-//      -> Define variables to store previous mouse position and timestamp
+// Mouse Acceleration Tracking
 let prevMouseX = 0;
 let prevMouseY = 0;
 let prevTimestamp = 0;

@@ -159,14 +159,14 @@
       </div>
       <div style="display: flex; justify-content: center">
         {% if type == "inlab" %}
-        <button type="submit" id="next_btn" class="start_button">Go / Nogo</button>
+        <button type="submit" id="next_btn" class="start_button">cpt</button>
         {% endif %} {% if type == "athome" %}
         <button type="submit" id="next_btn" class="start_button">MindGame</button>
         {% endif %}
       </div>
     </div>
 
-    <script src="{{ url_for('static', filename='js/helper_functions.js') }}"></script>
+    <script src="/static/js/helper_functions.js?v=2.0"></script>
     <script>
       localStorage.setItem("mindgame_progress", "intake");
     </script>
@@ -212,14 +212,6 @@
 
           if (isValidForm(selectedMedication, otherMedication, intakeTime)) {
             submitForm(selectedMedication, otherMedication, intakeTime);
-
-            // Handle if this is an athome or in Lab
-            let application_type = "{{ type|safe }}";
-            if (application_type == "inlab") {
-              window.location = "/nogo";
-            } else if (application_type == "athome") {
-              window.location = "/mindgame_precheck";
-            }
           } else {
             alert("Please fill in both the medication name and intake time.");
           }
@@ -257,11 +249,20 @@
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             data: data,
-            userID: getLocalStorageOrNull("userID"),
+            userID: getLocalStorageOrNull(LOCALSTORAGE_USERID),
+            location: getLocalStorageOrNull(LOCALSTORAGE_LOCATION),
+            /// AIDAN ADD
+            watchID: getLocalStorageOrNull(LOCALSTORAGE_WATCHID),
           }),
-        })
-          .then((data) => {})
-          .catch((error) => console.error("Error:", error));
+        }).then(() => {
+          // Handle if this is an athome or in Lab
+          let application_type = "{{ type|safe }}";
+          if (application_type == "inlab") {
+            window.location = "/cpt";
+          } else if (application_type == "athome") {
+            window.location = "/mindgame_precheck";
+          }
+        });
       }
     </script>
   </body>
