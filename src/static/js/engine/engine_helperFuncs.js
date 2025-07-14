@@ -238,25 +238,35 @@ function drawSectionLines() {
  * @param  {Number} sub_level The sublevel to change too
  */
 function changeCurrentLevel(level, sub_level) {
-  //Update Global Varaibles
+  console.log("Changing to Level:", level, "Sublevel:", sub_level);
+
+  // Update Global Variables
   current_level = level;
   current_sub_level = sub_level;
 
-  //Reset All Shapes on screen
+  // Reset All Shapes on Screen
   shapes = [];
 
-  //Add Back and Draw needed blocks for new level
-  shapes.push(...building_blocks);
-  shapes.push(...LEVELS[current_level][current_sub_level]);
+  // Validate the level configuration
+  const levelConfig = LEVELS[current_level]?.[current_sub_level];
+  if (!Array.isArray(levelConfig)) {
+    console.error(`Invalid level configuration for Level ${current_level}-${current_sub_level}:`, levelConfig);
+    return;
+  }
 
-  LEVELS[current_level][current_sub_level].forEach((shape) => {
+  // Add Shapes and Draw
+  shapes.push(...building_blocks);
+  shapes.push(...levelConfig);
+
+  levelConfig.forEach((shape) => {
     shape.isLevelShapeFilled = false;
   });
 
-  //Update UI
+  // Update UI
   drawShapes();
   updateProgressBar();
 }
+
 
 //====================================
 //             Utils

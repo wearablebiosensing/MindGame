@@ -421,6 +421,22 @@ class Trapezoid extends Shape {
     // Check if the point is within the boundaries
     return rotatedY >= topBoundary && rotatedY <= bottomBoundary && rotatedX >= -topWidth / 2 && rotatedX <= topWidth / 2;
   }
+
+  drawHitbox() {
+    const step = 5; // Step size for the grid
+    const halfHeight = this.height / 2;
+
+    for (let x = this.x - this.base; x <= this.x + this.base; x += step) {
+      for (let y = this.y - this.height; y <= this.y + this.height; y += step) {
+        if (this.isPointInside(x, y)) {
+          ctx.fillStyle = "rgba(255, 0, 0, 0.5)"; // Red color for points inside the hitbox
+        } else {
+          ctx.fillStyle = "rgba(0, 0, 255, 0.1)"; // Blue color for points outside the hitbox
+        }
+        ctx.fillRect(x, y, 1, 1); // Draw a small rectangle at the point
+      }
+    }
+  }
 }
 
 class RightTriangle extends Shape {
@@ -603,6 +619,21 @@ class Diamond extends Shape {
     // Check if the adjusted point is inside the diamond
     return Math.abs(rotatedX) / (this.width / 2) + Math.abs(rotatedY) / (this.height / 2) <= 1;
   }
+
+  // drawHitbox() {
+  //   const step = 5; // Step size for the grid
+
+  //   for (let x = this.x; x <= this.x + this.width; x += step) {
+  //     for (let y = this.y; y <= this.y + this.height; y += step) {
+  //       if (this.isPointInside(x, y)) {
+  //         ctx.fillStyle = "rgba(255, 0, 0, 0.5)"; // Red color for points inside the hitbox
+  //       } else {
+  //         ctx.fillStyle = "rgba(0, 0, 255, 0.1)"; // Blue color for points outside the hitbox
+  //       }
+  //       ctx.fillRect(x, y, 1, 1); // Draw a small rectangle at the point
+  //     }
+  //   }
+  // }
 }
 
 class EquilateralTriangle extends Shape {

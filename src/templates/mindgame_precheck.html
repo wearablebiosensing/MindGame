@@ -12,6 +12,7 @@
     <div class="container">
       <div class="pregame_header">MindGame Pre-Check</div>
       <div class="pregame_directions">This is to ensure that your watch is functioning properly<br />Open the app and start sending data<br />Then input your watch ID and check its status</div>
+      <div class="pregame_directions" style="color: black">You will complete as many puzzles as you can within a 10 minute window</div>
       <div style="display: flex; flex-direction: column; align-items: center; gap: 5px; width: 100%">
         <!-- <div class="pregame_id">UserID: <span>P1</span></div> -->
         <input type="text" placeholder="Watch ID" id="watchID_input" />
@@ -30,22 +31,16 @@
       <div class="pregame_id" id="pregame_id">User ID: &nbsp;</div>
     </div>
 
-    <script src="{{ url_for('static', filename='js/helper_functions.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/watch_check.js') }}"></script>
+    <script src="/static/js/helper_functions.js?v=2.0"></script>
+    <script src="/static/js/watch_check.js?v=2.0"></script>
 
     <script>
-      let restore_tiles_progress = false;
-      let mindgame_status = getLocalStorageOrNull("mindgame_progress");
-      if (mindgame_status == null || mindgame_status != "tiles") {
-        // Only set the precheck as progress since if inside tiles
-        // we send user to this page anways
-        localStorage.setItem("mindgame_progress", "precheck");
-      }
+      // Make sure its stopped
+      stop_mqtt_data_collection();
+    </script>
 
-      // Set flag so we dont start from begining
-      if (mindgame_status == "tiles") {
-        restore_tiles_progress = true;
-      }
+    <script>
+      localStorage.setItem(LOCALSTORAGE_PROGRESS, MINDGAME_PROGRESS_ENUM.PRECHECK);
     </script>
 
     <script>
@@ -53,23 +48,28 @@
       const g_show_user_id = document.getElementById("pregame_id");
       let g_watch_status = false;
 
-      function prefillInputsWithLocalStorage() {
-        const watchID = getLocalStorageOrNull("watchID");
+      function prefillWatchWithLocalStorage() {
+        const watchID = getLocalStorageOrNull(LOCALSTORAGE_WATCHID);
         g_watchID_input.value = watchID;
       }
-      prefillInputsWithLocalStorage();
+      prefillWatchWithLocalStorage();
 
       // Event listner for the check status button
-      g_watch_check_watch_status_btn.addEventListener("click", async () => {
+      g_watch_check_watch_status_btn.addEventListener("click", async (e) => {
+        e.preventDefault(); // Firefox is stupid
+
+        // Disable button so we dont press again
         g_mindgame_start_btn.classList.add("pregame_disabled");
 
+        // Retrive WatchID
         const watchID = g_watchID_input.value;
         if (!watchID.match(/\S/)) {
           alert("Watch ID is empty");
           return;
         }
 
-        localStorage.setItem("watchID", watchID);
+        // Store the ID and handle its status
+        localStorage.setItem(LOCALSTORAGE_WATCHID, watchID);
         await handleWatchStatusCheck((status) => {
           if (status == "online") {
             g_watch_status = true;
@@ -78,11 +78,13 @@
             g_watch_status = false;
             g_mindgame_start_btn.classList.add("pregame_disabled");
           }
-        });
+        }, localStorage.getItem(LOCALSTORAGE_WATCHID));
       });
 
       // Event listner for the start mindgame button
-      g_mindgame_start_btn.addEventListener("click", () => {
+      g_mindgame_start_btn.addEventListener("click", async (e) => {
+        e.preventDefault(); // Firefox is stupid
+
         const watchID = g_watchID_input.value;
         if (!watchID.match(/\S/)) {
           alert("Watch ID is empty");
@@ -91,27 +93,30 @@
 
         if (g_mindgame_start_btn.classList.contains("pregame_disabled")) return;
 
-        if (getLocalStorageOrNull("userID") == null) {
+        if (getLocalStorageOrNull(LOCALSTORAGE_USERID) == null) {
           alert("Cannot start MindGame as there is no userID saved to differentiate the data");
           return;
         }
 
-        // Start from begining
-        if (restore_tiles_progress == false) {
-          localStorage.setItem("watchID", watchID);
+        // Start Tiles Games, default to 1-1 if not specified
+        localStorage.setItem(LOCALSTORAGE_CURR_LEVEL, getLocalStorageOrNull(LOCALSTORAGE_NEXT_LEVEL) == null ? 1 : getLocalStorageOrNull(LOCALSTORAGE_NEXT_LEVEL));
+        localStorage.setItem(LOCALSTORAGE_CURR_SUBLEVEL, getLocalStorageOrNull(LOCALSTORAGE_NEXT_SUBLEVEL) == null ? 1 : getLocalStorageOrNull(LOCALSTORAGE_NEXT_SUBLEVEL));
+        const location = localStorage.getItem("mindgame_location");
+        const UserID = getLocalStorageOrNull(LOCALSTORAGE_USERID);
 
-          //localStorage.setItem("currentLevel", 1); // Start at level 1
-          //localStorage.setItem("currentSubLevel", getRandomNumberInclusive(1, 3));
-        } else {
-          localStorage.setItem("currentSubLevel", getLocalStorageOrNull("mindgame_next_sublevel") == null ? 1 : getLocalStorageOrNull("mindgame_next_sublevel")); // Pick random puzzle
-          localStorage.setItem("currentLevel", getLocalStorageOrNull("mindgame_next_level") == null ? 1 : getLocalStorageOrNull("mindgame_next_level")); // Pick random puzzle
-        }
-        window.location = "/tiles_game";
-        //document.location.replace("/tiles_game");
+
+        // Start 10 minute timer
+        fetch("/mindgame_start_timer", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ watchID, location, UserID }),
+        }).then(() => {
+          window.location = "/tiles_game";
+        });
       });
 
       // Show userID
-      g_show_user_id.innerHTML += getLocalStorageOrNull("userID") == null ? "No UserID found" : getLocalStorageOrNull("userID");
+      g_show_user_id.innerHTML += getLocalStorageOrNull(LOCALSTORAGE_USERID) == null ? "No UserID found" : getLocalStorageOrNull(LOCALSTORAGE_USERID);
     </script>
   </body>
 </html>
