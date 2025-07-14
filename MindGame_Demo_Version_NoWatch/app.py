@@ -24,7 +24,7 @@ csv_lock = threading.Lock()
 app = Flask(__name__)
 root = "/Users/shehjarsadhu/Desktop/UniversityOfRhodeIsland/Graduate/WBL/Project_Carehub/CareWear-PortalView/CareWear-MagneticTilesActivity/"
 
-cred = credentials.Certificate('./carewear-77d8e-b0c3a74e907c.json') 
+cred = credentials.Certificate('/Users/shehjarsadhu/Desktop/UniversityOfRhodeIsland/Graduate/WBL/Project_MindGame/CODE/CareWear-MagneticTilesActivity/carewear-77d8e-b0c3a74e907c.json') 
 
 firebaseConfig = {
   "apiKey": "AIzaSyDyjHLuokjuGEPr3HOSsX8FP16qxyS62W8",
@@ -116,7 +116,7 @@ def calculate_zero_crossing_rate(accel_data):
     zero_crossings = np.nonzero(np.diff(np.signbit(accel_data)))[0]
     zcr = len(zero_crossings) / (2.0 * len(accel_data))
     return zcr
-
+'''
 # Read data form cloud. 
 def read_csv_from_firebase():
     bucket = storage.bucket()
@@ -144,7 +144,7 @@ def read_csv_from_firebase():
     # This is a list of all files in the folder. 
     files_list_df = pd.DataFrame(main_list,columns=["deviceID","date","file_name"])
     return files_list_df
-
+'''
 def count_files(files_list_df):
     file_count_json = {}
     for i in files_list_df["deviceID"].unique():
