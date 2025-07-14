@@ -28,7 +28,7 @@ This repository contains a Python Flask application in the /src.
    ```
 
 3. **Install dependencies:**
-   If a `requirements.txt` file is present:
+   If a `req.txt` file is present:
    ```bash
    pip install -r requirements.txt
    ```
@@ -61,5 +61,4 @@ This repository contains a Python Flask application in the /src.
 
 ## Notes
 
-- If your main app file has a different name (not `app.py`), replace it accordingly in the commands above.
-- Additional configuration or dependencies may be required depending on your app's features.
+- The app has a depancy with the follwoing companion Galaxy Watch 4 Repository: https://github.com/wearablebiosensing/MindGameSmartWatch
