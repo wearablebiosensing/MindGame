@@ -58,6 +58,13 @@ This repository contains a Python Flask application in the /src.
 
 3. **Access the app:**
    Open your browser and visit [http://127.0.0.1:5000](http://127.0.0.1:5000)
+   
+## Citation:
+
+** ACM Reference Format: **
+
+Shehjar Sadhu, Nishtha Bhagat, Elijah Castillo, Lisa Weyandt, Kunal
+Mankodiya, and Dhaval Solanki. 2025. Is wearable data reliable for monitoring behavior? Design of a wearable-based IoMT puzzle game for remote behavior monitoring. In The 15th International Conference on the Internet of Things (IOT 2025), November 18–21, 2025, Vienna, Austria. ACM, New York, NY, USA, 9 pages. https://doi.org/10.1145/3770501.3770523
 
 ## Notes
 
