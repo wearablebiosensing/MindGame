@@ -222,13 +222,18 @@ def completion_time(userID, level):
 def calculate_completion_time(csv_file):
     timestamps = []
     
+    # Read the data for both time and distance calculations
     with open(csv_file, 'r') as file:
         csv_reader = csv.DictReader(file)
-        for row in csv_reader:
+        rows = list(csv_reader)
+        for row in rows:
             if row['timestamp'] != '0':
                 timestamps.append(row['timestamp'])
                 
     # Parse the timestamps and calculate the time duration            
+    if not timestamps:
+        return "Time and Score data unavailable."
+        
     first_timestamp = timestamps[0]
     last_timestamp = timestamps[-1]
     
@@ -241,17 +246,73 @@ def calculate_completion_time(csv_file):
     total_seconds = duration.total_seconds()
     minutes = int(total_seconds // 60)
     seconds = int(total_seconds % 60)
-    return f"{minutes} minutes {seconds} seconds"
+    time_str = f"It took {minutes} minutes {seconds} seconds to complete this Level."
+    
+    # Calculate Aggregate Inattention Score (Out of 100)
+    strokes = []
+    current_stroke = []
+
+    for row in rows:
+        if row['x'] == "END_OF_STROKE":
+            if current_stroke:
+                strokes.append(current_stroke)
+                current_stroke = []
+        else:
+            current_stroke.append(row)
+    if current_stroke:
+        strokes.append(current_stroke)
+
+    total_actual_dist = 0.0
+    total_ideal_dist = 0.0
+
+    for stroke in strokes:
+        if len(stroke) > 1:
+            # Actual Distance (sum of all segments)
+            stroke_dist = 0.0
+            for i in range(1, len(stroke)):
+                x1, y1 = float(stroke[i-1]['x']), float(stroke[i-1]['y'])
+                x2, y2 = float(stroke[i]['x']), float(stroke[i]['y'])
+                stroke_dist += ((x2 - x1)**2 + (y2 - y1)**2)**0.5
+            
+            # Ideal Distance (straight line from start to end of that stroke)
+            x_start, y_start = float(stroke[0]['x']), float(stroke[0]['y'])
+            x_end, y_end = float(stroke[-1]['x']), float(stroke[-1]['y'])
+            ideal_dist = ((x_end - x_start)**2 + (y_end - y_start)**2)**0.5
+            
+            total_actual_dist += stroke_dist
+            total_ideal_dist += ideal_dist
+
+    # Distance Efficiency Metric
+    if total_actual_dist > 0:
+        dist_eff = (total_ideal_dist / total_actual_dist)
+    else:
+        dist_eff = 1.0
+
+    # Time Efficiency Metric
+    # Assume a comfortable puzzle solving speed: base 10 seconds of thinking + 300 px/sec mouse movement
+    expected_time = 10.0 + (total_ideal_dist / 300.0)
+    
+    if total_seconds > 0:
+        time_eff = expected_time / total_seconds
+        # Cap time efficiency at 1.0 (no extra bonus for finishing extremely fast)
+        if time_eff > 1.0:
+            time_eff = 1.0
+    else:
+        time_eff = 1.0
+        
+    # Aggregate Score combines both metrics
+    # Weighting: 60% distance efficiency, 40% time efficiency
+    score = ((dist_eff * 0.6) + (time_eff * 0.4)) * 100
+        
+    final_score = round(score)
+    
+    return f"{time_str} Aggregate Inattention Score: {final_score}/100"
 
 #Retuns the image data of the mouse movment graph given a csv file
 def plot_mouse_movement(csv_file):
-    colors = {'Square': '#ec940e', 'Circle': '#F29595', 'Right Triangle': '#90C0FF', 'Hexagon': '#1184e2', 'Trapezoid': '#61a962', 'Equilateral Triangle': '#a1e87e', 'Yellow Diamond': '#FFCC4D', 'Purple Diamond': '#9F9AFF'}
-
-
     df = pd.read_csv(csv_file)
     strokes = []
     current_stroke = []
-    unique_shapes = set()  # To keep track of unique shapes
 
     for _, row in df.iterrows():
         if row['x'] == "END_OF_STROKE":
@@ -260,10 +321,35 @@ def plot_mouse_movement(csv_file):
                 current_stroke = []
         else:
             current_stroke.append(row)
-            unique_shapes.add(row['shape'])  # Add the shape to the unique_shapes set
 
     if current_stroke:
         strokes.append(current_stroke)
+
+    # Automatically count same squares and triangles to differentiate them
+    shape_counts = {}
+    unique_shapes_ordered = []
+    
+    # Assign a distinct shape name for each new stroke
+    for stroke in strokes:
+        if len(stroke) > 1:
+            base_shape = stroke[-1]['shape']
+            shape_counts[base_shape] = shape_counts.get(base_shape, 0) + 1
+            shape_instance = f"{base_shape} {shape_counts[base_shape]}"
+            # We record it in stroke dictionary as shape_instance
+            stroke[-1]['shape_instance'] = shape_instance
+            if shape_instance not in unique_shapes_ordered:
+                unique_shapes_ordered.append(shape_instance)
+
+    # Large contrasting color palette
+    palette = [
+        '#478f96', '#f5a623', '#e05666', '#1a365d', '#38b28f', 
+        '#7b61ff', '#42a5f5', '#c62828', '#f48fb1', '#ffb300', 
+        '#00897b', '#3949ab', '#e53935', '#d81b60', '#8e24aa',
+        '#5e35b1', '#1e88e5', '#039be5', '#00acc1', '#43a047'
+    ]
+    color_map = {}
+    for i, shape_instance in enumerate(unique_shapes_ordered):
+        color_map[shape_instance] = palette[i % len(palette)]
 
     # Set a larger figure size for the graph (adjust the numbers as needed)
     fig, ax = plt.subplots(figsize=(12, 6))
@@ -271,31 +357,26 @@ def plot_mouse_movement(csv_file):
 
     for stroke in strokes:
         if len(stroke) > 1:
-            shape = stroke[-1]['shape']  # Get the shape from the last row of the stroke
-            # screenWidth = stroke[-1]['screenWidth']
-            # screenHeight = stroke[-1]['screenHeight']
+            shape_instance = stroke[-1]['shape_instance']
             
             #Plot Data
             data = pd.DataFrame(stroke)
-            color = colors.get(shape, 'black')
+            color = color_map.get(shape_instance, 'black')
             
             # Convert 'x' values to numeric
             data['x'] = pd.to_numeric(data['x'])
-            # print(data['x'])
             
-            plt.plot(data['x'], data['y'], color=color, label=shape)
+            plt.plot(data['x'], data['y'], color=color, label=shape_instance)
 
-
-
-    plt.xlabel('X Position')
-    plt.ylabel('Y Position')
-    plt.title('Mouse Movement Strokes')
+    plt.xlabel('X Position (px)', fontsize=14, fontweight='bold')
+    plt.ylabel('Y Position (px)', fontsize=14, fontweight='bold')
+    plt.title('Mouse Movement Strokes', fontsize=18, fontweight='bold')
 
     # Generate a single legend entry for each unique shape
     handles, labels = ax.get_legend_handles_labels()
     by_label = dict(zip(labels, handles))
-    unique_legend = [by_label[shape] for shape in unique_shapes]
-    plt.legend(handles=unique_legend, labels=unique_shapes)
+    unique_legend = [by_label[shape] for shape in unique_shapes_ordered]
+    plt.legend(handles=unique_legend, labels=unique_shapes_ordered, fontsize=12, title='Shapes', title_fontsize=14, bbox_to_anchor=(1.05, 1), loc='upper left')
 
     # plt.gca().set_aspect('equal')  # Set aspect ratio to preserve the screen's aspect ratio
 
@@ -314,7 +395,8 @@ def plot_mouse_movement(csv_file):
 
     # Convert the plot to a PNG image in memory
     image_stream = io.BytesIO()
-    FigureCanvas(fig).print_png(image_stream)
+    fig.tight_layout() # Ensure everything fits
+    fig.savefig(image_stream, format='png', dpi=300)
     plt.close(fig)
 
     # Get the image data as a base64-encoded string
