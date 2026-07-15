@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: mindgame
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    # Single worker only: MQTT clients and session timers live in process
+    # memory, so multiple workers would not see each other's state.
+    startCommand: cd src && gunicorn --workers 1 --threads 8 --timeout 120 app:app
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: SECRET_KEY
+        generateValue: true

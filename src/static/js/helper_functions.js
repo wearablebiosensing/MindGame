@@ -60,7 +60,7 @@ function updateRandomLevelSelectionWithoutRepeats() {
   if (unplayedLevels.length === 0) {
     console.log("All levels played! Resetting...");
     localStorage.removeItem("playedLevels"); // Reset played levels
-    return updateRandomLevelSelection(); // Restart random selection
+    return updateRandomLevelSelectionWithoutRepeats(); // Restart random selection
   }
 
   const randomIndex = Math.floor(Math.random() * unplayedLevels.length);

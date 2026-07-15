@@ -61,6 +61,7 @@
           <button id="in_lab_btn" class="start_button" >In Lab</button>
           <button id="at_home_btn" class="start_button" >At Home</button>
           <a href="{{ url_for('tutorial') }}"><button class="start_button" >Tutorial</button></a>
+          <button id="puzzle_demo_btn" class="start_button">Puzzle Demo</button>
           {% if type == "inlab" %}
           <a href="/cpt"><button class="start_button">CPT Task</button></a>
           {% endif %}
@@ -80,8 +81,29 @@
     <script src="/static/js/home.js?v=2.0"></script>
     <script>
       // Make sure its stopped
-      stop_mqtt_data_collection() 
+      stop_mqtt_data_collection()
 
+      // Back on the home page means any demo session is over
+      localStorage.removeItem("mindgame_demo");
+
+      // Demo Mode - runs the same 10 minute session (all levels, randomized,
+      // scoring pages) but without the medication intake, CPT task, or watch.
+      document.getElementById("puzzle_demo_btn").addEventListener("click", () => {
+        localStorage.setItem("mindgame_demo", "true");
+        localStorage.setItem(LOCALSTORAGE_USERID, "DEMO");
+        localStorage.setItem(LOCALSTORAGE_WATCHID, "DEMO");
+        localStorage.setItem(LOCALSTORAGE_LOCATION, "DEMO");
+        localStorage.removeItem("playedLevels"); // Fresh pool of all levels
+
+        // Start the 10 minute session timer, then enter the game loop
+        fetch("/mindgame_start_timer", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ watchID: "DEMO" }),
+        }).then(() => {
+          window.location = "/tiles_game";
+        });
+      });
     </script>
     
   </body>

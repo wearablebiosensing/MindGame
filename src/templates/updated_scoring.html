@@ -324,6 +324,11 @@
   <script>
     let g_watch_status = false;
     const SHOULD_KEEP_LOOPING_LEVELS = true;
+
+    // Demo mode - no watch to check, so allow moving to the next puzzle right away
+    if (getLocalStorageOrNull("mindgame_demo") === "true") {
+      nextLevelBtn.classList.remove("pregame_disabled");
+    }
     const isEntireGameFinished = g_current_level == MINDGAME_MAX_LEVEL && g_current_sub == MINDGAME_MAX_SUBLEVEL;
 
     // Finished all Levels

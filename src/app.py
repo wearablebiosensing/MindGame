@@ -34,7 +34,7 @@ logger.addHandler(handler)
 
 #Flask Config
 app = Flask(__name__)
-app.secret_key = "super secret key"
+app.secret_key = os.environ.get("SECRET_KEY", "super secret key")
 
 
 #Firebase Config
@@ -70,6 +70,53 @@ SAVED_DATA_DIRECTORY = os.path.join("data", "")
 
 # Dictionary to hold multiple MQTT clients
 mqtt_clients = {}
+
+# 10 minute play session, keyed by watchID -> start time (epoch seconds)
+MINDGAME_SESSION_SECONDS = 600
+mindgame_session_timers = {}
+
+
+@app.route("/mindgame_start_timer", methods=['POST'])
+def mindgame_start_timer():
+    """Starts the 10 minute session timer for a watchID.
+    Called from the precheck page (real sessions) and the landing page (demo sessions)."""
+    res = request.get_json()
+    watchID = res.get("watchID")
+    mindgame_session_timers[watchID] = time.time()
+
+    # Also make sure a session identifier exists for file naming
+    session['unique_session_identifier'] = int(time.time())
+
+    logger.info(f"Started 10 minute session timer for WatchID {watchID}")
+    return "", 201
+
+
+@app.route("/check_timeout_status", methods=['POST'])
+def check_timeout_status():
+    """Returns how long the current session has been running and whether
+    the 10 minute window is over. Used by tiles.html (elapsed_time) and
+    updated_scoring.html (status)."""
+    res = request.get_json()
+    watchID = res.get("watchID")
+
+    start_time = mindgame_session_timers.get(watchID)
+    elapsed = 0 if start_time is None else int(time.time() - start_time)
+
+    return jsonify({
+        "status": elapsed >= MINDGAME_SESSION_SECONDS,
+        "elapsed_time": elapsed
+    })
+
+
+@app.route("/mindgame_remove_timer", methods=['POST'])
+def mindgame_remove_timer():
+    """Clears the session timer for a watchID once the session is finished."""
+    res = request.get_json()
+    watchID = res.get("watchID")
+    mindgame_session_timers.pop(watchID, None)
+
+    logger.info(f"Removed session timer for WatchID {watchID}")
+    return "", 201
 
 
 
@@ -365,12 +412,12 @@ def tutorial():
 
 @app.route('/nogo', methods=['GET','POST'])
 def nogo():
-    
+
   return render_template("nogo.html")
 
-@app.route('/intake', methods=['GET','POST'])
-def intake(type: str):
-  return render_template("medication_intake.html")
+@app.route('/cpt', methods=['GET','POST'])
+def cpt():
+  return render_template("cpt.html")
 
 @app.route('/start_application/<string:type>', methods=['GET','POST'])
 def start_application(type: str):
@@ -616,8 +663,8 @@ def processMouseMovementData():
     #Retrive Data from Post request
     res = request.get_json()
     data = res["data"]
-    level = res["level"] #Current level that posted data is from
-    sub_level = res["sub_level"]
+    level = int(res["level"]) #Current level that posted data is from
+    sub_level = int(res["sub_level"])
     userID = res["userID"] #Used to differentiate csv files from differet subjects
     time_to_complete = res["time_to_complete"]
     user_euclid_distances = res["user_euclid_movement_distances"]
@@ -636,7 +683,8 @@ def processMouseMovementData():
     #Save Relevent Data to session to be used in scoring page
     session["AverageEuclidanPercentChange"] = math.floor(calculateEuclidanPercentChange(shortest_euclid_distances, user_euclid_distances))
     session["TimeToCompleteLevel"] = time_to_complete
-    session["ExpectedTimeToCompleteLevel"] = EXPECTED_TTC[level][sub_level]
+    # EXPECTED_TTC only has entries for some levels, fall back for the rest
+    session["ExpectedTimeToCompleteLevel"] = EXPECTED_TTC.get(level, {}).get(sub_level, {"minutes": 0, "seconds": 30})
     
     # print("HOPE", session.get("AverageEuclidanPercentChange"))
     # print("HOPE", session.get("TimeToCompleteLevel"))
@@ -798,6 +846,52 @@ def processnogo():
     except Exception as e:
         logger.error(f"An error occurred while processing No-Go data: {e}")
         return jsonify({"error": "Internal server error"}), 500
+
+
+@app.route('/process-cpt-data', methods=['POST'])
+def processCptData():
+    """
+    Endpoint to process and save data from the CPT task.
+
+    Expects a JSON payload with 'data' (list of dicts, one per stimulus),
+    'userID', 'location', 'watchID', and 'isTest'.
+
+    The data is saved in a CSV file within a 'cpt' directory.
+
+    Returns:
+        JSON response with 'success' indicating the outcome (cpt.js checks result.success).
+    """
+    try:
+        res = request.get_json()
+        data = res.get("data")
+        userID = res.get("userID")
+        location = res.get("location")
+        is_test = res.get("isTest", False)
+
+        if not data or not userID:
+            logger.error("Missing 'data' or 'userID' in the CPT request payload")
+            return jsonify({"success": False, "message": "Missing 'data' or 'userID' in the request payload"}), 400
+
+        # Build the CSV in memory
+        output = io.StringIO()
+        writer = csv.DictWriter(output, fieldnames=data[0].keys())
+        writer.writeheader()
+        for row in data:
+            writer.writerow(row)
+        csv_string = output.getvalue()
+
+        cpt_dir = "cpt/"
+        test_suffix = "_test" if is_test else ""
+        cpt_file_name = f"cpt_{userID}_{location}_{int(time.time())}{test_suffix}.csv"
+
+        createAndUpload(cpt_dir, cpt_file_name, csv_string.encode("utf-8"))
+
+        logger.info(f"Successfully processed and saved CPT data for userID {userID}")
+        return jsonify({"success": True, "message": "Data received and processed successfully"}), 201
+
+    except Exception as e:
+        logger.error(f"An error occurred while processing CPT data: {e}")
+        return jsonify({"success": False, "message": "Internal server error"}), 500
 
     
     
